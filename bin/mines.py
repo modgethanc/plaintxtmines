@@ -24,6 +24,14 @@ def generate(minerates): #takes a minerate file; returns a list of resource amou
 
     return resources
 
+def writeMine(mine, record):
+    recordfile = open(record, 'w')
+    for x in mine:
+        recordfile.write(str(x))
+        recordfile.write("\n")
+
+    recordfile.close()
+
 def printMine(mine):
     total = 0
     for x in mine:
@@ -39,12 +47,14 @@ def printMine(mine):
     print "carats:  %d (%d%%)" % (mine[7], 100*float(mine[7])/float(total))
     print "\ntotal: %d" % (total)
 
+    return mine
+
 #testing below
 print "MINE #1"
-printMine(generate("standardrates"))
+writeMine(printMine(generate("standardrates")), "m1")
 print "\nMINE #2"
-printMine(generate("standardrates"))
+writeMine(printMine(generate("standardrates")), "m2")
 print "\nMINE #3"
-printMine(generate("standardrates"))
+writeMine(printMine(generate("standardrates")), "m3")
 print "\nMINE #4"
-printMine(generate("standardrates"))
+writeMine(printMine(generate("standardrates")), "m4")
