@@ -2,7 +2,7 @@
 
 import random
 
-def generate(minerates):
+def generate(minerates): #takes a minerate file; returns a list of resource amounts for a generated mine
     ratefile = open(minerates,'r')
     rates = []
     for x in ratefile:
@@ -22,25 +22,29 @@ def generate(minerates):
         total += resources[i]
         i += 1
 
-    print "seed: %d" % (seed)
-    print "tildes:  %d (%d%%)" % (resources[0], 100*float(resources[0])/float(total))
-    print "pounds:  %d (%d%%)" % (resources[1], 100*float(resources[1])/float(total))
-    print "spirals: %d (%d%%)" % (resources[2], 100*float(resources[2])/float(total))
-    print "ampers:  %d (%d%%)" % (resources[3], 100*float(resources[3])/float(total))
-    print "splats:  %d (%d%%)" % (resources[4], 100*float(resources[4])/float(total))
-    print "lbracks: %d (%d%%)" % (resources[5], 100*float(resources[5])/float(total))
-    print "rbracks: %d (%d%%)" % (resources[6], 100*float(resources[6])/float(total))
-    print "carats:  %d (%d%%)" % (resources[7], 100*float(resources[7])/float(total))
+    return resources
+
+def printMine(mine):
+    total = 0
+    for x in mine:
+        total += x
+
+    print "tildes:  %d (%d%%)" % (mine[0], 100*float(mine[0])/float(total))
+    print "pounds:  %d (%d%%)" % (mine[1], 100*float(mine[1])/float(total))
+    print "spirals: %d (%d%%)" % (mine[2], 100*float(mine[2])/float(total))
+    print "ampers:  %d (%d%%)" % (mine[3], 100*float(mine[3])/float(total))
+    print "splats:  %d (%d%%)" % (mine[4], 100*float(mine[4])/float(total))
+    print "lbracks: %d (%d%%)" % (mine[5], 100*float(mine[5])/float(total))
+    print "rbracks: %d (%d%%)" % (mine[6], 100*float(mine[6])/float(total))
+    print "carats:  %d (%d%%)" % (mine[7], 100*float(mine[7])/float(total))
     print "\ntotal: %d" % (total)
 
-
 #testing below
-
 print "MINE #1"
-generate("standardrates")
+printMine(generate("standardrates"))
 print "\nMINE #2"
-generate("standardrates")
+printMine(generate("standardrates"))
 print "\nMINE #3"
-generate("standardrates")
+printMine(generate("standardrates"))
 print "\nMINE #4"
-generate("standardrates")
+printMine(generate("standardrates"))
