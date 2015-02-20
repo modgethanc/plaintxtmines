@@ -1,0 +1,24 @@
+BOT BEHAVIORS
+
+name:
+
+-bot greets you on entry:
+  'welcome back' if you have an account
+  'welcome; would you like a tutorial' if you do not
+
+
+TUTORIAL (through PM)
+-list of commands
+-general practices
+-advice
+
+
+RESOURCE TYPES
+-tilde      ~   40%
+-pound      #   20%
+-spiral     @   15%
+-ampersand  &   10%
+-splat      *    6%
+-lbracket   [    4%
+-rbracket   ]    4%
+-carat      ^    1%
