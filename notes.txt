@@ -1,10 +1,11 @@
 BOT BEHAVIORS
-
-name:
+  minebot
 
 -bot greets you on entry:
   'welcome back' if you have an account
   'welcome; would you like a tutorial' if you do not
+-all bot transactions are private
+-bot never speaks in main channel; only monitors
 
 
 TUTORIAL (through PM)
@@ -22,3 +23,16 @@ RESOURCE TYPES
 -lbracket   [    4%
 -rbracket   ]    4%
 -carat      ^    1%
+
+
+GENERAL THOUGHTS
+-thieving: small chance to nick undeposited goods from target
+-minions: convert some resources into mining golems
+ -minion power based on rarity of components
+ -minion components do not count towards wealth
+ -minions die/decompose
+
+
+NEW MINES
+
+resource multiplier * roll(100)
