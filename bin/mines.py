@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import random
+import names
 
 def generate(minerates): #takes a minerate file; returns a list of resource amounts for a generated mine
     ratefile = open(minerates,'r')
@@ -24,12 +25,15 @@ def generate(minerates): #takes a minerate file; returns a list of resource amou
 
     return resources
 
-def writeMine(mine, record): #returns a filename for a list of resoureces recorded
+def writeMine(mine, record='../data/'+names.medium()+'.mine'): #returns a filename for a list of resources recorded
     recordfile = open(record, 'w')
+    total = 0
     for x in mine:
         recordfile.write(str(x))
+        total += x
         recordfile.write("\n")
-
+    
+    recordfile.write(str(total))
     recordfile.close()
     return record
 
@@ -42,28 +46,24 @@ def openMine(record): #returns a list of resources when given a file
     return mine
 
 def printMine(mine):
-    total = 0
-    for x in mine:
-        total += int(x)
+    #total = 0
+    #for x in mine:
+    #    total += int(x)
 
-    print "tildes:  %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(total))
-    print "pounds:  %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(total))
-    print "spirals: %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(total))
-    print "ampers:  %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(total))
-    print "splats:  %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(total))
-    print "lbracks: %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(total))
-    print "rbracks: %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(total))
-    print "carats:  %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(total))
-    print "\ntotal: %d" % (total)
+    print "tildes:  %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(mine[8]))
+    print "pounds:  %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(mine[8]))
+    print "spirals: %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(mine[8]))
+    print "ampers:  %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(mine[8]))
+    print "splats:  %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(mine[8]))
+    print "lbracks: %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(mine[8]))
+    print "rbracks: %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(mine[8]))
+    print "carats:  %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(mine[8]))
+    print "\ntotal: %d" % (int(mine[8]))
 
     return mine
 
 #testing below
 print "MINE #1"
-printMine(openMine(writeMine(generate("standardrates"), "m1")))
-print "\nMINE #2"
-writeMine(printMine(generate("standardrates")), "m2")
-print "\nMINE #3"
-writeMine(printMine(generate("standardrates")), "m3")
-print "\nMINE #4"
-writeMine(printMine(generate("standardrates")), "m4")
+printMine(openMine(writeMine(generate("standardrates"), "../data/m1")))
+print "\nNAMED MINE"
+printMine(openMine(writeMine(generate("standardrates"))))

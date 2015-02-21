@@ -32,7 +32,7 @@ def long():
 def excessive():
     return new(random.randrange(6,10))
 
-print short()
-print medium()
-print long()
-print excessive()
+#print short()
+#print medium()
+#print long()
+#print excessive()
