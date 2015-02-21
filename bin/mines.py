@@ -80,8 +80,10 @@ def printMine(mine):
 
 #testing below
 printMine(openMine('../data/'+writeMine(generate("standardrates"), "../data/m1")))
-print writeMine(generate("standardrates"), '../data/m2')
-printMine(openMine('../data/m2'))
-print "\n"
-printMine(openMine('../data/'+writeMine(generate("standardrates"))+'.mine'))
+#print writeMine(generate("standardrates"), '../data/m2')
+#printMine(openMine('../data/m2'))
+#print "\n"
+#printMine(openMine('../data/'+writeMine(generate("standardrates"))+'.mine'))
 print excavate('../data/m1')
+print excavate('../data/m1', 30)
+print excavate('../data/m1', 30, 8)
