@@ -48,17 +48,33 @@ def openMine(record): #returns a list of mine data given a filename
 
     return mine
 
+def excavate(record, rate=10, types=3):
+    excavated = [0,0,0,0,0,0,0,0]
+    mine = openMine(record)
+    mined = []
+    i = types
+    while i > 0:
+        mined.append(random.randrange(0,7))
+        i -= 1
+    
+    i = rate
+    while i > 0:
+        excavated[random.choice(mined)] += 1
+        i -= 1
+
+    return excavated
+
 def printMine(mine):
     print mine[-1]
-    print "~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(mine[8]))
-    print "# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(mine[8]))
-    print "@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(mine[8]))
-    print "& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(mine[8]))
-    print "* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(mine[8]))
-    print "[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(mine[8]))
-    print "] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(mine[8]))
-    print "^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(mine[8]))
-    print "\ntotal: %d" % (int(mine[8]))
+    print "~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(mine[-2]))
+    print "# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(mine[-2]))
+    print "@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(mine[-2]))
+    print "& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(mine[-2]))
+    print "* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(mine[-2]))
+    print "[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(mine[-2]))
+    print "] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(mine[-2]))
+    print "^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(mine[-2]))
+    print "\ntotal: %d" % (int(mine[-2]))
 
     return mine
 
@@ -68,3 +84,4 @@ print writeMine(generate("standardrates"), '../data/m2')
 printMine(openMine('../data/m2'))
 print "\n"
 printMine(openMine('../data/'+writeMine(generate("standardrates"))+'.mine'))
+print excavate('../data/m1')
