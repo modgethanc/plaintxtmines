@@ -44,12 +44,85 @@ def getMines(player):
 
 def excavate(player, mine):
     holdings = getMines(player)
-    if holdings.index(mine):
-        return mines.excavate(mine)
+    if holdings.count(mine) > 0:
+        return mines.excavate('../data/'+mine+'.mine')
     else:
         return "that's not ur mine"
 
+def acquire(player, excavation):
+    playerfile = open('../data/'+player+'.player', 'r')
+    playerdata = []
+    
+    for x in playerfile:
+        playerdata.append(str(x).rstrip())
+    
+    playerfile.close()
+
+    i = 0
+    for x in excavation:
+        res = int(playerdata[i+1]) 
+        res += excavation[i]
+        playerdata[i+1] = res
+        i += 1
+
+    playerfile = open('../data/'+player+'.player', 'w')
+    for x in playerdata:
+        playerfile.write(str(x)+'\n')
+    playerfile.close()
+
+    return excavation
+
+def report(excavation):
+    mined = ''
+    y = 0
+    for x in excavation:
+        if y == 0:
+            item = '~'
+        elif y == 1:
+            item = '#'
+        elif y == 2:
+            item = '@'
+        elif y == 3:
+            item = '&'
+        elif y == 4:
+            item = '*'
+        elif y == 5:
+            item = '['
+        elif 7 == 6:
+            item = ']'
+        elif y == 7:
+            item = '^'
+
+        i = 0
+        while i < int(x):
+            mined += item
+            i += 1
+
+        y += 1
+    
+    return mined
+
+def mined(player):
+    playerfile = open('../data/'+player+'.player', 'r')
+    playerdata = []
+    
+    for x in playerfile:
+        playerdata.append(str(x).rstrip())
+    
+    playerfile.close()
+    
+    print "~ x%s" % (playerdata[1])
+    print "# x%s" % (playerdata[2])
+    print "@ x%s" % (playerdata[3])
+    print "& x%s" % (playerdata[4])
+    print "* x%s" % (playerdata[5])
+    print "[ x%s" % (playerdata[6])
+    print "] x%s" % (playerdata[7])
+    print "^ x%s" % (playerdata[8])
+
+
 #new("hvincent")
 #print newMine("hvincent", "standardrates")
-print getMines("hvincent")
-print excavate("hvincent", getMines("hvincent")[0])
+#print getMines("hvincent")
+print report(acquire("hvincent", excavate("hvincent", getMines("hvincent")[0])))
+mined("hvincent")
