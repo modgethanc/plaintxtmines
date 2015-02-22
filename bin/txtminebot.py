@@ -2,6 +2,7 @@
 
 import socket
 import os
+import os.path
 import sys
 from optparse import OptionParser
 
@@ -31,35 +32,103 @@ def connect(server, channel, botnick):
 
   joinchan(channel)
 
+def newPlayer(msg, channel, user):
+    players.new(user)
+    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
+
+def newMine(msg, channel, user):
+    mine = players.newMine(user, "standardrates").capitalize()
+    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts.\n")
+
+def excavate(msg, channel, user):
+    mineList = players.getMines(user)
+    for x in mineList:
+        mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
+
+def report(msg, channel, user):
+    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
 
 ###########################
 
 def listen():
+  lastTick = 0
+
   while 1:
     msg = ircsock.recv(2048)
-    msg = ircmsg.strip('\n\r')
+    msg = msg.strip('\n\r')
 
-    if ircmsg.find("PING :") != -1:
+    if msg.find("PING :") != -1:
       ping()
 
-    formatted = formatter.format_message(ircmsg)
+    formatted = formatter.format_message(msg)
 
     if "" == formatted:
       continue
 
+    user = msg.split("!")[0].split(":")[1]
+
     split = formatted.split("\t")
     time = split[0]
-    user = split[1]
+    #user = split[1]
     command = split[2]
     channel = split[3]
     messageText = split[4]
 
+    #####  meta commands
     if msg.find("!join") != -1:
-        #ircsock.send("PRIVMSG " + channel + " :" + user + ": k\n")
         split = msg.split(" ");
         for x in split:
             if x.find("#") != -1:
                 joinchan(x)
+
+    ###### gameplay
+    if msg.find("!info") != -1:
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !info.\n")
+
+    if msg.find("!init") != -1:
+        if os.path.isfile('../data/'+user+'.player'):
+            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You already have a dossier in my records, friend.\n")
+        else:
+            newPlayer(msg, channel, user)
+
+    if msg.find("!open") != -1:
+        if os.path.isfile('../data/'+user+'.player'):
+            if len(players.getMines(user)) == 0:
+                 newMine(msg, channel, user)
+            else: 
+                ircsock.send("PRIVMSG "+ channel + " :" + user + ": You have already been assigned your alotted mine.  Perhaps in the future, the empress will permit further ventures.\n")
+        else:
+            ircsock.send("PRIVMSG "+ channel + " :" + user + ": I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
+
+    if msg.find("!mines") != -1:
+        if os.path.isfile('../data/'+user+'.player'):
+            if len(players.getMines(user)) == 0:
+                ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
+            else: 
+                plural = ''
+                if len(players.getMines(user)) > 0:
+                    plural = 's'
+                j = ', '
+                mines = j.join(players.getMines(user)).capitalize()
+                ircsock.send("PRIVMSG "+ channel + " :" + user + ": You own the following mine"+plural+": "+mines+"\n")
+        else:
+            ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
+
+    if msg.find("!strike") != -1:
+        if os.path.isfile('../data/'+user+'.player'):
+            if len(players.getMines(user)) == 0:
+                ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
+            else: 
+                excavate(msg, channel, user)
+        else:
+            ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
+
+    if msg.find("!report") != -1:
+        if os.path.isfile('../data/'+user+'.player'):
+            report(msg, channel, user)
+        else:
+            ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
 #########################
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

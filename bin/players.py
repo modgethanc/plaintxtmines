@@ -72,7 +72,7 @@ def acquire(player, excavation):
 
     return excavation
 
-def report(excavation):
+def printExcavation(excavation):
     mined = ''
     y = 0
     for x in excavation:
@@ -102,7 +102,7 @@ def report(excavation):
     
     return mined
 
-def mined(player):
+def report(player):
     playerfile = open('../data/'+player+'.player', 'r')
     playerdata = []
     
@@ -110,19 +110,20 @@ def mined(player):
         playerdata.append(str(x).rstrip())
     
     playerfile.close()
-    
-    print "~ x%s" % (playerdata[1])
-    print "# x%s" % (playerdata[2])
-    print "@ x%s" % (playerdata[3])
-    print "& x%s" % (playerdata[4])
-    print "* x%s" % (playerdata[5])
-    print "[ x%s" % (playerdata[6])
-    print "] x%s" % (playerdata[7])
-    print "^ x%s" % (playerdata[8])
+
+    return playerdata[1]+ "x tilde, "+playerdata[2]+ "x pound, "+playerdata[3]+ "x spiral,  "+playerdata[4]+ "x amper, "+playerdata[5]+ "x splat, "+playerdata[6]+ "x lbrack, "+playerdata[7]+ "x rbrack, "+playerdata[8]+"x carat"
+    #print "~ x%s" % (playerdata[1])
+    #print "# x%s" % (playerdata[2])
+    #print "@ x%s" % (playerdata[3])
+    #print "& x%s" % (playerdata[4])
+    #print "* x%s" % (playerdata[5])
+    #print "[ x%s" % (playerdata[6])
+    #print "] x%s" % (playerdata[7])
+    #print "^ x%s" % (playerdata[8])
 
 
 #new("hvincent")
 #print newMine("hvincent", "standardrates")
 #print getMines("hvincent")
-print report(acquire("hvincent", excavate("hvincent", getMines("hvincent")[0])))
-mined("hvincent")
+#print report(acquire("hvincent", excavate("hvincent", getMines("hvincent")[0])))
+#mined("hvincent")
