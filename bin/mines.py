@@ -9,6 +9,7 @@ def generate(minerates): #takes a minerate file; returns a list of resource amou
     rates = []
     for x in ratefile:
         rates.append(int(x.rstrip()))
+    ratefile.close()
 
     bound = rates[8]
 
