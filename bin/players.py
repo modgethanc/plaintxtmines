@@ -5,7 +5,7 @@ import mines
 
 def new(player):
     playerfile = open('../data/'+player+'.player', 'w+')
-   
+
     playerfile.write('\n')
     i = 0
     while i < 8:
@@ -19,7 +19,7 @@ def new(player):
 def newMine(player, rates):
     playerfile = open('../data/'+player+'.player', 'r')
     playerdata = []
-    
+
     for x in playerfile:
          playerdata.append(x)
 
@@ -52,15 +52,15 @@ def excavate(player, mine):
 def acquire(player, excavation):
     playerfile = open('../data/'+player+'.player', 'r')
     playerdata = []
-    
+
     for x in playerfile:
         playerdata.append(str(x).rstrip())
-    
+
     playerfile.close()
 
     i = 0
     for x in excavation:
-        res = int(playerdata[i+1]) 
+        res = int(playerdata[i+1])
         res += excavation[i]
         playerdata[i+1] = res
         i += 1
@@ -73,6 +73,14 @@ def acquire(player, excavation):
     return excavation
 
 def printExcavation(excavation):
+    total = 0
+
+    for x in excavation:
+        total += x
+
+    if total == 0:
+        return "nothing..."
+
     mined = ''
     y = 0
     for x in excavation:
@@ -99,28 +107,19 @@ def printExcavation(excavation):
             i += 1
 
         y += 1
-    
+
     return mined
 
 def report(player):
     playerfile = open('../data/'+player+'.player', 'r')
     playerdata = []
-    
+
     for x in playerfile:
         playerdata.append(str(x).rstrip())
-    
+
     playerfile.close()
 
-    return playerdata[1]+ "x tilde, "+playerdata[2]+ "x pound, "+playerdata[3]+ "x spiral,  "+playerdata[4]+ "x amper, "+playerdata[5]+ "x splat, "+playerdata[6]+ "x lbrack, "+playerdata[7]+ "x rbrack, "+playerdata[8]+"x carat"
-    #print "~ x%s" % (playerdata[1])
-    #print "# x%s" % (playerdata[2])
-    #print "@ x%s" % (playerdata[3])
-    #print "& x%s" % (playerdata[4])
-    #print "* x%s" % (playerdata[5])
-    #print "[ x%s" % (playerdata[6])
-    #print "] x%s" % (playerdata[7])
-    #print "^ x%s" % (playerdata[8])
-
+    return playerdata[1]+ "x tilde, "+playerdata[2]+ "x pound, "+playerdata[3]+ "x spiral, "+playerdata[4]+ "x amper, "+playerdata[5]+ "x splat, "+playerdata[6]+ "x lbrack, "+playerdata[7]+ "x rbrack, "+playerdata[8]+"x carat"
 
 #new("hvincent")
 #print newMine("hvincent", "standardrates")

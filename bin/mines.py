@@ -2,6 +2,7 @@
 
 import random
 import names
+import os
 
 def generate(minerates): #takes a minerate file; returns a list of resource amounts for a generated mine
     ratefile = open(minerates,'r')
@@ -26,16 +27,38 @@ def generate(minerates): #takes a minerate file; returns a list of resource amou
     return resources
 
 def writeMine(mine, record='../data/'+names.medium()+'.mine'): #returns a mine name for a list of resources recorded
+    totals = [0,0]
+    totalseek = []
+
+    if os.path.isfile(record):
+      recordfile = open(record, 'r')
+      for x in recordfile:
+        totalseek.append(x)
+      recordfile.close()
+
+      #print totalseek[-1]
+      totals = totalseek[-1].rstrip().split(',')
+      new = False
+    else:
+      new = True
+
     recordfile = open(record, 'w')
-    total = 0
+    totals[0] = 0
     i = 0
     for x in mine:
         if i < 8:
             recordfile.write(str(x)+'\n')
-            total += int(x)
+            totals[0] += int(x)
             i += 1
-    
-    recordfile.write(str(total)+'\n')
+
+    if new:
+      totals[1] = str(totals[0])
+    totals[0] = str(totals[0])
+
+    #print totals
+    j = ','
+    total = j.join(totals)
+    recordfile.write(total+'\n')
     recordfile.close()
 
     return record.split('/')[-1].split('.')[0]
@@ -45,10 +68,16 @@ def openMine(record): #returns a list of mine data plus name given a filename
     mine = []
     for x in recordfile:
         mine.append(x)
-    
+
     mine.append(record.split('/')[-1].split('.')[0])
 
     return mine
+
+def remaining(record):
+    return int(openMine(record)[-2].rstrip().split(',')[0])
+
+def starting(record):
+    return int(openMine(record)[-2].rstrip().split(',')[1])
 
 def excavate(record, rate=10, types=3):
     excavated = [0,0,0,0,0,0,0,0]
@@ -63,7 +92,7 @@ def excavate(record, rate=10, types=3):
 
     #print "mining thinks total is: %s, taking %d" % (mine[-1].rstrip(),rate)
 
-    if int(mine[-1]) <= rate:
+    if remaining(record) <= rate:
         #print "TAKE IT ALL"
         i = 0
         while i < 8:
@@ -95,7 +124,7 @@ def excavate(record, rate=10, types=3):
             i -= 1
         else:
            # print 'womp'
-            mined.remove(mineHere) 
+            mined.remove(mineHere)
             minesLeft -= 1
     i = 0
     while i < 8:
@@ -110,18 +139,19 @@ def excavate(record, rate=10, types=3):
 
 def printMine(mine):
     print mine[-1]
-    if int(mine[-2]) == 0:
+    remaining = mine[-2].split(',')[0]
+    if int(remaining) == 0:
         print "mine depleted"
     else:
-        print "~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(mine[-2]))
-        print "# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(mine[-2]))
-        print "@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(mine[-2]))
-        print "& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(mine[-2]))
-        print "* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(mine[-2]))
-        print "[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(mine[-2]))
-        print "] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(mine[-2]))
-        print "^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(mine[-2]))
-        print "\ntotal: %d" % (int(mine[-2]))
+        print "~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(remaining))
+        print "# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(remaining))
+        print "@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(remaining))
+        print "& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(remaining))
+        print "* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(remaining))
+        print "[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(remaining))
+        print "] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(remaining))
+        print "^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(remaining))
+        print "\ntotal: %s" % (remaining)
 
     return mine
 

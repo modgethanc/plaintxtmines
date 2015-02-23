@@ -63,6 +63,22 @@ def excavate(msg, channel, user):
 def report(msg, channel, user):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
 
+def mineList(msg, channel, user):
+    plural = ''
+    if len(players.getMines(user)) > 0:
+        plural = 's'
+
+    prejoin = []
+
+    rawList = players.getMines(user)
+    for x in rawList:
+        prejoin.append(x.capitalize() + " (" + str(int(100*float(mines.remaining("../data/"+x+".mine"))/float(mines.starting("../data/"+x+".mine")))) + "%)")
+
+    j = ", "
+    list = j.join(prejoin)
+    ircsock.send("PRIVMSG "+ channel + " :" + user + ": You own the following mine"+plural+": "+list+"\n")
+
+
 ###########################
 
 def listen():
@@ -138,12 +154,7 @@ def listen():
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else: 
-                plural = ''
-                if len(players.getMines(user)) > 0:
-                    plural = 's'
-                j = ', '
-                mines = j.join(players.getMines(user)).capitalize()
-                ircsock.send("PRIVMSG "+ channel + " :" + user + ": You own the following mine"+plural+": "+mines+"\n")
+                mineList(msg, channel, user)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
