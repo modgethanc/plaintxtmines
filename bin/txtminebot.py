@@ -11,11 +11,15 @@ import mines
 import players
 import names
 
+### IRC CONFIG
+
+config = open("ircconfig", 'r')
+
 parser = OptionParser()
 
-parser.add_option("-s", "--server", dest="server", default='irc.freenode.net', help="the server to connect to", metavar="SERVER")
-parser.add_option("-c", "--channel", dest="channel", default='#kvincent', help="the channel to join", metavar="CHANNEL")
-parser.add_option("-n", "--nick", dest="nick", default='txtminebot', help="the nick to use", metavar="NICK")
+parser.add_option("-s", "--server", dest="server", default=config.readline().rstrip(), help="the server to connect to", metavar="SERVER")
+parser.add_option("-c", "--channel", dest="channel", default=config.readline().rstrip(), help="the channel to join", metavar="CHANNEL")
+parser.add_option("-n", "--nick", dest="nick", default=config.readline().rstrip(), help="the nick to use", metavar="NICK")
 
 (options, args) = parser.parse_args()
 
@@ -27,7 +31,7 @@ def joinchan(chan):
 
 def connect(server, channel, botnick):
   ircsock.connect((server, 6667))
-  ircsock.send("USER "+ botnick +" "+ botnick +" "+ botnick +" :hvincent\n") 
+  ircsock.send("USER "+ botnick +" "+ botnick +" "+ botnick +" :"+config.readline().rstrip()+"\n")
   ircsock.send("NICK "+ botnick +"\n")
 
   joinchan(channel)
@@ -44,7 +48,7 @@ def excavate(msg, channel, user):
     mineList = players.getMines(user)
     for x in mineList:
         mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
+        ircsock.send("PRIVMSG "+ user +" :"+ user + ": WHAM!  You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
 
 def report(msg, channel, user):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
@@ -66,14 +70,21 @@ def listen():
     if "" == formatted:
       continue
 
-    user = msg.split("!")[0].split(":")[1]
+    #user = msg.split("!")[0].split(":")[1]
 
     split = formatted.split("\t")
     time = split[0]
-    #user = split[1]
+    user = split[1]
     command = split[2]
     channel = split[3]
     messageText = split[4]
+
+    #print command
+    #print user
+    #print channel
+
+    if user == "nbsp":
+        user = "hvincent"
 
     #####  meta commands
     if msg.find("!join") != -1:
@@ -83,6 +94,9 @@ def listen():
                 joinchan(x)
 
     ###### gameplay
+    if msg.find("!rollcall") != -1:
+        ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !info.\n")
+
     if msg.find("!info") != -1:
         ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !info.\n")
 
