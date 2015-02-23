@@ -13,7 +13,8 @@ def new(player):
     while i < 8:
         playerfile.write("0\n")
         i += 1
-
+    
+    playerfile.write("0\n")
     playerfile.close()
 
     return player
@@ -47,6 +48,31 @@ def getMines(player):
     playerfile.close()
 
     return minelist
+
+def lastMined(player):
+    playerfile = open('../data/'+player+'.player', 'r')
+    playerdata = []
+
+    for x in playerfile:
+        playerdata.append(x)
+
+    return playerdata[-1]
+
+def updateLast(player, time):
+    playerfile = open('../data/'+player+'.player', 'r')
+    playerdata = []
+
+    for x in playerfile:
+        playerdata.append(x)
+
+    playerfile.close()
+
+    playerdata[-1] = str(time) + "\n"
+
+    playerfile = open('../data/'+player+'.player', 'w')
+    for x in playerdata:
+        playerfile.write(x)
+    playerfile.close()
 
 def excavate(player, mine):
     holdings = getMines(player)

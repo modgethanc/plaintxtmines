@@ -54,12 +54,17 @@ def newMine(msg, channel, user):
     mine = players.newMine(user, "standardrates").capitalize()
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts.\n")
 
-def excavate(msg, channel, user):
-    mineList = players.getMines(user)
-    for x in mineList:
-        mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
-        ircsock.send("PRIVMSG "+ user +" :WHAM!  You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
+def excavate(msg, channel, user, time):
+    diff = int(time)-int(players.lastMined(user))
+    if diff < 30:
+        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(30-diff)+" seconds.\n")
+    else:
+        mineList = players.getMines(user)
+        for x in mineList:
+            mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
+            ircsock.send("PRIVMSG "+ user +" :WHAM!  You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
 
+    players.updateLast(user, time)
 def report(msg, channel, user):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
 
@@ -110,11 +115,16 @@ def listen():
     #print user
     #print channel
 
-    if user == "nbsp" and nick == "hvincent":
-        user = "hvincent"
-    elif user == "nbsp":
-        user = "kortec"
+    #if user == "nbsp" and nick == "hvincent":
+    #    user = "hvincent"
+    #elif user == "nbsp":
+    #    user = "kortec"
+    
+    if nick != user:
+        user = nick
 
+    if channel == config[2]:
+        channel = user
     #print msg
 
     if channel == config[2] or msg.find(":!") != -1:
@@ -165,7 +175,7 @@ def listen():
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else: 
-                excavate(msg, channel, user)
+                excavate(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
