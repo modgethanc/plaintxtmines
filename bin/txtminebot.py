@@ -97,7 +97,7 @@ def listen():
       continue
 
     #print formatted
-    #user = msg.split("!")[0].split(":")[1]
+    nick = msg.split("!")[0].split(":")[1]
 
     split = formatted.split("\t")
     time = split[0]
@@ -110,8 +110,10 @@ def listen():
     #print user
     #print channel
 
-    if user == "nbsp":
+    if user == "nbsp" and nick == "hvincent":
         user = "hvincent"
+    elif user == "nbsp":
+        user = "kortec"
 
     #print msg
 

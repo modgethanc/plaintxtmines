@@ -2,6 +2,8 @@
 
 import random
 import mines
+import names
+import os
 
 def new(player):
     playerfile = open('../data/'+player+'.player', 'w+')
@@ -21,9 +23,13 @@ def newMine(player, rates):
     playerdata = []
 
     for x in playerfile:
-         playerdata.append(x)
+        playerdata.append(x)
 
-    minename = mines.writeMine(mines.generate(rates))
+    minename = names.medium()
+    while os.path.isfile('../data/'+minename+'.mine'):
+        minename = names.medium()
+
+    mines.writeMine(mines.generate(rates), '../data/'+minename+'.mine')
     playerdata[0] = playerdata[0].rstrip() + minename + ",\n"
     playerfile.close()
 
