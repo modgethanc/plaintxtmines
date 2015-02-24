@@ -1,0 +1,22 @@
+SKILLS
+-survey: discover makeup of your mine
+-theft: steal resources from others
+-strength: more resources per strike
+-endurance: less fatigue
+
+GOLEMS
+-created through mined resources
+-mines for you until it dies
+
+TITHING
+-giving resources to the empress
+
+MARKET
+-trade resources to others
+-sell resources for cash
+-buy stuff
+
+MISC
+-strike specific mines
+-rename your mines
+-burn: destroy your dossier (soft reset)
