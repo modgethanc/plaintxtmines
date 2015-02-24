@@ -97,7 +97,7 @@ def listen():
 
   while 1:
     msg = ircsock.recv(2048)
-    msg = msg.strip('\n\r')
+    msg = msg.strip('\n\r').lower()
 
     if msg.find("PING :") != -1:
       ping()
