@@ -55,10 +55,14 @@ def newMine(msg, channel, user):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts.\n")
 
 def excavate(msg, channel, user, time):
+    base = 10
     diff = int(time)-int(players.lastMined(user))
-    if diff < 30:
-        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in 30 seconds.  I encourage you to take a breather before striking again.\n")
-        #ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(30-diff)+" seconds.\n")
+    if diff < base:
+        left =  base - diff
+        fatigue = left * 2
+        time = int(time) + fatigue - base
+        #ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in 30 seconds.  I encourage you to take a breather before striking again.\n")
+        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue.\n")
     else:
         mineList = players.getMines(user)
         for x in mineList:
@@ -66,6 +70,7 @@ def excavate(msg, channel, user, time):
             ircsock.send("PRIVMSG "+ user +" :WHAM!  You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
 
     players.updateLast(user, time)
+
 def report(msg, channel, user):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
 
