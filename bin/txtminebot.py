@@ -57,7 +57,8 @@ def newMine(msg, channel, user):
 def excavate(msg, channel, user, time):
     diff = int(time)-int(players.lastMined(user))
     if diff < 30:
-        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(30-diff)+" seconds.\n")
+        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in 30 seconds.  I encourage you to take a breather before striking again.\n")
+        #ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(30-diff)+" seconds.\n")
     else:
         mineList = players.getMines(user)
         for x in mineList:
