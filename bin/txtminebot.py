@@ -97,11 +97,11 @@ def listen():
 
   while 1:
     msg = ircsock.recv(2048)
-    msg = msg.strip('\n\r').lower()
 
     if msg.find("PING :") != -1:
       ping()
 
+    msg = msg.strip('\n\r').lower()
     formatted = formatter.format_message(msg)
 
     if "" == formatted:
