@@ -106,6 +106,8 @@ def listen():
 
     if "" == formatted:
       continue
+    #else:
+    #  continue
 
     #print formatted
     nick = msg.split("!")[0].split(":")[1]
@@ -116,6 +118,10 @@ def listen():
     command = split[2]
     channel = split[3]
     messageText = split[4]
+
+    #print msg
+    #print formatted
+    #print messageText
 
     #print command
     #print user
@@ -133,11 +139,13 @@ def listen():
         channel = user
     #print msg
 
+###put log back here when done
+
+    #if 1:
     if channel == config[2] or msg.find(":!") != -1:
         logfile = open("irclog", 'a')
-        logfile.write(formatted+"\n")
+        logfile.write(msg+"\n")
         logfile.close()
-
     #####  meta commands
     if msg.find(":!join") != -1:
         split = msg.split(" ");

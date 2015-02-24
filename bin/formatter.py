@@ -2,7 +2,8 @@ import time
 import re
 
 def format_message(message):
-	pattern = r'^:.*\!~(.*)@.* (.*) (.*) :(.*)'
+	#pattern = r'^:.*\!~(.*)@.* (.*) (.*) :(.*)'
+	pattern = r'^:.*\!(.*)@.* (.*) (.*) :(.*)'
 	now = int(time.time())
 	matches = re.match(pattern, message)
 	if not matches:
