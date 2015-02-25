@@ -21,3 +21,4 @@ MISC
 -rename your mines
 -burn: destroy your dossier (soft reset)
 -abandon mines
+-strike yourself if you typo !strike [hazel]

@@ -56,15 +56,16 @@ def newMine(msg, channel, user):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts.\n")
 
 def excavate(msg, channel, user, time):
-    base = 10
+    base = 10 
     diff = int(time)-int(players.lastMined(user))
-    if diff < base:
+    if diff < base: # fatigue check
         left =  base - diff
         fatigue = left * 2
         time = int(time) + fatigue - base
-        #ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in 30 seconds.  I encourage you to take a breather before striking again.\n")
+
         ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue.\n")
-    else:
+
+    else: # actual mining actions
         mineList = players.getMines(user)
         for x in mineList:
             mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
@@ -79,7 +80,8 @@ def excavate(msg, channel, user, time):
     players.updateLast(user, time)
 
 def report(msg, channel, user):
-    ircsock.send("PRIVMSG "+ user +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :You have acquired the following resources: "+players.report(user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :"+mineList(msg, channel, user)+"\n")
 
 def mineList(msg, channel, user):
     plural = ''
@@ -90,11 +92,27 @@ def mineList(msg, channel, user):
 
     rawList = players.getMines(user)
     for x in rawList:
-        prejoin.append(x.capitalize() + " (" + str(int(100*float(mines.remaining("../data/"+x+".mine"))/float(mines.starting("../data/"+x+".mine")))) + "%)")
+        depletion = int(100*float(mines.remaining("../data/"+x+".mine"))/float(mines.starting("../data/"+x+".mine")))
+
+        color = '' 
+        if depletion > 98:
+            color += "\x0311"
+        elif depletion > 90:
+            color += "\x0309"
+        elif depletion > 49:
+            color += "\x0308"
+        elif depletion > 24:
+            color += "\x0307"
+        elif depletion > 9:
+            color += "\x0304"
+        else:
+            color += "\x0305"
+
+        prejoin.append(x.capitalize() + " (" + color + str(depletion) + "%\x03)")
 
     j = ", "
-    list = j.join(prejoin)
-    ircsock.send("PRIVMSG "+ channel + " :" + user + ": You own the following mine"+plural+": "+list+"\n")
+    #ircsock.send("PRIVMSG "+ channel + " :" + user + ": You own the following mine"+plural+": "+list+"\n")
+    return "You own the following mine"+plural+": "+j.join(prejoin)
 
 ###########################
 
@@ -126,14 +144,14 @@ def listen():
     #print formatted
     #print messageText
     
-    if nick != user:
+    if nick != user: #check for weird identity stuff
         user = nick
 
-    if channel == config[2]:
+    if channel == config[2]:  #check for PM
         channel = user
 
 
-    if channel == config[2] or msg.find(":!") != -1:
+    if channel == config[2] or msg.find(":!") != -1: #only log PM and commands
         logfile = open("irclog", 'a')
         logfile.write(msg+"\n")
         logfile.close()
@@ -172,7 +190,7 @@ def listen():
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else: 
-                mineList(msg, channel, user)
+                ircsock.send("PRIVMSG "+channel+" :" + user + ": "+mineList(msg, channel, user)+"\n")
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
