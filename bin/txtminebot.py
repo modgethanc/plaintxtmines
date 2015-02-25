@@ -5,6 +5,7 @@ import os
 import os.path
 import sys
 from optparse import OptionParser
+import random
 
 import formatter
 import mines
@@ -67,7 +68,13 @@ def excavate(msg, channel, user, time):
         mineList = players.getMines(user)
         for x in mineList:
             mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
-            ircsock.send("PRIVMSG "+ user +" :WHAM!  You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
+            ircsock.send("PRIVMSG "+ user +" :" + random.choice(['WHAM', 'CRASH', 'BANG', 'KLANG', 'CLUNK', 'PLINK', 'DINK'])+"!  You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
+
+            if mines.remaining("../data/"+x+".mine") == 0:
+	        mineList.remove(x)
+                ircsock.send("PRIVMSG "+ user +" :"+x.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
+        
+	players.updateMines(user, mineList)
 
     players.updateLast(user, time)
 

@@ -49,6 +49,29 @@ def getMines(player):
 
     return minelist
 
+def updateMines(player, minelist):
+    playerfile = open('../data/'+player+'.player', 'r')
+    playerdata = []
+
+    for x in playerfile:
+        playerdata.append(x)
+
+    playerfile.close()
+
+    minelist.append('')
+    mines = ''
+    j = ','
+    mines = j.join(minelist)
+
+    playerdata[0] = mines + "\n"
+
+    playerfile = open('../data/'+player+'.player', 'w')
+    for x in playerdata:
+        playerfile.write(x)
+    playerfile.close()
+
+    return mines
+
 def lastMined(player):
     playerfile = open('../data/'+player+'.player', 'r')
     playerdata = []
@@ -111,7 +134,7 @@ def printExcavation(excavation):
         total += x
 
     if total == 0:
-        return "nothing..."
+        return "nothing useful..."
 
     mined = ''
     y = 0

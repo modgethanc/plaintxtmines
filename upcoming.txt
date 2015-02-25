@@ -20,3 +20,4 @@ MISC
 -strike specific mines
 -rename your mines
 -burn: destroy your dossier (soft reset)
+-abandon mines
