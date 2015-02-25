@@ -83,6 +83,16 @@ def report(msg, channel, user):
     ircsock.send("PRIVMSG "+ user +" :You have acquired the following resources: "+players.report(user)+"\n")
     ircsock.send("PRIVMSG "+ user +" :"+mineList(msg, channel, user)+"\n")
 
+def fatigue(msg, channel, user, time):
+    base = 10 
+    diff = int(time)-int(players.lastMined(user))
+    if diff < base: # fatigue check
+        fatigue =  base - diff
+
+        ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" seconds.  Please rest patiently so you do not stress your body.\n")
+    else:
+        ircsock.send("PRIVMSG "+ channel + " :" + user +": You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.\n")
+
 def mineList(msg, channel, user):
     plural = ''
     if len(players.getMines(user)) > 0:
@@ -165,10 +175,10 @@ def listen():
 
     ###### gameplay
     if msg.find(":!rollcall") != -1:
-        ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !info.\n")
+        ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !info.\n")
 
     if msg.find(":!info") != -1:
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !info.\n")
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !info.\n")
 
     if msg.find(":!init") != -1:
         if os.path.isfile('../data/'+user+'.player'):
@@ -202,6 +212,12 @@ def listen():
                 excavate(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
+
+    if msg.find(":!fatigue") != -1:
+        if os.path.isfile('../data/'+user+'.player'):
+            fatigue(msg, channel, user, time)
+        else:
+            ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
     if msg.find(":!report") != -1:
         if os.path.isfile('../data/'+user+'.player'):
