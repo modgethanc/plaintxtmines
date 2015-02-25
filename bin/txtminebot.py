@@ -53,7 +53,7 @@ def newPlayer(msg, channel, user):
 
 def newMine(msg, channel, user):
     mine = players.newMine(user, "standardrates").capitalize()
-    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts.\n")
+    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.\n")
 
 def excavate(msg, channel, user, time):
     base = 10 
