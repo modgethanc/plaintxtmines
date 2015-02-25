@@ -175,9 +175,3 @@ def report(player):
     playerfile.close()
 
     return playerdata[1]+ "x tilde, "+playerdata[2]+ "x pound, "+playerdata[3]+ "x spiral, "+playerdata[4]+ "x amper, "+playerdata[5]+ "x splat, "+playerdata[6]+ "x lbrack, "+playerdata[7]+ "x rbrack, "+playerdata[8]+"x carat"
-
-#new("hvincent")
-#print newMine("hvincent", "standardrates")
-#print getMines("hvincent")
-#print report(acquire("hvincent", excavate("hvincent", getMines("hvincent")[0])))
-#mined("hvincent")

@@ -68,7 +68,7 @@ def excavate(msg, channel, user, time):
         mineList = players.getMines(user)
         for x in mineList:
             mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
-            ircsock.send("PRIVMSG "+ user +" :" + random.choice(['WHAM', 'CRASH', 'BANG', 'KLANG', 'CLUNK', 'PLINK', 'DINK'])+"!  You struck at " + x.capitalize() +" and excavated the following: "+mined+"\n")
+            ircsock.send("PRIVMSG "+ user +" :" + random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"  You struck at " + x.capitalize() +" and excavated "+mined+"\n")
 
             if mines.remaining("../data/"+x+".mine") == 0:
 	        mineList.remove(x)
@@ -79,7 +79,7 @@ def excavate(msg, channel, user, time):
     players.updateLast(user, time)
 
 def report(msg, channel, user):
-    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :"+ user + ": You have acquired the following resources: "+players.report(user)+"\n")
 
 def mineList(msg, channel, user):
     plural = ''
@@ -95,7 +95,6 @@ def mineList(msg, channel, user):
     j = ", "
     list = j.join(prejoin)
     ircsock.send("PRIVMSG "+ channel + " :" + user + ": You own the following mine"+plural+": "+list+"\n")
-
 
 ###########################
 
@@ -113,10 +112,7 @@ def listen():
 
     if "" == formatted:
       continue
-    #else:
-    #  continue
 
-    #print formatted
     nick = msg.split("!")[0].split(":")[1]
 
     split = formatted.split("\t")
@@ -129,30 +125,19 @@ def listen():
     #print msg
     #print formatted
     #print messageText
-
-    #print command
-    #print user
-    #print channel
-
-    #if user == "nbsp" and nick == "hvincent":
-    #    user = "hvincent"
-    #elif user == "nbsp":
-    #    user = "kortec"
     
     if nick != user:
         user = nick
 
     if channel == config[2]:
         channel = user
-    #print msg
 
-###put log back here when done
 
-    #if 1:
     if channel == config[2] or msg.find(":!") != -1:
         logfile = open("irclog", 'a')
         logfile.write(msg+"\n")
         logfile.close()
+
     #####  meta commands
     if msg.find(":!join") != -1:
         split = msg.split(" ");

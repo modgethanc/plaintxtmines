@@ -37,7 +37,6 @@ def writeMine(mine, record='../data/'+names.medium()+'.mine'): #returns a mine n
         totalseek.append(x)
       recordfile.close()
 
-      #print totalseek[-1]
       totals = totalseek[-1].rstrip().split(',')
       new = False
     else:
@@ -91,10 +90,7 @@ def excavate(record, rate=10, types=3):
         mine.append(mineData[i])
         i += 1
 
-    #print "mining thinks total is: %s, taking %d" % (mine[-1].rstrip(),rate)
-
     if remaining(record) <= rate:
-        #print "TAKE IT ALL"
         i = 0
         while i < 8:
             excavated[i] = int(mine[i])
@@ -111,8 +107,6 @@ def excavate(record, rate=10, types=3):
         mineChoices.remove(mineHere)
         i -= 1
 
-    #print mined
-
     i = rate
     minesLeft = types
     while i > 0:
@@ -124,7 +118,6 @@ def excavate(record, rate=10, types=3):
             excavated[mineHere] += 1
             i -= 1
         else:
-           # print 'womp'
             mined.remove(mineHere)
             minesLeft -= 1
     i = 0
@@ -155,16 +148,3 @@ def printMine(mine):
         print "\ntotal: %s" % (remaining)
 
     return mine
-
-#testing below
-#printMine(openMine('../data/'+writeMine(generate("standardrates"), "../data/m1")))
-#print writeMine(generate("standardrates"), '../data/m2')
-#printMine(openMine('../data/m2'))
-#print "\n"
-#printMine(openMine('../data/'+writeMine(generate("standardrates"))+'.mine'))
-#print str(excavate('../data/m1'))
-#printMine(openMine('../data/m1'))
-#print excavate('../data/m1', 300, 1)
-#printMine(openMine('../data/m1'))
-#print excavate('../data/m1', 10000, 8)
-#printMine(openMine('../data/m1'))
