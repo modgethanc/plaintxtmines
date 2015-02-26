@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import random
-import names
+import gibber
 import os
 
 def generate(minerates): #takes a minerate file; returns a list of resource amounts for a generated mine
@@ -27,7 +27,7 @@ def generate(minerates): #takes a minerate file; returns a list of resource amou
 
     return resources
 
-def writeMine(mine, record='../data/'+names.medium()+'.mine'): #returns a mine name for a list of resources recorded
+def writeMine(mine, record='../data/'+gibber.medium()+'.mine'): #returns a mine name for a list of resources recorded
     totals = [0,0]
     totalseek = []
 

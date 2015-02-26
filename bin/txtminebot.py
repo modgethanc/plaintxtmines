@@ -10,7 +10,7 @@ import random
 import formatter
 import mines
 import players
-import names
+import gibber
 
 ### IRC CONFIG
 

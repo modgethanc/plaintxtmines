@@ -2,7 +2,7 @@
 
 import random
 import mines
-import names
+import gibber
 import os
 
 def new(player):
@@ -26,9 +26,9 @@ def newMine(player, rates):
     for x in playerfile:
         playerdata.append(x)
 
-    minename = names.medium()
+    minename = gibber.medium()
     while os.path.isfile('../data/'+minename+'.mine'):
-        minename = names.medium()
+        minename = gibber.medium()
 
     mines.writeMine(mines.generate(rates), '../data/'+minename+'.mine')
     playerdata[0] = playerdata[0].rstrip() + minename + ",\n"
