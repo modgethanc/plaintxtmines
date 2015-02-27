@@ -23,15 +23,19 @@ for x in configfile:
 
 configfile.close()
 
+botName     = config[2]
+admin       = config[3]
+baseFatigue = int(config[4])
+
 parser = OptionParser()
 
 parser.add_option("-s", "--server", dest="server", default=config[0], help="the server to connect to", metavar="SERVER")
 parser.add_option("-c", "--channel", dest="channel", default=config[1], help="the channel to join", metavar="CHANNEL")
-parser.add_option("-n", "--nick", dest="nick", default=config[2], help="the nick to use", metavar="NICK")
+parser.add_option("-n", "--nick", dest="nick", default=botName, help="the nick to use", metavar="NICK")
 
 (options, args) = parser.parse_args()
 
-###
+### irc functions 
 
 def ping():
   ircsock.send("PONG :pingis\n")
@@ -46,7 +50,7 @@ def connect(server, channel, botnick):
 
   joinchan(channel)
 
-###
+### gameplay functions
 
 def newPlayer(msg, channel, user):
     players.new(user)
@@ -57,12 +61,11 @@ def newMine(msg, channel, user):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.\n")
 
 def excavate(msg, channel, user, time):
-    base = 10 
     diff = int(time)-int(players.lastMined(user))
-    if diff < base: # fatigue check
-        left =  base - diff
+    if diff < baseFatigue: # fatigue check
+        left =  baseFatigue - diff
         fatigue = left * 2
-        time = int(time) + fatigue - base
+        time = int(time) + fatigue - baseFatigue
 
         ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue.\n")
 
@@ -93,11 +96,13 @@ def grovel(msg, channel, user, time):
     
     ircsock.send("PRIVMSG "+ channel + " :" + user +": The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(comments)+"\n")
 
-def fatigue(msg, channel, user, time):
-    base = 10 
+def stirke(msg, channel, user, time): #hazelnut memorial disfeature
+    a = 0
+
+def fatigue(msg, channel, user, time): #~krowbar memorial feature
     diff = int(time)-int(players.lastMined(user))
-    if diff < base: # fatigue check
-        fatigue =  base - diff
+    if diff < baseFatigue: # fatigue check
+        fatigue =  baseFatigue - diff
 
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" seconds.  Please rest patiently so you do not stress your body.\n")
     else:
@@ -131,21 +136,18 @@ def mineList(msg, channel, user):
         prejoin.append(x.capitalize() + " (" + color + str(depletion) + "%\x03)")
 
     j = ", "
-    #ircsock.send("PRIVMSG "+ channel + " :" + user + ": You own the following mine"+plural+": "+list+"\n")
     return "You own the following mine"+plural+": "+j.join(prejoin)
 
 ###########################
 
 def listen():
-  lastTick = 0
-
   while 1:
     msg = ircsock.recv(2048)
 
     if msg.find("PING :") != -1:
       ping()
 
-    msg = msg.strip('\n\r').lower()
+    msg = msg.strip('\n\r').lower() #case insensitive
     formatted = formatter.format_message(msg)
 
     if "" == formatted:
@@ -153,50 +155,57 @@ def listen():
 
     nick = msg.split("!")[0].split(":")[1]
 
-    split = formatted.split("\t")
-    time = split[0]
-    user = split[1]
-    command = split[2]
-    channel = split[3]
+    split       = formatted.split("\t")
+    time        = split[0]
+    user        = split[1]
+    command     = split[2]
+    channel     = split[3]
     messageText = split[4]
 
     #print msg
     #print formatted
-    #print messageText
     
     if nick != user: #check for weird identity stuff
         user = nick
 
-    if channel == config[2]:  #check for PM
+    if channel == botName:  #check for PM
         channel = user
 
 
-    if channel == config[2] or msg.find(":!") != -1: #only log PM and commands
+    if channel == botName or msg.find(":!") != -1: #only log PM and commands
         logfile = open("irclog", 'a')
         logfile.write(msg+"\n")
         logfile.close()
 
-    #####  meta commands
-    if msg.find(":!join") != -1:
+    ###### admin commands
+    if msg.find(":!join") != -1 and user == admin:
         split = msg.split(" ");
         for x in split:
             if x.find("#") != -1:
                 joinchan(x)
 
-    ###### gameplay
+    if msg.find(":!forcenew") != -1:
+        if user == admin:
+            split = msg.split(" ");
+            target = split[-1]
+            newMine(msg, target, target)
+        else:
+            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Sorry, friend, but only "+admin+" can force new mines right now.\n")
+
+    ###### gameplay commands
     if msg.find(":!rollcall") != -1:
         ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !info.\n")
 
-    if msg.find(":!info") != -1:
+    elif msg.find(":!info") != -1:
         ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !info.\n")
 
-    if msg.find(":!init") != -1:
+    elif msg.find(":!init") != -1:
         if os.path.isfile('../data/'+user+'.player'):
             ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You already have a dossier in my records, friend.\n")
         else:
             newPlayer(msg, channel, user)
 
-    if msg.find(":!open") != -1:
+    elif msg.find(":!open") != -1:
         if os.path.isfile('../data/'+user+'.player'):
             if len(players.getMines(user)) == 0:
                  newMine(msg, channel, user)
@@ -205,7 +214,7 @@ def listen():
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
 
-    if msg.find(":!mines") != -1:
+    elif msg.find(":!mines") != -1:
         if os.path.isfile('../data/'+user+'.player'):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
@@ -214,7 +223,7 @@ def listen():
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
-    if msg.find(":!strike") != -1:
+    elif msg.find(":!strike") != -1:
         if os.path.isfile('../data/'+user+'.player'):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
@@ -223,19 +232,19 @@ def listen():
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
-    if msg.find(":!fatigue") != -1:
+    elif msg.find(":!fatigue") != -1:
         if os.path.isfile('../data/'+user+'.player'):
             fatigue(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
-    if msg.find(":!grovel") != -1:
+    elif msg.find(":!grovel") != -1:
         if os.path.isfile('../data/'+user+'.player'):
             grovel(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.\n")
 
-    if msg.find(":!report") != -1:
+    elif msg.find(":!report") != -1:
         if os.path.isfile('../data/'+user+'.player'):
             report(msg, channel, user)
         else:
