@@ -1,0 +1,8 @@
+init
+open
+mines
+strike
+report
+fatigue
+grovel
+info

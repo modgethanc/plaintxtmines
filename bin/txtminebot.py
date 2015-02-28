@@ -45,7 +45,7 @@ file_interp_neg = "lang/interp-neg.txt"
 file_wham = "lang/wham.txt"
 
 if config[4]:
-    baseFatigue = config[4]
+    baseFatigue = int(config[4])
 if config[5]:
     file_commands = config[5]
 if config[6]:
@@ -97,7 +97,7 @@ def connect(server, channel, botnick):
 ### meta functions
 
 def isPlaying(player):
-    return os.path.isfile('../data/'+x+'.player')
+    return os.path.isfile('../data/'+player+'.player')
 
 ### gameplay functions
 
@@ -212,7 +212,7 @@ def listen():
     time        = split[0]
     user        = split[1]
     command     = split[2]
-    channel     = split[3]
+    channel     = split[3] #if you include the :: we can do slicker PM
     messageText = split[4]
 
     #print msg
@@ -247,19 +247,19 @@ def listen():
             ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Sorry, friend, but only "+admin+" can force new mines right now.\n")
 
     ###### gameplay commands
-    if msg.find(":!rollcall") != -1:
+    if msg.find(":!rollcall") != -1: # tildetown specific
         ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !info.\n")
 
-    elif msg.find(":!info") != -1:
+    elif msg.find(":!"+COMMANDS[7]) != -1: # !info
         ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !info.\n")
 
-    elif msg.find(":!init") != -1:
+    elif msg.find(":!"+COMMANDS[0]) != -1: # !init
         if isPlaying(user):
             ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You already have a dossier in my records, friend.\n")
         else:
             newPlayer(msg, channel, user)
 
-    elif msg.find(":!open") != -1:
+    elif msg.find(":!"+COMMANDS[1]) != -1: # !open
         if isPlaying(user):
             if len(players.getMines(user)) == 0:
                  newMine(msg, channel, user)
@@ -268,7 +268,7 @@ def listen():
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
 
-    elif msg.find(":!mines") != -1:
+    elif msg.find(":!"+COMMANDS[2]) != -1: # !mines
         if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
@@ -277,7 +277,7 @@ def listen():
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
-    elif msg.find(":!strike") != -1:
+    elif msg.find(":!"+COMMANDS[3]) != -1: # !strike
         if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
@@ -286,19 +286,19 @@ def listen():
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
-    elif msg.find(":!fatigue") != -1:
+    elif msg.find(":!"+COMMANDS[5]) != -1: # !fatigue
         if isPlaying(user):
             fatigue(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
-    elif msg.find(":!grovel") != -1:
+    elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
         if isPlaying(user):
             grovel(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.\n")
 
-    elif msg.find(":!report") != -1:
+    elif msg.find(":!"+COMMANDS[4]) != -1: # !report
         if isPlaying(user):
             report(msg, channel, user)
         else:
