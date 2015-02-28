@@ -15,7 +15,7 @@ import empress
 
 ### CONFIG
 
-configfile = open("ircconfig-test", 'r')
+configfile = open("ircconfig", 'r')
 config = []
 
 for x in configfile:
@@ -89,8 +89,8 @@ def joinchan(chan):
 
 def connect(server, channel, botnick):
   ircsock.connect((server, 6667))
-  ircsock.send("USER "+ botnick +" "+ botnick +" "+ botnick +" :"+config[3]+"\n")
-  ircsock.send("NICK "+ botnick +"\n")
+  ircsock.send("USER "+botnick+" "+botnick+" "+botnick+" :"+admin+"\n")
+  ircsock.send("NICK "+botnick+"\n")
 
   joinchan(channel)
 
@@ -103,7 +103,7 @@ def isPlaying(player):
 
 def newPlayer(msg, channel, user):
     players.new(user)
-    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
+    ircsock.send("PRIVMSG "+channel+" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
 
     return user
 
