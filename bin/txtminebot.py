@@ -13,9 +13,9 @@ import players
 import gibber
 import empress
 
-### IRC CONFIG
+### CONFIG
 
-configfile = open("ircconfig", 'r')
+configfile = open("ircconfig-test", 'r')
 config = []
 
 for x in configfile:
@@ -23,9 +23,8 @@ for x in configfile:
 
 configfile.close()
 
-botName     = config[2]
-admin       = config[3]
-baseFatigue = int(config[4])
+botName = config[2]
+admin   = config[3]
 
 parser = OptionParser()
 
@@ -34,6 +33,51 @@ parser.add_option("-c", "--channel", dest="channel", default=config[1], help="th
 parser.add_option("-n", "--nick", dest="nick", default=botName, help="the nick to use", metavar="NICK")
 
 (options, args) = parser.parse_args()
+
+## gameplay config defaults
+
+baseFatigue     = 10
+
+file_commands   = "lang/commands.txt"
+file_interp_pos = "lang/interp-pos.txt"
+file_interp_neu = "lang/interp-neu.txt"
+file_interp_neg = "lang/interp-neg.txt"
+file_wham = "lang/wham.txt"
+
+if config[4]:
+    baseFatigue = config[4]
+if config[5]:
+    file_commands = config[5]
+if config[6]:
+    file_interp_pos = config[6]
+if config[7]:
+    file_interp_neu = config[7]
+if config[8]:
+    file_interp_neg = config[8]
+if config[9]:
+    file_wham = config[9]
+
+## lang import
+
+COMMANDS = []
+for x in open(file_commands):
+    COMMANDS.append(x.rstrip())
+
+INTERP_POS = []
+for x in open(file_interp_pos):
+    INTERP_POS.append(x.rstrip())
+
+INTERP_NEU = []
+for x in open(file_interp_neu):
+    INTERP_NEU.append(x.rstrip())
+
+INTERP_NEG = []
+for x in open(file_interp_neg):
+    INTERP_NEG.append(x.rstrip())
+
+WHAM = []
+for x in open(file_wham):
+    WHAM.append(x.rstrip())
 
 ### irc functions 
 
@@ -50,15 +94,24 @@ def connect(server, channel, botnick):
 
   joinchan(channel)
 
+### meta functions
+
+def isPlaying(player):
+    return os.path.isfile('../data/'+x+'.player')
+
 ### gameplay functions
 
 def newPlayer(msg, channel, user):
     players.new(user)
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
 
+    return user
+
 def newMine(msg, channel, user):
     mine = players.newMine(user, "standardrates").capitalize()
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.\n")
+
+    return mine
 
 def excavate(msg, channel, user, time):
     diff = int(time)-int(players.lastMined(user))
@@ -187,8 +240,9 @@ def listen():
     if msg.find(":!forcenew") != -1:
         if user == admin:
             split = msg.split(" ");
-            target = split[-1]
-            newMine(msg, target, target)
+            for x in split:
+                if isPlaying(x):
+                    newMine(msg, x, x)
         else:
             ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Sorry, friend, but only "+admin+" can force new mines right now.\n")
 
@@ -200,13 +254,13 @@ def listen():
         ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !info.\n")
 
     elif msg.find(":!init") != -1:
-        if os.path.isfile('../data/'+user+'.player'):
+        if isPlaying(user):
             ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You already have a dossier in my records, friend.\n")
         else:
             newPlayer(msg, channel, user)
 
     elif msg.find(":!open") != -1:
-        if os.path.isfile('../data/'+user+'.player'):
+        if isPlaying(user):
             if len(players.getMines(user)) == 0:
                  newMine(msg, channel, user)
             else: 
@@ -215,7 +269,7 @@ def listen():
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!mines") != -1:
-        if os.path.isfile('../data/'+user+'.player'):
+        if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else: 
@@ -224,7 +278,7 @@ def listen():
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!strike") != -1:
-        if os.path.isfile('../data/'+user+'.player'):
+        if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else: 
@@ -233,19 +287,19 @@ def listen():
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!fatigue") != -1:
-        if os.path.isfile('../data/'+user+'.player'):
+        if isPlaying(user):
             fatigue(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!grovel") != -1:
-        if os.path.isfile('../data/'+user+'.player'):
+        if isPlaying(user):
             grovel(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!report") != -1:
-        if os.path.isfile('../data/'+user+'.player'):
+        if isPlaying(user):
             report(msg, channel, user)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
