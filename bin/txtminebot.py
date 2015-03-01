@@ -124,14 +124,18 @@ def excavate(msg, channel, user, time):
 
     else: # actual mining actions
         mineList = players.getMines(user)
+        emptyMines = []
         for x in mineList:
             mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
             ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + x.capitalize() +" and excavated "+mined+"\n")
 
             if mines.remaining("../data/"+x+".mine") == 0:
-	        mineList.remove(x)
+                emptyMines.append(x)
                 ircsock.send("PRIVMSG "+ user +" :"+x.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
-        
+       
+        for x in emptyMines:
+                mineList.remove(x)
+ 
 	players.updateMines(user, mineList)
 
     players.updateLast(user, time)
