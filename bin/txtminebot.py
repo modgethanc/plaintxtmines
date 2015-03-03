@@ -151,7 +151,7 @@ def strike(msg, channel, user, time):
         if mines.remaining("../data/"+target+".mine") == 0:
             emptyMines.append(target)
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
-            ircsock.send("PRIVMSG ##txtmines :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+"\n")
+            ircsock.send("PRIVMSG "+config[1]+" :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+"\n")
 
         #for x in mineList:
         #    mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
