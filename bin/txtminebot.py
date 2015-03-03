@@ -151,6 +151,7 @@ def strike(msg, channel, user, time):
         if mines.remaining("../data/"+target+".mine") == 0:
             emptyMines.append(target)
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
+            ircsock.send("PRIVMSG ##txtmines :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+"\n")
 
         #for x in mineList:
         #    mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
@@ -264,6 +265,7 @@ def listen():
     channel     = split[3] #if you include the :: we can do slicker PM
     messageText = split[4]
 
+    #print channel
     #print msg
     #print formatted
     
