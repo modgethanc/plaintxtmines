@@ -99,6 +99,9 @@ def connect(server, channel, botnick):
 def isPlaying(player):
     return os.path.isfile('../data/'+player+'.player')
 
+def isMine(mine):
+    return os.path.isfile('../data/'+mine+'.mine')
+
 ### gameplay functions
 
 def newPlayer(msg, channel, user):
@@ -117,7 +120,21 @@ def newMine(msg, channel, user):
 
     return mine
 
-def excavate(msg, channel, user, time):
+def strike(msg, channel, user, time):
+    mineList = players.getMines(user)
+    target = mineList[0] #autotarget first mine
+
+    selected = msg.split(COMMANDS[3])[-1].split(" ")[-1] #check for targetted mine
+    if selected != "":
+        if mineList.count(selected) == 0:
+            ircsock.send("PRIVMSG "+ user +" : That's not one of your mines, friend.\n")
+            return
+
+        if target != selected:
+            target = selected 
+            mineList.remove(target)    #bump this to the top of the minelist
+            mineList.insert(0, target)
+
     diff = int(time)-int(players.lastMined(user))
     if diff < baseFatigue: # fatigue check
         left =  baseFatigue - diff
@@ -127,15 +144,21 @@ def excavate(msg, channel, user, time):
         ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue.\n")
 
     else: # actual mining actions
-        mineList = players.getMines(user)
         emptyMines = []
-        for x in mineList:
-            mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
-            ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + x.capitalize() +" and excavated "+mined+"\n")
+        mined = players.printExcavation(players.acquire(user, players.excavate(user, target)))
+        ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + target.capitalize() +" and excavated "+mined+"\n")
 
-            if mines.remaining("../data/"+x+".mine") == 0:
-                emptyMines.append(x)
-                ircsock.send("PRIVMSG "+ user +" :"+x.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
+        if mines.remaining("../data/"+target+".mine") == 0:
+            emptyMines.append(target)
+            ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
+
+        #for x in mineList:
+        #    mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
+        #    ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + x.capitalize() +" and excavated "+mined+"\n")
+
+        #    if mines.remaining("../data/"+x+".mine") == 0:
+        #        emptyMines.append(x)
+        #        ircsock.send("PRIVMSG "+ user +" :"+x.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
        
         for x in emptyMines:
                 mineList.remove(x)
@@ -274,10 +297,10 @@ def listen():
 
     ###### gameplay commands
     if msg.find(":!rollcall") != -1: # tildetown specific
-        ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !rankings, !info.\n")
+        ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !fatigue, !grovel, !rankings, !info.\n")
 
     elif msg.find(":!"+COMMANDS[7]) != -1: # !info
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !rankings, !info.\n")
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !fatigue, !grovel, !rankings, !info.\n")
 
     elif msg.find(":!"+COMMANDS[0]) != -1: # !init
         if isPlaying(user):
@@ -308,7 +331,7 @@ def listen():
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else: 
-                excavate(msg, channel, user, time)
+                strike(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
