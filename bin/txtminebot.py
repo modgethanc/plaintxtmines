@@ -15,7 +15,7 @@ import empress
 
 ### CONFIG
 
-configfile = open("ircconfig", 'r')
+configfile = open("ircconfig-test", 'r')
 config = []
 
 for x in configfile:
@@ -103,6 +103,10 @@ def isPlaying(player):
 
 def newPlayer(msg, channel, user):
     players.new(user)
+    playerlist = open("../data/players.txt", 'a')
+    playerlist.write(user)
+    playerlist.close()
+
     ircsock.send("PRIVMSG "+channel+" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
 
     return user
@@ -195,6 +199,24 @@ def mineList(msg, channel, user):
     j = ", "
     return "You own the following mine"+plural+": "+j.join(prejoin)
 
+def rankings(msg, channel, user):
+    dossiers = []
+    playerlist = open("../data/players.txt", 'r')
+    for x in playerlist:
+       dossiers.append(x.rstrip())
+    playerlist.close()
+
+    records = [] 
+    for x in dossiers:
+        records.append([x, str(players.totalResources(x))])
+
+    records.sort(key=lambda entry:int(entry[1]), reverse=True)
+    ircsock.send("PRIVMSG " + channel + " :The top most productive citizens are:\n")
+    
+    for x in range (0, 5):
+        entry = records[x]
+        ircsock.send("PRIVMSG " + channel + " :" + entry[0] + " with " + entry[1] + " units\n") 
+
 ###########################
 
 def listen():
@@ -252,10 +274,10 @@ def listen():
 
     ###### gameplay commands
     if msg.find(":!rollcall") != -1: # tildetown specific
-        ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !info.\n")
+        ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !rankings, !info.\n")
 
     elif msg.find(":!"+COMMANDS[7]) != -1: # !info
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !info.\n")
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike, !report, !fatigue, !grovel, !rankings, !info.\n")
 
     elif msg.find(":!"+COMMANDS[0]) != -1: # !init
         if isPlaying(user):
@@ -307,6 +329,9 @@ def listen():
             report(msg, channel, user)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
+
+    elif msg.find(":!"+COMMANDS[8]) != -1: # !rankings
+        rankings(msg, channel, user)
 
 #########################
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

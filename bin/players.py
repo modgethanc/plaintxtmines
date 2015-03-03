@@ -97,6 +97,23 @@ def updateLast(player, time):
         playerfile.write(x)
     playerfile.close()
 
+def totalResources(player):
+    playerfile = open('../data/'+player+'.player', 'r')
+    playerdata = []
+
+    for x in playerfile:
+        playerdata.append(str(x).rstrip())
+
+    playerfile.close()
+
+    total = 0
+    i = 1
+    while i < 9:
+        total += int(playerdata[i])
+        i += 1
+
+    return total
+
 def excavate(player, mine):
     holdings = getMines(player)
     if holdings.count(mine) > 0:
@@ -174,4 +191,4 @@ def report(player):
 
     playerfile.close()
 
-    return playerdata[1]+ "x tilde, "+playerdata[2]+ "x pound, "+playerdata[3]+ "x spiral, "+playerdata[4]+ "x amper, "+playerdata[5]+ "x splat, "+playerdata[6]+ "x lbrack, "+playerdata[7]+ "x rbrack, "+playerdata[8]+"x carat"
+    return playerdata[1]+ "x tilde, "+playerdata[2]+ "x pound, "+playerdata[3]+ "x spiral, "+playerdata[4]+ "x amper, "+playerdata[5]+ "x splat, "+playerdata[6]+ "x lbrack, "+playerdata[7]+ "x rbrack, "+playerdata[8]+"x carat, for a total of "+str(totalResources(player))+" units"
