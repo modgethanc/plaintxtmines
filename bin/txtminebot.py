@@ -15,7 +15,7 @@ import empress
 
 ### CONFIG
 
-configfile = open("ircconfig-test", 'r')
+configfile = open("ircconfig", 'r')
 config = []
 
 for x in configfile:
@@ -104,7 +104,7 @@ def isPlaying(player):
 def newPlayer(msg, channel, user):
     players.new(user)
     playerlist = open("../data/players.txt", 'a')
-    playerlist.write(user)
+    playerlist.write(user+"\n")
     playerlist.close()
 
     ircsock.send("PRIVMSG "+channel+" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
