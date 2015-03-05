@@ -97,7 +97,7 @@ def connect(server, channel, botnick):
 ### meta functions
 
 def isPlaying(player):
-    return os.path.isfile('../data/'+player+'.player')
+    return os.path.isfile('../data/'+player+'.dossier')
 
 def isMine(mine):
     return os.path.isfile('../data/'+mine+'.mine')
