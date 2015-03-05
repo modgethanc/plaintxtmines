@@ -15,7 +15,7 @@ import empress
 
 ### CONFIG
 
-configfile = open("ircconfig", 'r')
+configfile = open("ircconfig-test", 'r')
 config = []
 
 for x in configfile:
@@ -145,7 +145,7 @@ def strike(msg, channel, user, time):
 
     else: # actual mining actions
         emptyMines = []
-        mined = players.printExcavation(players.acquire(user, players.excavate(user, target)))
+        mined = players.printExcavation(players.acquireRes(user, target))
         ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + target.capitalize() +" and excavated "+mined+"\n")
 
         if mines.remaining("../data/"+target+".mine") == 0:

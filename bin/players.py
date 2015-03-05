@@ -5,41 +5,38 @@ import mines
 import gibber
 import os
 
-# PLAYER.DOSSIER
-# 0 owned mines
-# 1 contracted mines
-# 2 held res
-# 3 mined total
-# 4 tithed res
-# 5 tithed total
-
-# PLAYER.STATS
-# 0 last strike
-# 1 tool
-# 3 golem
-
 def newDossier(player): # makes a new .dossier file for named player
     playerfile = open('../data/'+player+'.dossier', 'w+')
 
-    playerfile.write('\n') # owned mines
-    playerfile.write('\n') # contracted mines
-    playerfile.write("0,0,0,0,0,0,0,0\n") # held res
-    playerfile.write("0\n") # all-time mined
-    playerfile.write("0,0,0,0,0,0,0,0\n") # tithed res
-    playerfile.write("0\n") # tithed total
+    playerfile.write('\n') # 0 owned mines
+    playerfile.write('\n') # 1 contracted mines
+    playerfile.write("0,0,0,0,0,0,0,0\n") # 2 held res
+    playerfile.write("0\n") # 3 total mined 
+    playerfile.write("0,0,0,0,0,0,0,0\n") # 4 tithed res
+    playerfile.write("0\n") # 5 tithed total
+    playerfile.write("\n") # 6 finished mines
+    playerfile.write("0,0,0,0\n") # 7 empress stats 
+    # 0 available mines
+    # 1 grovel count
+    # 2 tithe count
+    # 3 favors
 
     playerfile.close()
 
     return player # for name confirmation
 
-def newPlayer(player):
+def newPlayer(player): # makes new player instance, including dossier
     newDossier(player)
 
     playerfile = open('../data/'+player+'.stats', 'w+')
 
-    playerfile.write("0\n") # last strike
-    playerfile.write("0,0,0\n") # tool
-    playerfile.write("\n") # golem
+    playerfile.write("0\n") # 0 last strike
+    playerfile.write("0,0,0\n") # 1 tool
+    playerfile.write("1\n") # 2 strength
+    playerfile.write("1\n") # 3 endurance
+    playerfile.write("0\n") # 4 strike count
+    playerfile.write("0\n") # 5 mine completion count
+    # player.golem
 
     playerfile.close()
 
@@ -130,19 +127,33 @@ def getLastStrike(player): #returns int of last strike time
     playerdata = openStats(player)
 
     return playerdata[0] 
+
 def getTool(player): #returns str list of tool
     playerdata = openStats(player)
 
-    tool = playerdata[0].rstrip().split(',')
+    tool = playerdata[1].rstrip().split(',')
 
     return tool 
 
-def getGolem(player): #returns str of golem
+def getStrength(player): #returns int of strength
     playerdata = openStats(player)
 
-    golem = playerdata[0].rstrip()
+    return playerdata[2] 
 
-    return golem
+def getEndurance(player): #returns int of endurance
+    playerdata = openStats(player)
+
+    return playerdata[3] 
+
+def getStrikes(player): #returns int of strike count
+    playerdata = openStats(player)
+
+    return playerdata[4]
+
+def getClearedCount(player): #returns int of cleared mines count
+    playerdata = openStats(player)
+
+    return playerdata[5] 
 
 ### dossier updating
 
@@ -174,12 +185,20 @@ def writeStats(player, playerdata):
 
 def updateLastStrike(player, time):
     playerdata = openStats(player)
-
     playerdata[0] = str(time) + "\n"
-
     writeStats(player, playerdata)
 
     return time
+
+def incStrikes(player): # increment strike count
+    s = int(getStrikes(player))
+    s += 1
+
+    playerdata = openStats(player)
+    playerdata[4] = str(s) + "\n"
+    writeStats(player, playerdata)
+
+    return s
 
 #### mine wrangling
 
@@ -222,17 +241,10 @@ def getMines(player):
 
     return minelist
 
-########### LINE OF DEATH ###############
+def acquireRes(player, mine): # performs mining action 
+    # TODO: include depth/width calculation
+    excavation = mines.excavate('../data/'+mine+'.mine')
 
-def excavate(player, mine):
-    holdings = getMines(player)
-
-    if holdings.count(mine) > 0: # this check shoudn't happen here
-        return mines.excavate('../data/'+mine+'.mine')
-    else:
-        return "that's not ur mine"
-
-def acquire(player, excavation):
     held = getHeld(player)
     res = int(getTotalMined(player))
 
