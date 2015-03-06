@@ -15,7 +15,7 @@ import empress
 
 ### CONFIG
 
-configfile = open("ircconfig-test", 'r')
+configfile = open("ircconfig", 'r')
 config = []
 
 for x in configfile:
@@ -105,7 +105,10 @@ def isMine(mine):
 ### gameplay functions
 
 def newPlayer(msg, channel, user):
-    players.new(user)
+    if os.path.isfile('../data/'+user+'.stats'):
+        players.newDossier(user)
+    else:
+        players.newPlayer(user)
     playerlist = open("../data/players.txt", 'a')
     playerlist.write(user+"\n")
     playerlist.close()
@@ -135,7 +138,7 @@ def strike(msg, channel, user, time):
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
 
-    diff = int(time)-int(players.lastMined(user))
+    diff = int(time)-int(players.getLastStrike(user))
     if diff < baseFatigue: # fatigue check
         left =  baseFatigue - diff
         fatigue = left * 2
@@ -145,14 +148,17 @@ def strike(msg, channel, user, time):
 
     else: # actual mining actions
         emptyMines = []
+        status = players.incStrikes(user)
         mined = players.printExcavation(players.acquireRes(user, target))
-        ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + target.capitalize() +" and excavated "+mined+"\n")
+        ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined+"\n")
 
         if mines.remaining("../data/"+target+".mine") == 0:
             emptyMines.append(target)
+            players.incCleared(user)
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
             ircsock.send("PRIVMSG "+config[1]+" :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+"\n")
 
+        ### OLD SHIT FROM MULTISTRIKE
         #for x in mineList:
         #    mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
         #    ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + x.capitalize() +" and excavated "+mined+"\n")
@@ -164,13 +170,13 @@ def strike(msg, channel, user, time):
         for x in emptyMines:
                 mineList.remove(x)
  
-	players.updateMines(user, mineList)
+	players.updateOwned(user, mineList)
 
-    players.updateLast(user, time)
+    players.updateLastStrike(user, time)
 
 def report(msg, channel, user):
-    ircsock.send("PRIVMSG "+ user +" :You have acquired the following resources: "+players.report(user)+"\n")
-    ircsock.send("PRIVMSG "+ user +" :"+mineList(msg, channel, user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :You have acquired the following resources: "+players.heldFormatted(user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :"+mineListFormatted(msg, channel, user)+"\n")
 
 def grovel(msg, channel, user, time):
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
@@ -185,7 +191,7 @@ def stirke(msg, channel, user, time): #hazelnut memorial disfeature
     a = 0
 
 def fatigue(msg, channel, user, time): #~krowbar memorial feature
-    diff = int(time)-int(players.lastMined(user))
+    diff = int(time)-int(players.getLastStrike(user))
     if diff < baseFatigue: # fatigue check
         fatigue =  baseFatigue - diff
 
@@ -193,7 +199,7 @@ def fatigue(msg, channel, user, time): #~krowbar memorial feature
     else:
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.\n")
 
-def mineList(msg, channel, user):
+def mineListFormatted(msg, channel, user):
     plural = ''
     if len(players.getMines(user)) > 0:
         plural = 's'
@@ -232,7 +238,7 @@ def rankings(msg, channel, user):
 
     records = [] 
     for x in dossiers:
-        records.append([x, str(players.totalResources(x))])
+        records.append([x, str(players.getHeldTotal(x))])
 
     records.sort(key=lambda entry:int(entry[1]), reverse=True)
     ircsock.send("PRIVMSG " + channel + " :The top most productive citizens are:\n")
@@ -324,7 +330,7 @@ def listen():
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else: 
-                ircsock.send("PRIVMSG "+channel+" :" + user + ": "+mineList(msg, channel, user)+"\n")
+                ircsock.send("PRIVMSG "+channel+" :" + user + ": "+mineListFormatted(msg, channel, user)+"\n")
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 

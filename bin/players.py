@@ -33,7 +33,7 @@ def newPlayer(player): # makes new player instance, including dossier
     playerfile.write("0\n") # 0 last strike
     playerfile.write("0,0,0\n") # 1 tool
     playerfile.write("1\n") # 2 strength
-    playerfile.write("1\n") # 3 endurance
+    playerfile.write("0\n") # 3 endurance
     playerfile.write("0\n") # 4 strike count
     playerfile.write("0\n") # 5 mine completion count
     # player.golem
@@ -138,7 +138,7 @@ def getTool(player): #returns str list of tool
 def getStrength(player): #returns int of strength
     playerdata = openStats(player)
 
-    return playerdata[2] 
+    return int(playerdata[2])
 
 def getEndurance(player): #returns int of endurance
     playerdata = openStats(player)
@@ -185,20 +185,59 @@ def writeStats(player, playerdata):
 
 def updateLastStrike(player, time):
     playerdata = openStats(player)
-    playerdata[0] = str(time) + "\n"
+    playerdata[0] = str(time)
     writeStats(player, playerdata)
 
     return time
 
 def incStrikes(player): # increment strike count
+    status = ''
     s = int(getStrikes(player))
     s += 1
 
     playerdata = openStats(player)
-    playerdata[4] = str(s) + "\n"
+    playerdata[4] = str(s)
+
+    x = int(playerdata[2])
+    if x < 4: # low level rates
+        if rand.randrange(0,99) < 35:
+            x += 1
+            playerdata[2] = str(x)
+            status = "You're feeling strong!  "
+    elif x < 8: # mid level rates
+        if rand.randrange(0,99) < 10:
+            x += 1
+            playerdata[2] = str(x)
+            status = "You're feeling strong!  "
+    else: # high level rates
+        if rand.randrange(0,99) < 1:
+            x += 1
+            playerdata[2] = str(x)
+            status = "You're feeling strong!  "
+
     writeStats(player, playerdata)
 
-    return s
+    return status
+
+def incCleared(player): # increment cleared count
+    c = int(getClearedCount(player))
+    c += 1
+
+    playerdata = openStats(player)
+    playerdata[5] = str(c)
+    writeStats(player, playerdata)
+
+    return c
+
+def incEndurance(player): # increment endurance
+    e = int(getEndurance(player))
+    e += 1
+
+    playerdata = openStats(player)
+    playerdata[3] = str(e)
+    writeStats(player, playerdata)
+
+    return e
 
 #### mine wrangling
 
@@ -216,23 +255,6 @@ def newMine(player, rates):
 
     return minename
 
-## redundant shit; clean this up sometime
-
-def new(player):
-    newPlayer(player)
-
-def lastMined(player): # REPLACED WITH  getLastStrike
-    return getLastStrike(player)
-
-def updateLast(player, time): # REPLACED WITH updateLastStrike
-    updateLastStrike(player, time)
-
-def totalResources(player): # REPLACED WITH getHeldTotal
-    return getHeldTotal(player)
-
-def updateMines(player, minelist): # REPLACED WITH updateOwned
-    return updateOwned(player, minelist)
-
 def getMines(player):
     minelist = getOwned(player)
 
@@ -242,8 +264,11 @@ def getMines(player):
     return minelist
 
 def acquireRes(player, mine): # performs mining action 
-    # TODO: include depth/width calculation
-    excavation = mines.excavate('../data/'+mine+'.mine')
+    baseDepth = 3
+    strikeDepth = baseDepth * getStrength(player)
+    print strikeDepth
+
+    excavation = mines.excavate('../data/'+mine+'.mine', strikeDepth)
 
     held = getHeld(player)
     res = int(getTotalMined(player))
@@ -302,8 +327,8 @@ def printExcavation(excavation):
 
     return mined
 
-def report(player):
+def heldFormatted(player):
     playerdata = openDossier(player)
     held = getHeld(player)
 
-    return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(totalResources(player))+" units"
+    return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"

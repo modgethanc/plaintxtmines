@@ -84,7 +84,6 @@ def excavate(record, rate=10, types=3):
     mineData = openMine(record)
     mined = []
     mine = []
-
     i = 0
     while i < 9:
         mine.append(mineData[i])
