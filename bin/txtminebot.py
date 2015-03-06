@@ -81,7 +81,7 @@ WHAM = []
 for x in open(file_wham):
     WHAM.append(x.rstrip())
 
-### irc functions 
+### irc functions
 
 def ping():
   ircsock.send("PONG :pingis\n")
@@ -136,7 +136,7 @@ def strike(msg, channel, user, time):
             return
 
         if target != selected:
-            target = selected 
+            target = selected
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
 
@@ -168,12 +168,11 @@ def strike(msg, channel, user, time):
         #    if mines.remaining("../data/"+x+".mine") == 0:
         #        emptyMines.append(x)
         #        ircsock.send("PRIVMSG "+ user +" :"+x.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
-       
+
         for x in emptyMines:
                 mineList.remove(x)
- 
-	players.updateOwned(user, mineList)
 
+    players.updateOwned(user, mineList)
     players.updateLastStrike(user, time)
 
 def report(msg, channel, user):
@@ -186,7 +185,7 @@ def grovel(msg, channel, user, time):
     comments = []
     for x in commentfile:
         comments.append(x.rstrip())
-    
+
     ircsock.send("PRIVMSG "+ channel + " :" + user +": The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(comments)+"\n")
 
 def stirke(msg, channel, user, time): #hazelnut memorial disfeature
@@ -224,7 +223,7 @@ def mineListFormatted(msg, channel, user):
     for x in rawlist:
         depletion = x[1]
 
-        color = '' 
+        color = ''
         if depletion > 98:
             color += "\x0311"
         elif depletion > 90:
@@ -241,7 +240,7 @@ def mineListFormatted(msg, channel, user):
         prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
 
     j = ", "
-    return "You own the following mine"+plural+": "+j.join(prejoin)
+    return "You're working on the following mine"+plural+": "+j.join(prejoin)
 
 def rankings(msg, channel, user):
     dossiers = []
@@ -250,16 +249,16 @@ def rankings(msg, channel, user):
        dossiers.append(x.rstrip())
     playerlist.close()
 
-    records = [] 
+    records = []
     for x in dossiers:
         records.append([x, str(players.getHeldTotal(x))])
 
     records.sort(key=lambda entry:int(entry[1]), reverse=True)
-    ircsock.send("PRIVMSG " + channel + " :The top most productive citizens are:\n")
-    
+    ircsock.send("PRIVMSG " + channel + " :The most productive citizens are:\n")
+
     for x in range (0, min(5, len(records))):
         entry = records[x]
-        ircsock.send("PRIVMSG " + channel + " :" + entry[0] + " with " + entry[1] + " units\n") 
+        ircsock.send("PRIVMSG " + channel + " :" + entry[0] + " with " + entry[1] + " units\n")
 
 ###########################
 
@@ -288,7 +287,7 @@ def listen():
     #print channel
     #print msg
     #print formatted
-    
+
     if nick != user: #check for weird identity stuff
         user = nick
 
@@ -334,7 +333,7 @@ def listen():
         if isPlaying(user):
             if len(players.getMines(user)) == 0: # do a better check
                  newMine(msg, channel, user)
-            else: 
+            else:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You have already been assigned your alotted mine.  Perhaps in the future, the empress will permit further ventures.\n")
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
@@ -343,7 +342,7 @@ def listen():
         if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
-            else: 
+            else:
                 ircsock.send("PRIVMSG "+channel+" :" + user + ": "+mineListFormatted(msg, channel, user)+"\n")
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
@@ -352,7 +351,7 @@ def listen():
         if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
-            else: 
+            else:
                 strike(msg, channel, user, time)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
