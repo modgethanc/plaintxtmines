@@ -208,9 +208,17 @@ def mineListFormatted(msg, channel, user):
 
     prejoin = []
 
-    rawList = players.getMines(user)
+    mineList = players.getMines(user)
+    rawlist = []
     for x in rawList:
         depletion = int(100*float(mines.remaining("../data/"+x+".mine"))/float(mines.starting("../data/"+x+".mine")))
+
+        l = [x, depletion]
+
+    rawlist.sort(key=lambda entry:int(entry[1]))
+
+    for x in rawlist:
+        depletion = x[1]
 
         color = '' 
         if depletion > 98:
@@ -226,7 +234,7 @@ def mineListFormatted(msg, channel, user):
         else:
             color += "\x0305"
 
-        prejoin.append(x.capitalize() + " (" + color + str(depletion) + "%\x03)")
+        prejoin.append(x[0].capitalize() + " (" + color + str(depletion) + "%\x03)")
 
     j = ", "
     return "You own the following mine"+plural+": "+j.join(prejoin)
@@ -320,7 +328,7 @@ def listen():
 
     elif msg.find(":!"+COMMANDS[1]) != -1: # !open
         if isPlaying(user):
-            if len(players.getMines(user)) == 0:
+            if len(players.getMines(user)) == 0: # do a better check
                  newMine(msg, channel, user)
             else: 
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": You have already been assigned your alotted mine.  Perhaps in the future, the empress will permit further ventures.\n")
