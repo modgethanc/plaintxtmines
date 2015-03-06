@@ -6,6 +6,7 @@ import os.path
 import sys
 from optparse import OptionParser
 import random
+import inflect
 
 import formatter
 import mines
@@ -14,6 +15,7 @@ import gibber
 import empress
 
 ### CONFIG
+p = inflect.engine()
 
 configfile = open("ircconfig", 'r')
 config = []
@@ -175,7 +177,7 @@ def strike(msg, channel, user, time):
     players.updateLastStrike(user, time)
 
 def report(msg, channel, user):
-    ircsock.send("PRIVMSG "+ user +" :After "+str(players.getStrikes(user))+" strikes, you have acquired the following resources: "+players.heldFormatted(user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :After at least "+str(players.getStrikes(user))+" "+p.plural("strike", players.getStrikes(user))+", you have acquired the following resources: "+players.heldFormatted(user)+"\n")
     ircsock.send("PRIVMSG "+ user +" :"+mineListFormatted(msg, channel, user)+"\n")
 
 def grovel(msg, channel, user, time):
@@ -195,7 +197,7 @@ def fatigue(msg, channel, user, time): #~krowbar memorial feature
     if diff < baseFatigue: # fatigue check
         fatigue =  baseFatigue - diff
 
-        ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" seconds.  Please rest patiently so you do not stress your body.\n")
+        ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" "+p.plural("second", fatigue)+".  Please rest patiently so you do not stress your body.\n")
     else:
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.\n")
 
