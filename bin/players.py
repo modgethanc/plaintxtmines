@@ -199,21 +199,27 @@ def incStrikes(player): # increment strike count
     playerdata[4] = str(s)
 
     x = int(playerdata[2])
-    if x < 4: # low level rates
-        if rand.randrange(0,99) < 35:
-            x += 1
-            playerdata[2] = str(x)
-            status = "You're feeling strong!  "
-    elif x < 8: # mid level rates
-        if rand.randrange(0,99) < 10:
-            x += 1
-            playerdata[2] = str(x)
-            status = "You're feeling strong!  "
-    else: # high level rates
-        if rand.randrange(0,99) < 1:
-            x += 1
-            playerdata[2] = str(x)
-            status = "You're feeling strong!  "
+    if random.randrange(0,99) < 20/x: # scaling level up
+        x += 1
+        playerdata[2] = str(x)
+        status = "You're feeling strong!  "
+
+    ### rank-based rates
+    #if x < 4: # low level rates
+    #    if random.randrange(0,99) < 15:
+    #        x += 1
+    #        playerdata[2] = str(x)
+    #        status = "You're feeling strong!  "
+    #elif x < 8: # mid level rates
+    #    if random.randrange(0,99) < 8:
+    #        x += 1
+    #        playerdata[2] = str(x)
+    #        status = "You're feeling strong!  "
+    #else: # high level rates
+    #    if random.randrange(0,99) < 1:
+    #        x += 1
+    #        playerdata[2] = str(x)
+    #        status = "You're feeling strong!  "
 
     writeStats(player, playerdata)
 
@@ -266,7 +272,6 @@ def getMines(player):
 def acquireRes(player, mine): # performs mining action 
     baseDepth = 3
     strikeDepth = baseDepth * getStrength(player)
-    print strikeDepth
 
     excavation = mines.excavate('../data/'+mine+'.mine', strikeDepth)
 

@@ -243,7 +243,7 @@ def rankings(msg, channel, user):
     records.sort(key=lambda entry:int(entry[1]), reverse=True)
     ircsock.send("PRIVMSG " + channel + " :The top most productive citizens are:\n")
     
-    for x in range (0, 5):
+    for x in range (0, min(5, len(records))):
         entry = records[x]
         ircsock.send("PRIVMSG " + channel + " :" + entry[0] + " with " + entry[1] + " units\n") 
 
