@@ -210,10 +210,14 @@ def mineListFormatted(msg, channel, user):
 
     mineList = players.getMines(user)
     rawlist = []
-    for x in rawList:
+    for x in mineList:
         depletion = int(100*float(mines.remaining("../data/"+x+".mine"))/float(mines.starting("../data/"+x+".mine")))
+        prefix = ''
 
-        l = [x, depletion]
+        if mineList.index(x) == 0: # currently targetted
+            prefix= '>'
+
+        rawlist.append([prefix+x.capitalize(), depletion])
 
     rawlist.sort(key=lambda entry:int(entry[1]))
 
@@ -234,7 +238,7 @@ def mineListFormatted(msg, channel, user):
         else:
             color += "\x0305"
 
-        prejoin.append(x[0].capitalize() + " (" + color + str(depletion) + "%\x03)")
+        prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
 
     j = ", "
     return "You own the following mine"+plural+": "+j.join(prejoin)
