@@ -175,7 +175,7 @@ def strike(msg, channel, user, time):
     players.updateLastStrike(user, time)
 
 def report(msg, channel, user):
-    ircsock.send("PRIVMSG "+ user +" :You have acquired the following resources: "+players.heldFormatted(user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :After "+str(players.getStrikes(user))+" strikes, you have acquired the following resources: "+players.heldFormatted(user)+"\n")
     ircsock.send("PRIVMSG "+ user +" :"+mineListFormatted(msg, channel, user)+"\n")
 
 def grovel(msg, channel, user, time):
