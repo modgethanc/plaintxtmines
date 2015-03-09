@@ -279,7 +279,7 @@ def acquireRes(player, mine): # performs mining action
 
     i = 0
     for x in excavation:
-        r = int(held[i]) + x
+        r = int(held[i]) + int(x)
         res += int(x)
         held[i] = str(r)
         i += 1
@@ -297,7 +297,7 @@ def printExcavation(excavation):
     total = 0
 
     for x in excavation:
-        total += x
+        total += int(x)
 
     if total == 0:
         return "nothing but rubble."

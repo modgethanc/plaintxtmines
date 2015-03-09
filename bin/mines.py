@@ -107,7 +107,7 @@ def excavate(mine, rate=10, width=3):
     if getTotal(mine) <= rate: # clear the mine
 
         excavated = getRes(mine)
-        mineData[0] = [0,0,0,0,0,0,0,0]
+        mineData[0] = "0,0,0,0,0,0,0,0"
         writeMine(mine, mineData)
         return excavated
 

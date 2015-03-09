@@ -133,7 +133,7 @@ def strike(msg, channel, user, time):
     selected = msg.split(COMMANDS[3])[-1].split(" ")[-1] #check for targetted mine
     if selected != "":
         if mineList.count(selected) == 0:
-            ircsock.send("PRIVMSG "+ user +" : That's not one of your mines, friend.\n")
+            ircsock.send("PRIVMSG "+ user +" : That's not a mine you're working on, friend.\n")
             return
 
         if target != selected:
@@ -147,7 +147,7 @@ def strike(msg, channel, user, time):
         fatigue = left * 2
         time = int(time) + fatigue - baseFatigue
 
-        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only make your recovery longer.\n")
+        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.\n")
 
     else: # actual mining actions
         emptyMines = []
