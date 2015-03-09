@@ -276,7 +276,7 @@ def acquireRes(player, mine): # performs mining action
     baseDepth = 3
     strikeDepth = baseDepth * getStrength(player)
 
-    excavation = mines.excavate('../data/'+mine+'.mine', strikeDepth)
+    excavation = mines.excavate(mine, strikeDepth)
 
     held = getHeld(player)
     res = int(getTotalMined(player))
@@ -304,7 +304,7 @@ def printExcavation(excavation):
         total += x
 
     if total == 0:
-        return "nothing useful..."
+        return "nothing but rubble."
 
     mined = ''
     y = 0
@@ -340,3 +340,5 @@ def heldFormatted(player):
     held = getHeld(player)
 
     return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
+
+

@@ -155,7 +155,7 @@ def strike(msg, channel, user, time):
         mined = players.printExcavation(players.acquireRes(user, target))
         ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined+"\n")
 
-        if mines.remaining("../data/"+target+".mine") == 0:
+        if mines.getRemaining(target) == 0:
             emptyMines.append(target)
             players.incCleared(user)
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
@@ -211,7 +211,7 @@ def mineListFormatted(msg, channel, user):
     mineList = players.getMines(user)
     rawlist = []
     for x in mineList:
-        depletion = int(100*float(mines.remaining("../data/"+x+".mine"))/float(mines.starting("../data/"+x+".mine")))
+        depletion = int(100*float(mines.getRemaining(x))/float(mines.getStarting(x)))
         prefix = ''
 
         if mineList.index(x) == 0: # currently targetted
