@@ -247,7 +247,7 @@ def incEndurance(player): # increment endurance
 
 #### mine wrangling
 
-def newMine(player, rates):
+def openNewMine(player, rates):
     minename = gibber.medium()
     while os.path.isfile('../data/'+minename+'.mine'): # check for mine colision
         minename = gibber.medium()
@@ -260,6 +260,9 @@ def newMine(player, rates):
     updateOwned(player, currentMines)
 
     return minename
+
+def newMine(player, rates):
+    opennewMine(player, rates)
 
 def getMines(player):
     minelist = getOwned(player)

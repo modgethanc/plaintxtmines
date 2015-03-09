@@ -4,25 +4,37 @@ import random
 import gibber
 import os
 
-def generate(minerates): #takes a minerate file; returns a list of resource amounts for a generated mine
-    ratefile = open(minerates,'r')
+def newMine(minerate = "standardrates"):
+    minename = gibber.medium()
+    while os.path.isfile('../data/'+minename+'.mine'): # check for mine colision
+        minename = gibber.medium()
+
+    res = generateRes(minerate)
+    total = sumRes(res)
+
+    j = ','
+    minefile = open('../data/'+minename+'.mine', 'w+')
+    minefile.write(j.join(res)+'\n') # 0 res counts
+    minefile.write(str(total)+'\n') # 1 original total
+
+    minefile.close()
+
+    return minename # for mine name confirmation
+
+def generateRes(minerate): #takes a minerate file; returns a list of resource amounts for a generated mine
+    ratefile = open(minerate,'r')
     rates = []
     for x in ratefile:
         rates.append(int(x.rstrip()))
     ratefile.close()
 
     bound = rates[8]
-
     seed = random.randrange(1,bound)
-
     resources = [0,0,0,0,0,0,0,0]
-    total = 0
-
     i = 0
 
     for x in resources:
-        resources[i] = seed * rates[i] + random.randrange(1,bound)
-        total += resources[i]
+        resources[i] = str(seed * rates[i] + random.randrange(1,bound))
         i += 1
 
     return resources
@@ -72,6 +84,12 @@ def openMine(record): #returns a list of mine data plus name given a filename
     mine.append(record.split('/')[-1].split('.')[0])
 
     return mine
+
+def sumRes(res): # returns total for a list of res
+    total = 0
+    for x in res:
+        total += int(x)
+    return total
 
 def remaining(record):
     return int(openMine(record)[-2].rstrip().split(',')[0])

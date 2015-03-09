@@ -111,6 +111,7 @@ def newPlayer(msg, channel, user):
         players.newDossier(user)
     else:
         players.newPlayer(user)
+
     playerlist = open("../data/players.txt", 'a')
     playerlist.write(user+"\n")
     playerlist.close()
