@@ -4,131 +4,159 @@ import random
 import gibber
 import os
 
-def generate(minerates): #takes a minerate file; returns a list of resource amounts for a generated mine
-    ratefile = open(minerates,'r')
+def newMine(owner, minerate="standardrates"):
+    minename = gibber.medium()
+    while os.path.isfile('../data/'+minename+'.mine'): # check for mine colision
+        minename = gibber.medium()
+
+    print minerate
+    res = generateRes(minerate)
+    total = sumRes(res)
+
+    j = ','
+    minefile = open('../data/'+minename+'.mine', 'w+')
+    minefile.write(j.join(res)+'\n') # 0 res counts
+    minefile.write(str(total)+'\n') # 1 original total
+    minefile.write(owner+'\n') # 2 owner
+    minefile.write('\n') # 3 workers
+
+    minefile.close()
+
+    return minename # for mine name confirmation
+
+def generateRes(minerate): #takes a minerate file; returns a list of resource amounts for a generated mine
+    ratefile = open(minerate,'r')
     rates = []
     for x in ratefile:
         rates.append(int(x.rstrip()))
     ratefile.close()
 
     bound = rates[8]
-
     seed = random.randrange(1,bound)
-
     resources = [0,0,0,0,0,0,0,0]
-    total = 0
-
     i = 0
 
     for x in resources:
-        resources[i] = seed * rates[i] + random.randrange(1,bound)
-        total += resources[i]
+        resources[i] = str(seed * rates[i] + random.randrange(1,bound))
         i += 1
 
     return resources
 
-def writeMine(mine, record='../data/'+gibber.medium()+'.mine'): #returns a mine name for a list of resources recorded
-    totals = [0,0]
-    totalseek = []
+## mine output
 
-    if os.path.isfile(record):
-      recordfile = open(record, 'r')
-      for x in recordfile:
-        totalseek.append(x)
-      recordfile.close()
+def openMine(mine): # returns str list of entire mine file
+    minefile = open('../data/'+mine+'.mine', 'r')
 
-      totals = totalseek[-1].rstrip().split(',')
-      new = False
-    else:
-      new = True
+    minedata = []
+    for x in minefile:
+        minedata.append(x.rstrip())
 
-    recordfile = open(record, 'w')
-    totals[0] = 0
-    i = 0
-    for x in mine:
-        if i < 8:
-            recordfile.write(str(x)+'\n')
-            totals[0] += int(x)
-            i += 1
+    minefile.close()
+    return minedata
 
-    if new:
-      totals[1] = str(totals[0])
-    totals[0] = str(totals[0])
+def getRes(mine): # return list of res
+    minedata = openMine(mine)
 
-    #print totals
-    j = ','
-    total = j.join(totals)
-    recordfile.write(total+'\n')
-    recordfile.close()
+    return minedata[0].rstrip().split(',')
 
-    return record.split('/')[-1].split('.')[0]
+def getStarting(mine): # return original starting res
+    minedata = openMine(mine)
 
-def openMine(record): #returns a list of mine data plus name given a filename
-    recordfile = open(record, 'r')
-    mine = []
-    for x in recordfile:
-        mine.append(x)
+    return minedata[1]
 
-    mine.append(record.split('/')[-1].split('.')[0])
+def getTotal(mine): # return int of res total
+    return sumRes(getRes(mine))
 
-    return mine
+def getRemaining(mine):
+    return getStarting(mine) - getTotal(mine)
 
-def remaining(record):
-    return int(openMine(record)[-2].rstrip().split(',')[0])
+def getOwner(mine): # return str of owner
+    minedata = openMine(mine)
 
-def starting(record):
-    return int(openMine(record)[-2].rstrip().split(',')[1])
+    return minedata[2]
 
-def excavate(record, rate=10, types=3):
+def getWorkers(mine): # return str list of contracted workers
+    minedata = openMine(mine)
+
+    workerlist = minedata[2].rstrip().split[',']
+
+    while workerlist.count('') > 0:
+        workerlist.remove('') #dirty hack
+
+    return workerList
+
+def sumRes(res): # returns total for a list of res
+    total = 0
+    for x in res:
+        total += int(x)
+    return total
+
+## mine input
+
+def writeMine(mine, minedata):
+    minefile = open('../data/'+mine+'.mine', 'w')
+    for x in minedata:
+        minefile.write(str(x) + "\n")
+    minefile.close()
+
+## mine actions
+
+def excavate(mine, rate=10, width=3):
     excavated = [0,0,0,0,0,0,0,0]
-    mineData = openMine(record)
-    mined = []
-    mine = []
-    i = 0
-    while i < 9:
-        mine.append(mineData[i])
-        i += 1
+    res = getRes(mine)
 
-    if remaining(record) <= rate:
-        i = 0
-        while i < 8:
-            excavated[i] = int(mine[i])
-            mine[i] = 0
-            i += 1
-        writeMine(mine, record)
+    mineData = openMine(mine)
+    veins = []
+    mine = []
+
+    if getRemaining(mine) <= rate: # clear the mine
+
+        excavated = getRes(mine)
+        mineData[0] = [0,0,0,0,0,0,0,0]
+        writeMine(mine, mineData)
         return excavated
 
+    i = width
     mineChoices = [0,1,2,3,4,5,6,7]
-    i = types
-    while i > 0:
-        mineHere = random.choice(mineChoices)
-        mined.append(mineHere)
-        mineChoices.remove(mineHere)
+    while i > 0: # pick veins
+        vein = random.choice(mineChoices)
+        veined.append(vein)
+        mineChoices.remove(vein)
         i -= 1
 
     i = rate
-    minesLeft = types
-    while i > 0:
-        if minesLeft > 0:
-            mineHere = random.choice(mined)
+    veinsLeft = width
+    while i > 0: # strike!
+        if veinsLeft > 0:
+            strike = random.choice(veins)
         else:
             break
-        if int(mine[mineHere]) > excavated[mineHere]:
-            excavated[mineHere] += 1
+
+        if int(res[strike]) > excavated[strike]: # check for remaining res
+            excavated[strike] += 1
             i -= 1
-        else:
-            mined.remove(mineHere)
-            minesLeft -= 1
+        else: # stop striking empy vein
+            veins.remove(strike)
+            veinsLeft -= 1
+
     i = 0
-    while i < 8:
-       res = int(mine[i])
-       res -= excavated[i]
-       mine[i] = res
+    while i < 8: # clear out res
+       vein = int(res[i])
+       vein -= excavated[i]
+       res[i] = vein
        i += 1
 
-    writeMine(mine, record)
+    writeMine(mine, mineData)
 
     return excavated
+
+######## LINE OF DEATH
+
+def remaining(record): # REDUNDANT
+    return getRemining(record.split('/')[-1].split('.')[0])
+
+def starting(record): # REDUNDANT
+    return getStarting(record.split('/')[-1].split('.')[0])
 
 def printMine(mine):
     print mine[-1]
