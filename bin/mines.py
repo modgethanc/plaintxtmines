@@ -9,7 +9,6 @@ def newMine(owner, minerate="standardrates"):
     while os.path.isfile('../data/'+minename+'.mine'): # check for mine colision
         minename = gibber.medium()
 
-    print minerate
     res = generateRes(minerate)
     total = sumRes(res)
 
@@ -67,9 +66,6 @@ def getStarting(mine): # return original starting res
 def getTotal(mine): # return int of res total
     return sumRes(getRes(mine))
 
-def getRemaining(mine):
-    return getStarting(mine) - getTotal(mine)
-
 def getOwner(mine): # return str of owner
     minedata = openMine(mine)
 
@@ -107,9 +103,8 @@ def excavate(mine, rate=10, width=3):
 
     mineData = openMine(mine)
     veins = []
-    mine = []
 
-    if getRemaining(mine) <= rate: # clear the mine
+    if getTotal(mine) <= rate: # clear the mine
 
         excavated = getRes(mine)
         mineData[0] = [0,0,0,0,0,0,0,0]
@@ -120,7 +115,7 @@ def excavate(mine, rate=10, width=3):
     mineChoices = [0,1,2,3,4,5,6,7]
     while i > 0: # pick veins
         vein = random.choice(mineChoices)
-        veined.append(vein)
+        veins.append(vein)
         mineChoices.remove(vein)
         i -= 1
 
@@ -143,9 +138,11 @@ def excavate(mine, rate=10, width=3):
     while i < 8: # clear out res
        vein = int(res[i])
        vein -= excavated[i]
-       res[i] = vein
+       res[i] = str(vein)
        i += 1
 
+    j = ','
+    mineData[0] = j.join(res)
     writeMine(mine, mineData)
 
     return excavated
@@ -153,7 +150,7 @@ def excavate(mine, rate=10, width=3):
 ######## LINE OF DEATH
 
 def remaining(record): # REDUNDANT
-    return getRemining(record.split('/')[-1].split('.')[0])
+    return getTotal(record.split('/')[-1].split('.')[0])
 
 def starting(record): # REDUNDANT
     return getStarting(record.split('/')[-1].split('.')[0])

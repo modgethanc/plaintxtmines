@@ -120,7 +120,7 @@ def newPlayer(msg, channel, user):
 
     return user
 
-def newMine(msg, channel, user):
+def newMine(msg, channel, user, rates="standardrates"):
     mine = players.newMine(user, "standardrates").capitalize()
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.\n")
 
@@ -147,7 +147,7 @@ def strike(msg, channel, user, time):
         fatigue = left * 2
         time = int(time) + fatigue - baseFatigue
 
-        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue.\n")
+        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only make your recovery longer.\n")
 
     else: # actual mining actions
         emptyMines = []
@@ -155,7 +155,7 @@ def strike(msg, channel, user, time):
         mined = players.printExcavation(players.acquireRes(user, target))
         ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined+"\n")
 
-        if mines.getRemaining(target) == 0:
+        if mines.getTotal(target) == 0:
             emptyMines.append(target)
             players.incCleared(user)
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
@@ -211,7 +211,7 @@ def mineListFormatted(msg, channel, user):
     mineList = players.getMines(user)
     rawlist = []
     for x in mineList:
-        depletion = int(100*float(mines.getRemaining(x))/float(mines.getStarting(x)))
+        depletion = int(100*float(mines.getTotal(x))/float(mines.getStarting(x)))
         prefix = ''
 
         if mineList.index(x) == 0: # currently targetted
@@ -310,9 +310,16 @@ def listen():
     if msg.find(":!forcenew") != -1:
         if user == admin:
             split = msg.split(" ");
+            rates = ''
+            for x in split:
+                if os.path.isfile(x):
+                    rates = x
             for x in split:
                 if isPlaying(x):
-                    newMine(msg, x, x)
+                    if rates is not '':
+                        newMine(msg, x, x, rates)
+                    else:
+                        newMine(msg, x, x)
         else:
             ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Sorry, friend, but only "+admin+" can request new mines on behalf of others.\n")
 
