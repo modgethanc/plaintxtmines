@@ -294,11 +294,10 @@ def listen():
     if channel == botName:  #check for PM
         channel = user
 
-
-    if channel == botName or msg.find(":!") != -1: #only log PM and commands
-        logfile = open("irclog", 'a')
-        logfile.write(msg+"\n")
-        logfile.close()
+    #if channel == botName or msg.find(":!") != -1: #only log PM and commands
+    #    logfile = open("irclog", 'a')
+    #    logfile.write(msg+"\n")
+    #    logfile.close()
 
     ###### admin commands
     if msg.find(":!join") != -1 and user == admin:
@@ -314,7 +313,7 @@ def listen():
                 if isPlaying(x):
                     newMine(msg, x, x)
         else:
-            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Sorry, friend, but only "+admin+" can force new mines right now.\n")
+            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Sorry, friend, but only "+admin+" can request new mines on behalf of others.\n")
 
     ###### gameplay commands
     if msg.find(":!rollcall") != -1: # tildetown specific
