@@ -120,8 +120,9 @@ def newPlayer(msg, channel, user):
 
     return user
 
-def newMine(msg, channel, user, rates="standardrates"):
+def newMine, channel, user, rates="standardrates"):
     mine = players.newMine(user, "standardrates").capitalize()
+    players.decAvailableMines(user)
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.\n")
 
     return mine
@@ -175,13 +176,10 @@ def report(msg, channel, user):
     ircsock.send("PRIVMSG "+ user +" :"+mineListFormatted(msg, channel, user)+"\n")
 
 def grovel(msg, channel, user, time):
+    players.incGrovel(user)
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
-    commentfile = open("empresscomments.txt", 'r')
-    comments = []
-    for x in commentfile:
-        comments.append(x.rstrip())
 
-    ircsock.send("PRIVMSG "+ channel + " :" + user +": The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(comments)+"\n")
+    ircsock.send("PRIVMSG "+ channel + " :" + user +": The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP_NEU)+"\n")
 
 def stirke(msg, channel, user, time): #hazelnut memorial disfeature
     a = 0
@@ -331,10 +329,10 @@ def listen():
 
     elif msg.find(":!"+COMMANDS[1]) != -1: # !open
         if isPlaying(user):
-            if len(players.getMines(user)) == 0: # do a better check
+            if players.getAvailableMines(user) > 0:
                  newMine(msg, channel, user)
             else:
-                ircsock.send("PRIVMSG "+ channel + " :" + user + ": You have already been assigned your alotted mine.  Perhaps in the future, the empress will permit further ventures.\n")
+                ircsock.send("PRIVMSG "+ channel + " :" + user + ": You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.\n")
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
 

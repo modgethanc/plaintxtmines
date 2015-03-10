@@ -5,6 +5,8 @@ import mines
 import gibber
 import os
 
+j = ','
+
 def newDossier(player): # makes a new .dossier file for named player
     playerfile = open('../data/'+player+'.dossier', 'w+')
 
@@ -15,7 +17,7 @@ def newDossier(player): # makes a new .dossier file for named player
     playerfile.write("0,0,0,0,0,0,0,0\n") # 4 tithed res
     playerfile.write("0\n") # 5 tithed total
     playerfile.write("\n") # 6 finished mines
-    playerfile.write("0,0,0,0\n") # 7 empress stats 
+    playerfile.write("1,0,0,0\n") # 7 empress stats 
     # 0 available mines
     # 1 grovel count
     # 2 tithe count
@@ -46,18 +48,15 @@ def newPlayer(player): # makes new player instance, including dossier
 
 def openDossier(player): # returns str list of the entire dossier
     playerfile = open('../data/'+player+'.dossier', 'r')
-
     playerdata = []
     for x in playerfile:
         playerdata.append(x.rstrip())
-
     playerfile.close()
+
     return playerdata
 
 def getOwned(player): # returns str list of owned mines
-    playerdata = openDossier(player)
-
-    ownedlist = playerdata[0].rstrip().split(',')
+    ownedlist = openDossier(player)[0].rstrip().split(',')
 
     while ownedlist.count('') > 0:
         ownedlist.remove('') #dirty hack
@@ -65,105 +64,78 @@ def getOwned(player): # returns str list of owned mines
     return ownedlist
 
 def getContracted(player): #returns str list of contracted mines
-    playerdata = openDossier(player)
-
-    contractedlist = playerdata[1].rstrip().split(',')
+    contractedlist = openDossier(player)[1].rstrip().split(',')
 
     while contractedlist.count('') > 0:
         contractedlist.remove('') #dirty hack
 
     return contractedlist
 
-def getHeld(player): #returns int list of held resources
-    playerdata = openDossier(player)
-
-    heldlist = playerdata[2].rstrip().split(',')
-
-    return heldlist
+def getHeld(player): #returns list of held resources
+    return openDossier(player)[2].rstrip().split(',')
 
 def getHeldTotal(player): #returns int of current held assets
-    res = getHeld(player)
     total = 0
-    for x in res:
+    for x in getHeld(player):
         total += int(x)
 
     return total
 
-def getTotalMined(player): #returns int of all-timee mined
-    playerdata = openDossier(player)
-    total = playerdata[3].rstrip()
+def getTotalMined(player): #returns int of all-time mined
+    return int(openDossier(player)[3].rstrip())
 
-    return total
-
-def getTithed(player): #returns int list of tithed resources
-    playerdata = openDossier(player)
-    tithedist = int(playerdata[4].rstrip().split(','))
-
-    return tithedlist
+def getTithed(player): #returns list of tithed resources
+    return openDossier(player)[4].rstrip().split(',')
 
 def getTithedTotal(player): #returns int of tithed total
-    playerdata = openDossier(player)
-    tithed = int(playerdata[5].rstrip())
-
-    return tithed
+    return int(openDossieer(player)[5].rstrip())
 
 def getFinished(player): #returns str list of finished mines
-    playerdata = openDossier(player)
-    finishedlist = playerdata[6].rstrip().split(',')
+    finishedlist = openDossier(player)[6].rstrip().split(',')
 
     while finishedlist .count('') > 0:
         finishedlist.remove('') #dirty hack
 
     return finishedlist
 
-def getEmpressStats(player): #returns int list of empress stats
-    playerdata = openDossier(player)
-    empressstats = playerdata[7].rstrip().split(',')
+def getEmpressStats(player): #returns list of empress stats
+    return openDossier(player)[7].rstrip().split(',')
 
-    return empressstats
+def getAvailableMines(player): # returns int of number of free mines
+    return int(getEmpressStats(player)[0])
 
 ### stats outputting
 
 def openStats(player): # returns str list of the entire stats 
     playerfile = open('../data/'+player+'.stats', 'r')
-
     playerdata = []
     for x in playerfile:
         playerdata.append(x.rstrip())
-
     playerfile.close()
 
     return playerdata
 
 def getLastStrike(player): #returns int of last strike time
-    playerdata = openStats(player)
-    return playerdata[0] 
+    return int(openStats(player)[0])
 
 def getTool(player): #returns str list of tool
-    playerdata = openStats(player)
-    tool = playerdata[1].rstrip().split(',')
-
-    return tool 
+    return openStats(player)[1].rstrip().split(',')
 
 def getStrength(player): #returns int of strength
-    playerdata = openStats(player)
-
-    return int(playerdata[2])
+    return int(openStats(player)[2])
 
 def getEndurance(player): #returns int of endurance
-    playerdata = openStats(player)
-
-    return playerdata[3] 
+    return int(openStats(player)[3])
 
 def getStrikes(player): #returns int of strike count
-    playerdata = openStats(player)
-
-    return playerdata[4]
+    return int(openStats(player)[4])
 
 def getClearedCount(player): #returns int of cleared mines count
-    playerdata = openStats(player)
+    return int(openStats(player)[5])
 
-    return playerdata[5] 
+def fatigueCheck(player, time): # return remaining fatigue in seconds
+    baseFatigue = 10 # hardcode bs
+    return baseFatigue - int(time) - int(getLastStrike(player))
 
 ### dossier updating
 
@@ -174,16 +146,60 @@ def writeDossier(player, playerdata):
     playerfile.close()
 
 def updateOwned(player, minelist): # overwrites previous minelist with passed in one
-    mines = ''
-    j = ','
-    mines = j.join(minelist)
-
     playerdata = openDossier(player)
-    playerdata[0] = mines
-
+    playerdata[0] = j.join(minelist)
     writeDossier(player, playerdata)
 
     return mines
+
+def updateEmpressStats(player, statlist): # overwrites previous empress stats
+    playerdata = openDossier(player)
+    playerdata[7] = j.join(statlist)
+    writeDossier(player, playerdata)
+
+    return statlist
+
+def incAvailableMines(player): # increase mine permission
+    statlist = getEmpressStats(player)
+    statlist[0] = str(int(statlist[0]) + 1)
+    updateEmpressStats(player, statlist)
+
+    return int(statlist[0])
+
+def decAvailableMines(player): # decrease mine permission
+    statlist = getEmpressStats(player)
+    statlist[0] = str(int(statlist[0]) - 1)
+    updateEmpressStats(player, statlist)
+
+    return int(statlist[0])
+
+def incGrovel(player): # increase grovel count
+    statlist = getEmpressStats(player)
+    statlist[1] = str(int(statlist[1]) + 1)
+    updateEmpressStats(player, statlist)
+
+    return int(statlist[1])
+
+def incTithe(player): # increase tithe count
+    statlist = getEmpressStats(player)
+    statlist[2] = str(int(statlist[2]) + 1)
+    updateEmpressStats(player, statlist)
+
+    return int(statlist[2])
+
+def incFavor(player): # increase favor level
+    statlist = getEmpressStats(player)
+    statlist[3] = str(int(statlist[3]) + 1)
+    updateEmpressStats(player, statlist)
+
+    return int(statlist[3])
+
+def decFavor(player): # decrease favor level
+    statlist = getEmpressStats(player)
+    statlist[3] = str(int(statlist[3]) - 1)
+    updateEmpressStats(player, statlist)
+
+    return int(statlist[3])
 
 ### stats updating
 
@@ -200,67 +216,41 @@ def updateLastStrike(player, time):
 
     return time
 
+def incStrength(player): # increment strength
+    playerdata = openStats(player)
+    playerdata[2] = str(int(playerdata[2]) + 1)
+    writeStats(player, playerdata)
+
+    return playerdata[2]
+
+def incEndurance(player): # increment endurance
+    playerdata = openStats(player)
+    playerdata[3] = str(int(playerdata[3]) + 1)
+    writeStats(player, playerdata)
+
+    return playerdata[3]
+
 def incStrikes(player): # increment strike count
-    status = ''
-    s = int(getStrikes(player))
-    s += 1
+    status = '' #level up message
 
     playerdata = openStats(player)
-    playerdata[4] = str(s)
+    playerdata[4] = str(int(playerdata[4]) + 1)
 
     x = int(playerdata[2])
     if random.randrange(0,99) < 20/x: # scaling level up
-        x += 1
-        playerdata[2] = str(x)
+        playerdata[2] = str(x+1)
         status = "You're feeling strong!  "
-
-    ### rank-based rates
-    #if x < 4: # low level rates
-    #    if random.randrange(0,99) < 15:
-    #        x += 1
-    #        playerdata[2] = str(x)
-    #        status = "You're feeling strong!  "
-    #elif x < 8: # mid level rates
-    #    if random.randrange(0,99) < 8:
-    #        x += 1
-    #        playerdata[2] = str(x)
-    #        status = "You're feeling strong!  "
-    #else: # high level rates
-    #    if random.randrange(0,99) < 1:
-    #        x += 1
-    #        playerdata[2] = str(x)
-    #        status = "You're feeling strong!  "
 
     writeStats(player, playerdata)
 
     return status
 
 def incCleared(player): # increment cleared count
-    c = int(getClearedCount(player))
-    c += 1
-
     playerdata = openStats(player)
-    playerdata[5] = str(c)
+    playerdata[5] = str(int(playerdata[5]) + 1)
     writeStats(player, playerdata)
 
-    return c
-
-def incEndurance(player): # increment endurance
-    e = int(getEndurance(player))
-    e += 1
-
-    playerdata = openStats(player)
-    playerdata[3] = str(e)
-    writeStats(player, playerdata)
-
-    return e
-
-def fatigueCheck(player, time): # return remaining fatigue in seconds
-    baseFatigue = 10 # hardcode bs
-    diff = int(time)-int(getLastStrike(player))
-    left =  baseFatigue - diff
-
-    return left
+    return int(playerdata[5])
 
 #### mine wrangling
 
@@ -282,7 +272,7 @@ def getMines(player):
 
     return minelist
 
-def acquireRes(player, mine): # performs mining action 
+def acquireRes(player, mine): # performs mining action
     baseDepth = 3
     strikeDepth = baseDepth * getStrength(player)
 
@@ -298,7 +288,6 @@ def acquireRes(player, mine): # performs mining action
         held[i] = str(r)
         i += 1
 
-    j = ','
     playerdata = openDossier(player)
     playerdata[2] = j.join(held)
     playerdata[3] = res
@@ -346,9 +335,6 @@ def printExcavation(excavation):
     return mined
 
 def heldFormatted(player):
-    playerdata = openDossier(player)
     held = getHeld(player)
 
     return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
-
-
