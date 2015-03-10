@@ -120,7 +120,7 @@ def newPlayer(msg, channel, user):
 
     return user
 
-def newMine, channel, user, rates="standardrates"):
+def newMine (channel, user, rates="standardrates"):
     mine = players.newMine(user, "standardrates").capitalize()
     players.decAvailableMines(user)
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.\n")
