@@ -19,7 +19,7 @@ def newDossier(player): # makes a new .dossier file for named player
     # 0 available mines
     # 1 grovel count
     # 2 tithe count
-    # 3 favors
+    # 3 favor level
 
     playerfile.close()
 
@@ -91,24 +91,36 @@ def getHeldTotal(player): #returns int of current held assets
 
 def getTotalMined(player): #returns int of all-timee mined
     playerdata = openDossier(player)
-
     total = playerdata[3].rstrip()
 
     return total
 
 def getTithed(player): #returns int list of tithed resources
     playerdata = openDossier(player)
-
     tithedist = int(playerdata[4].rstrip().split(','))
 
     return tithedlist
 
 def getTithedTotal(player): #returns int of tithed total
     playerdata = openDossier(player)
-
     tithed = int(playerdata[5].rstrip())
 
     return tithed
+
+def getFinished(player): #returns str list of finished mines
+    playerdata = openDossier(player)
+    finishedlist = playerdata[6].rstrip().split(',')
+
+    while finishedlist .count('') > 0:
+        finishedlist.remove('') #dirty hack
+
+    return finishedlist
+
+def getEmpressStats(player): #returns int list of empress stats
+    playerdata = openDossier(player)
+    empressstats = playerdata[7].rstrip().split(',')
+
+    return empressstats
 
 ### stats outputting
 
@@ -125,12 +137,10 @@ def openStats(player): # returns str list of the entire stats
 
 def getLastStrike(player): #returns int of last strike time
     playerdata = openStats(player)
-
     return playerdata[0] 
 
 def getTool(player): #returns str list of tool
     playerdata = openStats(player)
-
     tool = playerdata[1].rstrip().split(',')
 
     return tool 
@@ -245,9 +255,16 @@ def incEndurance(player): # increment endurance
 
     return e
 
+def fatigueCheck(player, time): # return remaining fatigue in seconds
+    baseFatigue = 10 # hardcode bs
+    diff = int(time)-int(getLastStrike(player))
+    left =  baseFatigue - diff
+
+    return left
+
 #### mine wrangling
 
-def openNewMine(player, rates):
+def newMine(player, rates):
     minename = mines.newMine(player, rates)
 
     currentMines = getOwned(player)
@@ -256,9 +273,6 @@ def openNewMine(player, rates):
     updateOwned(player, currentMines)
 
     return minename
-
-def newMine(player, rates):
-    return openNewMine(player, rates)
 
 def getMines(player):
     minelist = getOwned(player)

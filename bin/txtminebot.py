@@ -141,12 +141,15 @@ def strike(msg, channel, user, time):
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
 
-    diff = int(time)-int(players.getLastStrike(user))
-    if diff < baseFatigue: # fatigue check
-        left =  baseFatigue - diff
-        fatigue = left * 2
-        time = int(time) + fatigue - baseFatigue
-
+    #diff = int(time)-int(players.getLastStrike(user))
+    #if diff < baseFatigue: # fatigue check
+    #    left =  baseFatigue - diff
+    #    fatigue = left * 2
+    #    time = int(time) + fatigue - baseFatigue
+    fatigue = players.fatigueCheck(user, time)
+    if fatigue > 0:
+        fatigue = fatigue * 2
+        time = int(time) + fatigue - baseFatigue # still hardcoded bs
         ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.\n")
 
     else: # actual mining actions
@@ -159,19 +162,10 @@ def strike(msg, channel, user, time):
             emptyMines.append(target)
             players.incCleared(user)
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
-            ircsock.send("PRIVMSG "+config[1]+" :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+"\n")
-
-        ### OLD SHIT FROM MULTISTRIKE
-        #for x in mineList:
-        #    mined = players.printExcavation(players.acquire(user, players.excavate(user, x)))
-        #    ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  You struck at " + x.capitalize() +" and excavated "+mined+"\n")
-
-        #    if mines.remaining("../data/"+x+".mine") == 0:
-        #        emptyMines.append(x)
-        #        ircsock.send("PRIVMSG "+ user +" :"+x.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now.\n")
+            ircsock.send("PRIVMSG "+config[1]+" :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".\n")
 
         for x in emptyMines:
-                mineList.remove(x)
+            mineList.remove(x)
 
     players.updateOwned(user, mineList)
     players.updateLastStrike(user, time)
@@ -193,9 +187,8 @@ def stirke(msg, channel, user, time): #hazelnut memorial disfeature
     a = 0
 
 def fatigue(msg, channel, user, time): #~krowbar memorial feature
-    diff = int(time)-int(players.getLastStrike(user))
-    if diff < baseFatigue: # fatigue check
-        fatigue =  baseFatigue - diff
+    fatigue = players.fatigueCheck(user, time)
+    if fatigue > 0:
 
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" "+p.plural("second", fatigue)+".  Please rest patiently so you do not stress your body.\n")
     else:
