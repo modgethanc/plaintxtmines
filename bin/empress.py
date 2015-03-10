@@ -14,12 +14,16 @@ def newEmpress():
 ### output
 
 def openEmpress():
+    return
 
 def getGrovel():
+    return
 
 def getTithed():
+    return
 
 def getFavorite():
+    return
 
 def speak():
     return gibber.sentence()
