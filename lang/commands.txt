@@ -7,3 +7,4 @@ fatigue
 grovel
 info
 rankings
+stats

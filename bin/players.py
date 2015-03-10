@@ -135,7 +135,7 @@ def getClearedCount(player): #returns int of cleared mines count
 
 def fatigueCheck(player, time): # return remaining fatigue in seconds
     baseFatigue = 10 # hardcode bs
-    return baseFatigue - int(time) - int(getLastStrike(player))
+    return baseFatigue - (int(time) - int(getLastStrike(player)))
 
 ### dossier updating
 
