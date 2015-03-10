@@ -5,7 +5,7 @@ import random
 import gibber
 
 def newEmpress():
-    empressfile = open('../data/empress/txt', 'w+')
+    empressfile = open('../data/empress.txt', 'w+')
 
     empressfile.write('0\n') # 0 next grovel window
     empressfile.write("0,0,0,0,0,0,0,0\n") # 1 tithed total
