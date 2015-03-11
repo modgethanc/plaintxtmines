@@ -1,0 +1,10 @@
+1. mine list sorted by completion
+2. number of mined resources per strike based on strength calculation
+  2a. formula is 3*str
+3. strength gain semi-randomly while !striking
+  3a. this gets harder the more str yoou have
+4. !stats outputs some stats
+  4a. it's included in !report
+5. !open new mines now depends on whether or not you have empress permission
+  5a. granted 1 on !init
+  5b. granted +1 for each mine cleare
