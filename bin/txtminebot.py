@@ -398,11 +398,11 @@ def listen():
 
     elif msg.find(":!"+COMMANDS[10]) != -1: # !golem
         if isPlaying(user):
-            parse = msg.split("!"+COMMAND[10])
+            parse = msg.split("!"+COMMANDS[10])
             if parse[1] == '': #no arguments
                 if os.path.isfile("../data/"+user+".golem"):
                     ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golems.getShape(user)+" is hard at work! \n")
-                else
+                else:
                     ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with !golem {resources}\n")
             else: # golem check
                 newGolem(channel, user, time, parse[1])
