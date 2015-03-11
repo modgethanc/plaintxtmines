@@ -308,22 +308,14 @@ def printExcavation(excavation):
     mined = ''
     y = 0
     for x in excavation:
-        if y == 0:
-            item = '~'
-        elif y == 1:
-            item = '#'
-        elif y == 2:
-            item = '@'
-        elif y == 3:
-            item = '&'
-        elif y == 4:
-            item = '*'
-        elif y == 5:
-            item = '['
-        elif 7 == 6:
-            item = ']'
-        elif y == 7:
-            item = '^'
+        if y == 0: item = '~'
+        elif y == 1: item = '#'
+        elif y == 2: item = '@'
+        elif y == 3: item = '&'
+        elif y == 4: item = '*'
+        elif y == 5: item = '['
+        elif 7 == 6: item = ']'
+        elif y == 7: item = '^'
 
         i = 0
         while i < int(x):

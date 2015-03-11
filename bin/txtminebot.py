@@ -13,6 +13,7 @@ import mines
 import players
 import gibber
 import empress
+import golems
 
 ### CONFIG
 p = inflect.engine()
@@ -126,6 +127,10 @@ def newMine(channel, user, rates="standardrates"):
     ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.\n")
 
     return mine
+
+def newGolem(channel, user, time, golemstring): #hardcode bssss
+    golem = golems.newGolem(user, golemstring, time)
+    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Your new golem can excavate "+str(golems.getStrength(user))+" resources every ten seconds, and will last for "+str(golems.getStrength(user)*100)+" seconds. \n")
 
 def strike(msg, channel, user, time):
     mineList = players.getMines(user)
@@ -390,6 +395,19 @@ def listen():
             report(msg, channel, user)
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
+
+    elif msg.find(":!"+COMMANDS[10]) != -1: # !golem
+        if isPlaying(user):
+            parse = msg.split("!"+COMMAND[10])
+            if parse[1] == '': #no arguments
+                if os.path.isfile("../data/"+user+".golem"):
+                    ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golems.getShape(user)+" is hard at work! \n")
+                else
+                    ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with !golem {resources}\n")
+            else: # golem check
+                newGolem(channel, user, time, parse[1])
+        else:
+            ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[8]) != -1: # !rankings
         rankings(msg, channel, user)
