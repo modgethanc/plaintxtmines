@@ -1,15 +1,15 @@
 SKILLS
 -survey: discover makeup of your mine
 -theft: steal resources from others
--strength: more resources per strike
--endurance: less fatigue
+-tools: upgrade for depth/width/multi
 
 GOLEMS
 -created through mined resources
 -mines for you until it dies
 
-TITHING
--giving resources to the empress
+EMPRESS
+-tithing
+-favors
 
 MARKET
 -trade resources to others
@@ -17,7 +17,6 @@ MARKET
 -buy stuff
 
 MISC
--strike specific mines
 -rename your mines
 -burn: destroy your dossier (soft reset)
 -abandon mines
