@@ -4,8 +4,7 @@ SKILLS
 -tools: upgrade for depth/width/multi
 
 GOLEMS
--created through mined resources
--mines for you until it dies
+-decay
 
 EMPRESS
 -tithing
@@ -22,3 +21,4 @@ MISC
 -abandon mines
 -strike yourself if you typo !strike [hazel]
 -contract other people to work in your mines
+-BETTER TIME FORMATTING OH GOD

@@ -120,6 +120,24 @@ def updateLastStrike(player, time):
     return time
 
 ## actions
+def decay(player, pieces):
+    golemdata = openGolem(player)
+    golemshape = list(golemdata[0])
+
+    i = 0
+    while i < pieces:
+        chunk = random.randrange(0,len(golemshape))
+        if golemshape[chunk] != " ":
+            golemshape[chunk] = " "
+            i += 1
+
+    newshape = ''
+    for x in golemshape:
+        newshape += x
+    golemdata[0] = newshape
+    #golemdata[0] = ''.join(golemshape)
+    #print ":"+golemdata[0]+":"
+    writeGolem(player, golemdata)
 
 def expire(player):
     mineList = players.getMines(player)
