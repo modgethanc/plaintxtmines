@@ -12,10 +12,11 @@ def newGolem(player, golemstring, time):
     golemfile = open("../data/"+player+".golem", 'w+')
     golemfile.write(golemstring+"\n") # 0 golem string
     golemfile.write(j.join(golem)+"\n") # 1 golem stats
-    golemfile.write(str(calcStrength(golem))+"\n") # 2 strength
+    golemfile.write(str(calcHeight(golem))+"\n") # 2 height 
     golemfile.write(str(calcWidth(golem))+"\n") # 3 width
-    golemfile.write(str(calcDeath(golem, time))+"\n") # 4 death time
-
+    golemfile.write(str(calcStrength(golem))+"\n") # 4 strength
+    golemfile.write(str(calcDeath(golem, time))+"\n") # 5 death time
+    golemfile.write(time+"\n") # 6 last strike
 
     golemfile.close()
     return golemstring
@@ -43,6 +44,9 @@ def parse(golemstring):
     return golem
 
 def calcStrength(golem):
+    return calcHeight(golem) * calcWidth(golem)
+
+def calcHeight(golem): # total number of res
     total = 0
     for x in golem:
         total += int(x)
@@ -52,14 +56,14 @@ def calcStrength(golem):
 def calcWidth(golem): # number of different res
     width = 0
     for x in golem:
-        if x > 0:
+        if int(x) > 0:
             width += 1
 
     return width
 
 def calcDeath(golem, time): # calcuate expiration time
     death = int(time)
-    life = calcStrength(golem) * 100
+    life = random.randrange(1, max(2,calcStrength(golem) * calcWidth(golem))) * 100 + random.randrange(1,max(calcStrength(golem), 50))
     death = int(time) + life
 
     return death
@@ -75,17 +79,41 @@ def openGolem(player):
 
     return golemdata
 
-def getShape(player):
+def getShape(player): # return str of shape
     return openGolem(player)[0]
 
-def getStats(player):
-    return parse(getShape(player)) # kind of dumb??
+def getStats(player): # return str list of stats
+    return openGolem(player)[1]
 
-def getStrength(player): # return int of strength
+def getHeight(player): # return int of height 
     return int(openGolem(player)[2])
 
 def getWidth(player): # return int of width
     return int(openGolem(player)[3])
 
+def getStrength(player): # return int of strength 
+    return int(openGolem(player)[4])
+
 def getDeath(player): # return int of death time
-    return int(openGolem(player)[0])
+    return int(openGolem(player)[5])
+
+def getLastStrike(player): # return int of last strike
+    return int(openGolem(player)[6])
+
+def getLifeRemaining(player, time): # return int of seconds left
+    return getDeath(player) - int(time)
+
+## golem updating
+
+def writeGolem(player, golemdata):
+    golemfile = open('../data/'+player+'.golem', 'w')
+    for x in golemdata:
+        golemfile.write(str(x) + "\n")
+    golemfile.close()
+
+def updateLastStrike(player, time):
+    golemdata = openGolem(player)
+    golemdata[6] = time
+    writeGolem(player, golemdata)
+
+    return time

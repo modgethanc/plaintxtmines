@@ -17,6 +17,7 @@ import golems
 
 ### CONFIG
 p = inflect.engine()
+j = ", "
 
 configfile = open("ircconfig", 'r')
 config = []
@@ -99,11 +100,49 @@ def connect(server, channel, botnick):
 
 ### meta functions
 
-def isPlaying(player):
-    return os.path.isfile('../data/'+player+'.dossier')
+def isPlaying(user):
+    return os.path.isfile('../data/'+user+'.dossier')
 
 def isMine(mine):
     return os.path.isfile('../data/'+mine+'.mine')
+
+def hasGolem(user):
+    return os.path.isfile('../data/'+user+'.golem')
+
+def listPlayers():
+    gamedata = os.listdir('../data/')
+    playerlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "stats":
+            playerlist.append(entry[0])
+    return playerlist
+
+def listDossiers():
+    gamedata = os.listdir('../data/')
+    playerlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "dossier":
+            playerlist.append(entry[0])
+    return playerlist
+def listGolems():
+    gamedata = os.listdir('../data/')
+    golemlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "golem":
+            golemlist.append(entry[0])
+    return golemlist
+
+def listMines():
+    gamedata = os.listdir('../data/')
+    minelist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "mine":
+            minelist.append(entry[0])
+    return minelist
 
 ### gameplay functions
 
@@ -129,8 +168,15 @@ def newMine(channel, user, rates="standardrates"):
     return mine
 
 def newGolem(channel, user, time, golemstring): #hardcode bssss
-    golem = golems.newGolem(user, golemstring, time)
-    ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Your new golem can excavate "+str(golems.getStrength(user))+" resources every ten seconds, and will last for "+str(golems.getStrength(user)*100)+" seconds. \n")
+    #if golems.parse(golemstring): # DO GOLEM CHECK
+    if golems.calcStrength(golems.parse(golemstring)) > 0:
+        golem = golems.newGolem(user, golemstring, time)
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Your new golem can excavate "+str(golems.getStrength(user))+" resources every ten seconds, and will last for "+p.no("second", golems.getLifeRemaining(user, time))+". \n")
+    else:
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired.\n")
+
+def updateGolems(time):
+    a = time
 
 def strike(msg, channel, user, time):
     mineList = players.getMines(user)
@@ -240,7 +286,6 @@ def mineListFormatted(msg, channel, user):
 
         prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
 
-    j = ", "
     return "You're working on the following mine"+plural+": "+j.join(prejoin)
 
 def statsFormatted(channel, user):
@@ -309,6 +354,8 @@ def listen():
     #    logfile.write(msg+"\n")
     #    logfile.close()
 
+    updateGolems(time)
+
     ###### admin commands
     if msg.find(":!join") != -1 and user == admin:
         split = msg.split(" ");
@@ -316,7 +363,19 @@ def listen():
             if x.find("#") != -1:
                 joinchan(x)
 
-    if msg.find(":!forcenew") != -1:
+    elif msg.find(":!allplayers") != -1:
+        ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listPlayers())+"\n")
+
+    elif msg.find(":!alldossiers") != -1:
+        ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listDossiers())+"\n")
+
+    elif msg.find(":!allgolems") != -1:
+        ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listGolems())+"\n")
+
+    elif msg.find(":!allmines") != -1:
+        ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listMines())+"\n")
+
+    elif msg.find(":!forcenew") != -1:
         if user == admin:
             split = msg.split(" ");
             rates = ''
@@ -400,12 +459,12 @@ def listen():
         if isPlaying(user):
             parse = msg.split("!"+COMMANDS[10])
             if parse[1] == '': #no arguments
-                if os.path.isfile("../data/"+user+".golem"):
-                    ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golems.getShape(user)+" is hard at work! \n")
+                if hasGolem(user):
+                    ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golems.getShape(user)+" is hard at work!  It'll last for another "+p.no("second", golems.getLifeRemaining(user, time))+".\n")
                 else:
-                    ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with !golem {resources}\n")
+                    ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with '!golem {resources}'.\n")
             else: # golem check
-                newGolem(channel, user, time, parse[1])
+                newGolem(channel, user, time, parse[1].lstrip())
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
