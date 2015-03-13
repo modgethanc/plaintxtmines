@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import players
+import mines
 import os
 import random
 
@@ -12,11 +13,11 @@ def newGolem(player, golemstring, time):
     golemfile = open("../data/"+player+".golem", 'w+')
     golemfile.write(golemstring+"\n") # 0 golem string
     golemfile.write(j.join(golem)+"\n") # 1 golem stats
-    golemfile.write(str(calcHeight(golem))+"\n") # 2 height 
+    golemfile.write(str(calcHeight(golem))+"\n") # 2 height
     golemfile.write(str(calcWidth(golem))+"\n") # 3 width
     golemfile.write(str(calcStrength(golem))+"\n") # 4 strength
     golemfile.write(str(calcDeath(golem, time))+"\n") # 5 death time
-    golemfile.write(time+"\n") # 6 last strike
+    golemfile.write(time+"\n") # 6 birth
 
     golemfile.close()
     return golemstring
@@ -63,7 +64,7 @@ def calcWidth(golem): # number of different res
 
 def calcDeath(golem, time): # calcuate expiration time
     death = int(time)
-    life = random.randrange(1, max(2,calcStrength(golem) * calcWidth(golem))) * 100 + random.randrange(1,max(calcStrength(golem), 50))
+    life = random.randrange(1, max(2,calcStrength(golem) * calcWidth(golem))) * random.randrange(1,max(calcStrength(golem), 50))
     death = int(time) + life
 
     return death
@@ -83,7 +84,7 @@ def getShape(player): # return str of shape
     return openGolem(player)[0]
 
 def getStats(player): # return str list of stats
-    return openGolem(player)[1]
+    return openGolem(player)[1].split(',')
 
 def getHeight(player): # return int of height 
     return int(openGolem(player)[2])
@@ -97,7 +98,7 @@ def getStrength(player): # return int of strength
 def getDeath(player): # return int of death time
     return int(openGolem(player)[5])
 
-def getLastStrike(player): # return int of last strike
+def getBirth(player): # return int of birth time
     return int(openGolem(player)[6])
 
 def getLifeRemaining(player, time): # return int of seconds left
@@ -117,3 +118,24 @@ def updateLastStrike(player, time):
     writeGolem(player, golemdata)
 
     return time
+
+## actions
+
+def expire(player):
+    mineList = players.getMines(player)
+    target = mineList[0] #autotarget first mine
+    strikes = (getDeath(player) - getBirth(player))/10
+
+    i = 0
+    golemstrike = [0,0,0,0,0,0,0,0]
+    while i < strikes:
+        excavation = mines.excavate(target, getStrength(player), getWidth(player))
+        j = 0
+        while j < 8:
+            golemstrike[j] += excavation[j]
+            j += 1
+
+        i += 1
+
+    players.acquireRes(player, golemstrike)
+    return golemstrike

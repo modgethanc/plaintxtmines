@@ -167,16 +167,23 @@ def newMine(channel, user, rates="standardrates"):
 
     return mine
 
-def newGolem(channel, user, time, golemstring): #hardcode bssss
-    #if golems.parse(golemstring): # DO GOLEM CHECK
-    if golems.calcStrength(golems.parse(golemstring)) > 0:
-        golem = golems.newGolem(user, golemstring, time)
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Your new golem can excavate "+str(golems.getStrength(user))+" resources every ten seconds, and will last for "+p.no("second", golems.getLifeRemaining(user, time))+". \n")
+def newGolem(channel, user, time, golemstring): 
+    if hasGolem(user):
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!  It'll be ready in "+p.no("second", golems.getLifeRemaining(user, time))+".\n")
     else:
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired.\n")
+        if golems.calcStrength(golems.parse(golemstring)) > 0:
+            golem = golems.newGolem(user, golemstring, time)
+            players.removeRes(user, golems.getStats(user))
+            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+p.no("second", golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
+        else:
+            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired.\n")
 
 def updateGolems(time):
-    a = time
+    for x in listGolems():
+        if int(time) > golems.getDeath(x):
+            mined = players.printExcavation(golems.expire(x))
+            ircsock.send("PRIVMSG "+ x +" :"+golems.getShape(x)+" crumbles to dust inside "+players.getMines(x)[0].capitalize()+" and leaves a wake of "+mined+"\n")
+            os.remove("../data/"+x+".golem")
 
 def strike(msg, channel, user, time):
     mineList = players.getMines(user)
@@ -208,13 +215,16 @@ def strike(msg, channel, user, time):
     else: # actual mining actions
         emptyMines = []
         status = players.incStrikes(user)
-        mined = players.printExcavation(players.acquireRes(user, target))
+        excavation = players.strike(user, target)
+        mined = players.printExcavation(players.acquireRes(user, excavation))
         ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined+"\n")
 
         if mines.getTotal(target) == 0:
             emptyMines.append(target)
             players.incCleared(user)
+            players.incEndurance(user)
             players.incAvailableMines(user)
+            ircsock.send("PRIVMSG "+ user +" :As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.\n")
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.\n")
             ircsock.send("PRIVMSG "+config[1]+" :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".\n")
 
@@ -289,10 +299,10 @@ def mineListFormatted(msg, channel, user):
     return "You're working on the following mine"+plural+": "+j.join(prejoin)
 
 def statsFormatted(channel, user):
-    stats = "You have a strength of "+str(players.getStrength(user))+" and an endurance of "+str(players.getEndurance(user))+".  "
+    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - players.getEndurance(user))+" before experiencing fatigue.  "
     plural = 's'
     if players.getClearedCount(user) == 1: plural = ''
-    stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+" with "+p.no("strike", players.getStrikes(user))+".  "
+    stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+".  "
     stats += "Please continue working hard for the empress!"
 
     return stats
@@ -363,16 +373,16 @@ def listen():
             if x.find("#") != -1:
                 joinchan(x)
 
-    elif msg.find(":!allplayers") != -1:
+    elif msg.find(":!allplayers") != -1 and user == admin:
         ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listPlayers())+"\n")
 
-    elif msg.find(":!alldossiers") != -1:
+    elif msg.find(":!alldossiers") != -1 and user == admin:
         ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listDossiers())+"\n")
 
-    elif msg.find(":!allgolems") != -1:
+    elif msg.find(":!allgolems") != -1 and user == admin:
         ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listGolems())+"\n")
 
-    elif msg.find(":!allmines") != -1:
+    elif msg.find(":!allmines") != -1 and user == admin:
         ircsock.send("PRIVMSG "+channel+" :"+ user + ": "+j.join(listMines())+"\n")
 
     elif msg.find(":!forcenew") != -1:
@@ -463,7 +473,7 @@ def listen():
                     ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golems.getShape(user)+" is hard at work!  It'll last for another "+p.no("second", golems.getLifeRemaining(user, time))+".\n")
                 else:
                     ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with '!golem {resources}'.\n")
-            else: # golem check
+            else: # check for mines??
                 newGolem(channel, user, time, parse[1].lstrip())
         else:
             ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")

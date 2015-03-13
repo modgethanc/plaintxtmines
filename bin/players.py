@@ -135,7 +135,7 @@ def getClearedCount(player): #returns int of cleared mines count
 
 def fatigueCheck(player, time): # return remaining fatigue in seconds
     baseFatigue = 10 # hardcode bs
-    return baseFatigue - (int(time) - int(getLastStrike(player)))
+    return (baseFatigue - max(9, getEndurance(player))) - (int(time) - int(getLastStrike(player)))
 
 ### dossier updating
 
@@ -151,6 +151,25 @@ def updateOwned(player, minelist): # overwrites previous minelist with passed in
     writeDossier(player, playerdata)
 
     return mines
+
+def removeRes(player, reslist): # subtracts reslist from player
+    held = getHeld(player)
+    res = int(getTotalMined(player))
+
+    i = 0
+    for x in reslist:
+        r = int(held[i]) - int(x)
+        res -= int(x)
+        held[i] = str(r)
+        i += 1
+
+    playerdata = openDossier(player)
+    playerdata[2] = j.join(held)
+    playerdata[3] = res
+
+    writeDossier(player, playerdata)
+
+    return reslist
 
 def updateEmpressStats(player, statlist): # overwrites previous empress stats
     playerdata = openDossier(player)
@@ -272,12 +291,13 @@ def getMines(player):
 
     return minelist
 
-def acquireRes(player, mine): # performs mining action
+def strike(player, mine): # performs mining action
     baseDepth = 3
     strikeDepth = baseDepth * getStrength(player)
 
-    excavation = mines.excavate(mine, strikeDepth)
+    return mines.excavate(mine, strikeDepth)
 
+def acquireRes(player, excavation): # adds res to held
     held = getHeld(player)
     res = int(getTotalMined(player))
 
@@ -314,7 +334,7 @@ def printExcavation(excavation):
         elif y == 3: item = '&'
         elif y == 4: item = '*'
         elif y == 5: item = '['
-        elif 7 == 6: item = ']'
+        elif y == 6: item = ']'
         elif y == 7: item = '^'
 
         i = 0
