@@ -316,6 +316,16 @@ def acquireRes(player, excavation): # adds res to held
 
     return excavation
 
+def canAfford(player, cost): # checks list of res against held
+    held = getHeld(player)
+    i = 0
+    while i < 8:
+        if int(held[i]) < int(cost[1]):
+            return False
+        i += 1
+
+    return True
+
 def printExcavation(excavation):
     total = 0
 

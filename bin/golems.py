@@ -16,8 +16,11 @@ def newGolem(player, golemstring, time):
     golemfile.write(str(calcHeight(golem))+"\n") # 2 height
     golemfile.write(str(calcWidth(golem))+"\n") # 3 width
     golemfile.write(str(calcStrength(golem))+"\n") # 4 strength
-    golemfile.write(str(calcDeath(golem, time))+"\n") # 5 death time
-    golemfile.write(time+"\n") # 6 birth
+    golemfile.write(str(calcInterval(golem))+"\n") # 5 interval
+    golemfile.write(str(calcDeath(golem, time))+"\n") # 6 death time
+    golemfile.write(time+"\n") # 7 birth time
+    golemfile.write(time+"\n") # 8 last strike
+    golemfile.write("0,0,0,0,0,0,0,0\n") # 9 held res
 
     golemfile.close()
     return golemstring
@@ -47,6 +50,9 @@ def parse(golemstring):
 def calcStrength(golem):
     return calcHeight(golem) * calcWidth(golem)
 
+def calcInterval(golem):
+    return 200/max(1, min(int(golem[3]), 100))
+
 def calcHeight(golem): # total number of res
     total = 0
     for x in golem:
@@ -64,7 +70,9 @@ def calcWidth(golem): # number of different res
 
 def calcDeath(golem, time): # calcuate expiration time
     death = int(time)
-    life = random.randrange(1, max(2,calcStrength(golem) * calcWidth(golem))) * random.randrange(1,max(calcStrength(golem), 50))
+    #life = random.randrange(1, max(2,calcStrength(golem) * calcWidth(golem))) * random.randrange(1,max(calcStrength(golem), 50))
+    tail = int(golem[0]) * random.randrange(1,10)
+    life = 100 * random.randrange(1, calcStrength(golem)) + tail
     death = int(time) + life
 
     return death
@@ -95,11 +103,20 @@ def getWidth(player): # return int of width
 def getStrength(player): # return int of strength 
     return int(openGolem(player)[4])
 
-def getDeath(player): # return int of death time
+def getInterval(player): # return int of strength 
     return int(openGolem(player)[5])
 
-def getBirth(player): # return int of birth time
+def getDeath(player): # return int of death time
     return int(openGolem(player)[6])
+
+def getBirth(player): # return int of birth time
+    return int(openGolem(player)[7])
+
+def getLastStrike(player): # return int of birth time
+    return int(openGolem(player)[8])
+
+def getHeld(player): # return str list of held res
+    return openGolem(player)[9].split(',')
 
 def getLifeRemaining(player, time): # return int of seconds left
     return getDeath(player) - int(time)
@@ -114,12 +131,30 @@ def writeGolem(player, golemdata):
 
 def updateLastStrike(player, time):
     golemdata = openGolem(player)
-    golemdata[6] = time
+    golemdata[8] = time
     writeGolem(player, golemdata)
 
     return time
 
 ## actions
+
+def strike(player, target): # performs mining action
+    excavation = mines.excavate(target, getStrength(player), getWidth(player))
+    held = getHeld(player)
+
+    i = 0
+    for x in excavation:
+        r = int(held[i]) + int(x)
+        held[i] = str(r)
+        i += 1
+
+    golemdata = openGolem(player)
+    golemdata[9] = j.join(held)
+
+    writeGolem(player, golemdata)
+
+    return excavation
+
 def decay(player, pieces):
     golemdata = openGolem(player)
     golemshape = list(golemdata[0])
@@ -135,25 +170,11 @@ def decay(player, pieces):
     for x in golemshape:
         newshape += x
     golemdata[0] = newshape
-    #golemdata[0] = ''.join(golemshape)
-    #print ":"+golemdata[0]+":"
     writeGolem(player, golemdata)
 
 def expire(player):
-    mineList = players.getMines(player)
-    target = mineList[0] #autotarget first mine
-    strikes = (getDeath(player) - getBirth(player))/10
+    golemheld = getHeld(player)
+    os.remove("../data/"+player+".golem")
+    players.acquireRes(player, golemheld)
 
-    i = 0
-    golemstrike = [0,0,0,0,0,0,0,0]
-    while i < strikes:
-        excavation = mines.excavate(target, getStrength(player), getWidth(player))
-        j = 0
-        while j < 8:
-            golemstrike[j] += excavation[j]
-            j += 1
-
-        i += 1
-
-    players.acquireRes(player, golemstrike)
-    return golemstrike
+    return golemheld

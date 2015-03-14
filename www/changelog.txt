@@ -1,3 +1,6 @@
+
+------- currently alphatesting in ##txtmines-test -------------------------------
+
 1. mine list sorted by completion
 2. number of mined resources per strike based on strength calculation
   2a. formula is 3*str
