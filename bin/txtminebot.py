@@ -181,7 +181,7 @@ def newGolem(channel, user, time, golemstring):
                 golemfilter = list(golemstring)
                 golemshape = []
                 for x in golemfilter:
-                    if x in ['`', '@', '#', '^', '&', '*', '[', ']']:
+                    if x in ['~', '@', '#', '^', '&', '*', '[', ']']:
                         golemshape.append(x)
 
                 golem = golems.newGolem(user, ''.join(golemshape), time)
