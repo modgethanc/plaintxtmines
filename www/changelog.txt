@@ -1,5 +1,4 @@
-
-------- currently alphatesting in ##txtmines-test -------------------------------
+------- features pushed on 2015-03-11 ------------------------------------------
 
 1. mine list sorted by completion
 2. number of mined resources per strike based on strength calculation
@@ -22,3 +21,7 @@
 	6g. KNOWN BUG: you can put non-resource characters into your golem (i am too
 	lazy to filter this shit out right now
 7. you now gain ENDURANCE from finishing a mine
+
+------- currently alphatesting in ##txtmines-test ------------------------------
+
+(none)

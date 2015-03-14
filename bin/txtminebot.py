@@ -39,6 +39,16 @@ parser.add_option("-n", "--nick", dest="nick", default=botName, help="the nick t
 
 (options, args) = parser.parse_args()
 
+def listDossiers():
+    gamedata = os.listdir('../data/')
+    playerlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "dossier":
+            playerlist.append(entry[0])
+    return playerlist
+
+dossierList = listDossiers()
 ## gameplay config defaults
 
 baseFatigue     = 10
@@ -119,15 +129,6 @@ def listPlayers():
             playerlist.append(entry[0])
     return playerlist
 
-def listDossiers():
-    gamedata = os.listdir('../data/')
-    playerlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "dossier":
-            playerlist.append(entry[0])
-    return playerlist
-
 def listGolems():
     gamedata = os.listdir('../data/')
     golemlist = []
@@ -154,9 +155,11 @@ def newPlayer(channel, user):
     else:
         players.newPlayer(user)
 
-    playerlist = open("../data/players.txt", 'a')
-    playerlist.write(user+"\n")
-    playerlist.close()
+    #playerlist = open("../data/players.txt", 'a')
+    #playerlist.write(user+"\n")
+    #playerlist.close()
+    global dossierList
+    dossierList.append(user)
 
     ircsock.send("PRIVMSG "+channel+" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
 
@@ -245,7 +248,8 @@ def strike(msg, channel, user, time):
         if mines.getTotal(target) == 0:
             emptyMines.append(target)
             players.incCleared(user)
-            players.incEndurance(user)
+            if players.getEndurance(user) < 8:
+                players.incEndurance(user)
             players.incAvailableMines(user)
             ircsock.send("PRIVMSG "+ user +" :As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.\n")
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.\n")
@@ -277,6 +281,7 @@ def stirke(msg, channel, user, time): #hazelnut memorial disfeature
 
 def fatigue(msg, channel, user, time): #~krowbar memorial feature
     fatigue = players.fatigueCheck(user, time)
+    print fatigue
     if fatigue > 0:
 
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" "+p.plural("second", fatigue)+".  Please rest patiently so you do not stress your body.\n")
@@ -334,11 +339,11 @@ def statsFormatted(channel, user):
     return stats
 
 def rankings(msg, channel, user):
-    dossiers = []
-    playerlist = open("../data/players.txt", 'r')
-    for x in playerlist:
-       dossiers.append(x.rstrip())
-    playerlist.close()
+    dossiers = dossierList
+    #playerlist = open("../data/players.txt", 'r')
+    #for x in playerlist:
+    #   dossiers.append(x.rstrip())
+    #playerlist.close()
 
     records = []
     for x in dossiers:
@@ -443,10 +448,10 @@ def listen():
 
         ###### gameplay commands
         elif msg.find(":!rollcall") != -1: # tildetown specific
-            ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !grovel, !rankings, !info.\n")
+            ircsock.send("PRIVMSG "+ channel +" :I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.\n")
 
         elif msg.find(":!"+COMMANDS[7]) != -1: # !info
-            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !grovel, !rankings, !info.\n")
+            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.\n")
 
         elif msg.find(":!"+COMMANDS[0]) != -1: # !init
             if isPlaying(user):
@@ -495,7 +500,8 @@ def listen():
 
         elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
             if isPlaying(user):
-                grovel(msg, channel, user, time)
+                #grovel(msg, channel, user, time)
+                ircsock.send("PRIVMSG "+ channel + " :" + user + ": The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.\n")
             else:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.\n")
 

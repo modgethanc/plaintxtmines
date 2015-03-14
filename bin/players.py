@@ -135,7 +135,7 @@ def getClearedCount(player): #returns int of cleared mines count
 
 def fatigueCheck(player, time): # return remaining fatigue in seconds
     baseFatigue = 10 # hardcode bs
-    return (baseFatigue - max(9, getEndurance(player))) - (int(time) - int(getLastStrike(player)))
+    return (baseFatigue - getEndurance(player)) - (int(time) - int(getLastStrike(player)))
 
 ### dossier updating
 
@@ -320,7 +320,7 @@ def canAfford(player, cost): # checks list of res against held
     held = getHeld(player)
     i = 0
     while i < 8:
-        if int(held[i]) < int(cost[1]):
+        if int(held[i]) < int(cost[i]):
             return False
         i += 1
 
