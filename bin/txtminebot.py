@@ -361,7 +361,7 @@ def rankings(msg, channel, user):
         records.append([x, str(players.getHeldTotal(x))])
 
     records.sort(key=lambda entry:int(entry[1]), reverse=True)
-    ircsock.send("PRIVMSG " + channel + " :The most productive citizens are:\n")
+    ircsock.send("PRIVMSG " + channel + " :The wealthiest citizens are:\n")
 
     for x in range (0, min(5, len(records))):
         entry = records[x]
@@ -383,11 +383,11 @@ def listen():
     msg = ircsock.recv(2048)
     #print msg
 
+    if msg.find("PING") != -1: 
+        ping()
+
     msg = msg.strip('\n\r').lower() #case insensitive
     formatted = formatter.format_message(msg)
-
-    if msg.find("PING :") != -1: 
-        ping()
 
     if "" == formatted:
           continue
