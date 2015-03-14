@@ -5,7 +5,6 @@ SKILLS
 
 GOLEMS
 -decay
--full stats output
 
 EMPRESS
 -tithing

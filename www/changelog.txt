@@ -18,7 +18,7 @@
 	tranferred to you
 	6e. golem default mines out of whatever mine you have targeted
 	6f. you can only have one golem at a time
-	6g. KNOWN BUG: you can put non-resource characters into your golem (i am too
+	6g. (FIXED) KNOWN BUG: you can put non-resource characters into your golem (i am too
 	lazy to filter this shit out right now
 7. you now gain ENDURANCE from finishing a mine
 
