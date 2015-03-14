@@ -48,7 +48,7 @@ def parse(golemstring):
     return golem
 
 def calcStrength(golem):
-    return calcHeight(golem) * calcWidth(golem)
+    return calcHeight(golem) * random.randrange(1, max(2, min(int(golem[1]), 10)))
 
 def calcInterval(golem):
     return 200/max(1, min(int(golem[3]), 100))
