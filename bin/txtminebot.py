@@ -243,7 +243,7 @@ def strike(msg, channel, user, time):
     fatigue = players.fatigueCheck(user, time)
     if fatigue > 0:
         fatigue = fatigue * 2
-        time = int(time) + fatigue - baseFatigue # still hardcoded bs
+        time = int(time) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
         ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.\n")
 
     else: # actual mining actions
@@ -292,7 +292,8 @@ def fatigue(msg, channel, user, time): #~krowbar memorial feature
     fatigue = players.fatigueCheck(user, time)
     if fatigue > 0:
 
-        ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" "+p.plural("second", fatigue)+".  Please rest patiently so you do not stress your body.\n")
+        #ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" "+p.plural("second", fatigue)+".  Please rest patiently so you do not stress your body.\n")
+        ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body.\n")
     else:
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.\n")
 
