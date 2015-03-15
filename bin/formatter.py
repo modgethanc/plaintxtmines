@@ -28,9 +28,9 @@ def prettyTime(time):
             if d > 0:
                 w, d = divmod(d, 7)
                 if w > 0:
-                    m, w = divmod(w, 4)
-                    if m > 0:
-                        return p.no("month", m) + ", " + p.no("week", w) +", " + p.no("day", d) + ", " + p.no("hour", h) + ", "+ p.no("minute", m) + " and " + p.no("second", s)
+                    mo, w = divmod(w, 4)
+                    if mo > 0:
+                        return p.no("month", mo) + ", " + p.no("week", w) +", " + p.no("day", d) + ", " + p.no("hour", h) + ", "+ p.no("minute", m) + " and " + p.no("second", s)
                     else:
                         return p.no("week", w) +", " + p.no("day", d) + ", " + p.no("hour", h) + ", "+ p.no("minute", m) + " and " + p.no("second", s)
                 else:
