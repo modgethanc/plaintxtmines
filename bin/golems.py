@@ -121,6 +121,18 @@ def getHeld(player): # return str list of held res
 def getLifeRemaining(player, time): # return int of seconds left
     return getDeath(player) - int(time)
 
+def getHeldTotal(player): #returns int of current held assets
+    total = 0
+    for x in getHeld(player):
+        total += int(x)
+
+    return total
+
+def heldFormatted(player):
+    held = getHeld(player)
+
+    return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
+
 ## golem updating
 
 def writeGolem(player, golemdata):

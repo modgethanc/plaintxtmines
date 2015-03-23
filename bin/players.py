@@ -106,7 +106,7 @@ def getAvailableMines(player): # returns int of number of free mines
 
 ### stats outputting
 
-def openStats(player): # returns str list of the entire stats 
+def openStats(player): # returns str list of the entire stats
     playerfile = open('../data/'+player+'.stats', 'r')
     playerdata = []
     for x in playerfile:
@@ -334,6 +334,9 @@ def printExcavation(excavation):
 
     if total == 0:
         return "nothing but rubble."
+
+    if total > 100:
+        return "a lot of resources!"
 
     mined = ''
     y = 0
