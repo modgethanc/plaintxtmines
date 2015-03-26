@@ -165,6 +165,9 @@ def strike(player, target): # performs mining action
 
     writeGolem(player, golemdata)
 
+    if random.randrange(1,100) < 15:
+        print decay(player, 1)
+
     return excavation
 
 def decay(player, pieces):
@@ -173,7 +176,7 @@ def decay(player, pieces):
 
     i = 0
     while i < pieces:
-        chunk = random.randrange(0,len(golemshape))
+        chunk = random.randrange(0,len(golemshape)-1)
         if golemshape[chunk] != " ":
             golemshape[chunk] = " "
             i += 1
@@ -183,6 +186,8 @@ def decay(player, pieces):
         newshape += x
     golemdata[0] = newshape
     writeGolem(player, golemdata)
+
+    return len(golemshape)-1
 
 def expire(player):
     golemheld = getHeld(player)

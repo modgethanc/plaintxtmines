@@ -200,11 +200,13 @@ def updateGolems(time):
         interval = golems.getInterval(x)
 
         if strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
+            target = players.getMines(x)[0]
             strikeCount = strikeDiff/interval
             i = 0
             elapsed = golems.getLastStrike(x)
             while i < strikeCount:
-                golems.strike(x, players.getMines(x)[0])
+                if mines.getTotal(target) > 0:
+                    print "golemstrike"+ str(golems.strike(x, target))
                 elapsed += interval
                 i += 1
 
@@ -256,8 +258,7 @@ def strike(msg, channel, user, time):
         if mines.getTotal(target) == 0:
             emptyMines.append(target)
             players.incCleared(user)
-            if players.getEndurance(user) < 8:
-                players.incEndurance(user)
+            players.incEndurance(user)
             players.incAvailableMines(user)
             ircsock.send("PRIVMSG "+ user +" :As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.\n")
             ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.\n")
@@ -460,8 +461,9 @@ def listen():
                             newMine(msg, x, x)
             else:
                 ircsock.send("PRIVMSG "+ channel +" :"+ user + ": Sorry, friend, but only "+admin+" can request new mines on behalf of others.\n")
-        elif msg.find(":!brb") != 1:
+        elif msg.find(":!brb") != -1:
           ircsock.send("QUIT\n")
+          print "manual shutdown"
           break
 
         ###### gameplay commands
