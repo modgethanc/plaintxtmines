@@ -8,6 +8,7 @@ import time as systime
 from optparse import OptionParser
 import random
 import inflect
+from datetime import datetime
 
 import formatter
 import mines
@@ -191,10 +192,19 @@ def newGolem(channel, user, time, golemstring):
                   golem = golems.newGolem(user, ''.join(golemshape), time)
                   players.removeRes(user, golems.getStats(user))
                   ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
+                  logGolem(user)
             else:
                 ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You don't have the resources to make that golem, friend.\n")
         else:
             ircsock.send("PRIVMSG "+ channel +" :"+ user + ": That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired.\n")
+
+def logGolem(user): 
+  golemarchive = open("../data/golems.txt", 'a')
+  golemtext = golems.getShape(user) + "\t"
+  golemtext += str(golems.getStrength(user)) + "/" + str(golems.getInterval(user)) + "\t"
+  golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
+  golemarchive.write(golemtext+"\n")
+  golemarchive.close()
 
 def updateGolems(time):
     for x in listGolems():
@@ -356,6 +366,7 @@ def golemStats(channel, user, time):
     status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(user, time))
 
     return status
+
 def rankings(msg, channel, user):
     dossiers = dossierList
     #playerlist = open("../data/players.txt", 'r')
