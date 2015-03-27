@@ -24,4 +24,8 @@
 
 ------- currently alphatesting in ##txtmines-test ------------------------------
 
-(none)
+1. golem size is now capped to player's strength
+	1a. formula: rounded 3.5*str
+2. golems do not strike on empty mines
+3. golems decay when striking
+4. golems are archived
