@@ -174,21 +174,23 @@ def newMine(channel, user, rates="standardrates"):
 
 def newGolem(channel, user, time, golemstring):
     if hasGolem(user):
-        #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!  It'll be ready in "+p.no("second", golems.getLifeRemaining(user, time))+".\n")
         ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".\n")
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
                 golemfilter = list(golemstring)
-                golemshape = []
-                for x in golemfilter:
-                    if x in ['~', '@', '#', '^', '&', '*', '[', ']']:
-                        golemshape.append(x)
+                maxgolem = (players.getStrength(user)*3.5)
+                if len(golemfilter) > maxgolem:
+                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You're not strong enough to construct a golem that big, friend.  The most you can use is "+p.no("resource", maxgolem)+".\n")
+                else:
+                  golemshape = []
+                  for x in golemfilter:
+                      if x in ['~', '@', '#', '^', '&', '*', '[', ']']:
+                          golemshape.append(x)
 
-                golem = golems.newGolem(user, ''.join(golemshape), time)
-                players.removeRes(user, golems.getStats(user))
-                #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+p.no("second", golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
-                ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
+                  golem = golems.newGolem(user, ''.join(golemshape), time)
+                  players.removeRes(user, golems.getStats(user))
+                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
             else:
                 ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You don't have the resources to make that golem, friend.\n")
         else:
@@ -271,12 +273,10 @@ def strike(msg, channel, user, time):
     players.updateLastStrike(user, time)
 
 def report(msg, channel, user, time):
-    #ircsock.send("PRIVMSG "+ user +" :After "+str(players.getStrikes(user))+" "+p.plural("strike", players.getStrikes(user))+", you have acquired the following resources: "+players.heldFormatted(user)+"\n")
     if len(players.getMines(user)) > 0:
         ircsock.send("PRIVMSG "+ user +" :"+mineListFormatted(msg, channel, user)+"\n")
-    ircsock.send("PRIVMSG "+ user +" :You're holding the following resources: "+players.heldFormatted(user)+"\n")
+    ircsock.send("PRIVMSG "+ user +" :"+resourcesFormatted(channel, user)+"\n")
     if hasGolem(user):
-        #ircsock.send("PRIVMSG "+ user +" :"+golems.getShape(user)+" is working hard for you.  It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+p.no("second", golems.getLifeRemaining(user, time))+".\n")
         ircsock.send("PRIVMSG "+ user +" :"+golemStats(channel, user, time)+".\n")
     ircsock.send("PRIVMSG "+ user +" :"+statsFormatted(channel, user)+"\n")
 
@@ -293,7 +293,6 @@ def fatigue(msg, channel, user, time): #~krowbar memorial feature
     fatigue = players.fatigueCheck(user, time)
     if fatigue > 0:
 
-        #ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+str(fatigue)+" "+p.plural("second", fatigue)+".  Please rest patiently so you do not stress your body.\n")
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body.\n")
     else:
         ircsock.send("PRIVMSG "+ channel + " :" + user +": You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.\n")
@@ -339,18 +338,21 @@ def mineListFormatted(msg, channel, user):
 
     return "You're working on the following mine"+plural+": "+j.join(prejoin)
 
+def resourcesFormatted(channel, user):
+    return "You're holding the following resources: "+players.heldFormatted(user)
+
 def statsFormatted(channel, user):
     stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - players.getEndurance(user))+" without experiencing fatigue.  "
     plural = 's'
     if players.getClearedCount(user) == 1: plural = ''
     stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+".  "
+    stats += "You can make a golem with up to "+p.no("resource", int(3.5*players.getStrength(user)))+".  "
     stats += "Please continue working hard for the empress!"
 
     return stats
 
 def golemStats(channel, user, time):
     status = golems.getShape(user)+" is hard at work!  "
-    #status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+p.no("second", golems.getLifeRemaining(user, time))
     status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(user, time))
 
     return status
@@ -500,6 +502,12 @@ def listen():
         elif msg.find(":!"+COMMANDS[9]) != -1: # !stats
             if isPlaying(user):
                 ircsock.send("PRIVMSG "+channel+" :" + user + ": "+statsFormatted(channel, user)+"\n")
+            else:
+                ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
+
+        elif msg.find(":!"+COMMANDS[11]) != -1: # !res
+            if isPlaying(user):
+                ircsock.send("PRIVMSG "+channel+" :" + user + ": "+resourcesFormatted(channel, user)+"\n")
             else:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 

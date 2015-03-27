@@ -9,3 +9,4 @@ info
 rankings
 stats
 golem
+res
