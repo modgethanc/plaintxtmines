@@ -1,3 +1,18 @@
+------- currently alphatesting in ##txtmines-test ------------------------------
+
+------- features pushed on 2015-03-29 ------------------------------------------
+
+GOLEMNERF
+1. golem size is now capped to player's strength
+	1a. formula: rounded 3.5*str
+2. golems do not strike on empty mines
+3. golems die when they completely crumble (instead of over time)
+	3a. current decay rate is 50% chance of losing one piece every strike
+4. golems and stats are archived for your edification
+5. "!golem destroy" instantly kills current golem
+	5a. a random amount of golem's resources crumble to dust
+6. resource harvesting from golems is more human-readable
+
 ------- features pushed on 2015-03-11 ------------------------------------------
 
 1. mine list sorted by completion
@@ -21,11 +36,3 @@
 	6g. (FIXED) KNOWN BUG: you can put non-resource characters into your golem (i am too
 	lazy to filter this shit out right now
 7. you now gain ENDURANCE from finishing a mine
-
-------- currently alphatesting in ##txtmines-test ------------------------------
-
-1. golem size is now capped to player's strength
-	1a. formula: rounded 3.5*str
-2. golems do not strike on empty mines
-3. golems decay when striking
-4. golems are archived

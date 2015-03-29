@@ -169,7 +169,7 @@ def strike(player, target): # performs mining action
     writeGolem(player, golemdata)
 
     if random.randrange(1,100) < 50:
-        print decay(player, 1)
+        decay(player, 1)
 
     return excavation
 
@@ -200,3 +200,18 @@ def expire(player):
     players.acquireRes(player, golemheld)
 
     return golemheld
+
+def destroy(player):
+    golemheld = getHeld(player)
+    os.remove("../data/"+player+".golem")
+    recovered = []
+
+    for x in golemheld:
+        if int(x) > 0:
+            recovered.append(random.randrange(0, max(1,int(x))))
+        else:
+            recovered.append(0)
+
+    players.acquireRes(player, recovered)
+
+    return recovered

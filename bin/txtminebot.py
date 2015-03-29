@@ -10,6 +10,7 @@ import random
 import inflect
 from datetime import datetime
 
+import game
 import formatter
 import mines
 import players
@@ -173,15 +174,18 @@ def newMine(channel, user, rates="standardrates"):
 
     return mine
 
-def newGolem(channel, user, time, golemstring):
+def golemHandler(channel, user, time, golemstring):
     if hasGolem(user):
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!\n")
+        if golemstring == "destroy":
+            golemDestroy(channel, user, time)
+        else:
+            ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!\n")
         #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".\n")
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
                 golemfilter = list(golemstring)
-                maxgolem = (players.getStrength(user)*3.5)
+                maxgolem = int((players.getStrength(user)*3.5))
                 if len(golemfilter) > maxgolem:
                   ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You're not strong enough to construct a golem that big, friend.  The most you can use is "+p.no("resource", maxgolem)+".\n")
                 else:
@@ -227,7 +231,8 @@ def updateGolems(time):
             while i < strikeCount:
                 if mines.getTotal(target) > 0:
                     if golems.getSize(x) > 0:
-                        print "golemstrike"+ str(golems.strike(x, target))
+                        #print "golemstrike"+ str(golems.strike(x, target))
+                        golems.strike(x, target)
                     else:
                         dead = golemDie(x, time)
                 elapsed += interval
@@ -237,13 +242,21 @@ def updateGolems(time):
 
 def golemDie(user, time):
     life = formatter.prettyTime(golems.getLife(user, time))
-    mined = players.printExcavation(golems.expire(user))
+    mined = game.itemizeRes(golems.expire(user))
 
     golemgrave = "in front of you"
     if len(players.getMines(user)) > 0:
         golemgrave = "inside of "+players.getMines(user)[0].capitalize()
 
-    ircsock.send("PRIVMSG "+ user +" :After working for "+life+", your golem crumbles to dust "+golemgrave+" and leaves a wake of "+mined+"\n")
+    ircsock.send("PRIVMSG "+ user +" :After working for "+life+", your golem crumbles to dust "+golemgrave+" and leaves a wake of its mined resources: "+mined+"\n")
+
+    return True
+
+def golemDestroy(channel, user, time):
+    life = formatter.prettyTime(golems.getLife(user, time))
+    mined = game.itemizeRes(golems.destroy(user))
+
+    ircsock.send("PRIVMSG "+ channel + " :" + user +": Your golem collapsed on the spot!  Through the rubble, you manage to recover the following resources: "+mined+"\n")
 
     return True
 
@@ -586,7 +599,7 @@ def listen():
                     else:
                         ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with '!golem {resources}'.\n")
                 else: # check for mines??
-                    newGolem(channel, user, time, parse[1].lstrip())
+                    golemHandler(channel, user, time, parse[1].lstrip())
             else:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
