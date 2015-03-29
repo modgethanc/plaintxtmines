@@ -145,7 +145,7 @@ def listMines():
     for x in gamedata:
         entry = os.path.basename(x).split('.')
         if entry[-1] == "mine":
-            minelist.append(entry[0])
+            minelist.append(entry[0].capitalize())
     return minelist
 
 ### gameplay functions
@@ -192,7 +192,7 @@ def newGolem(channel, user, time, golemstring):
 
                   golem = golems.newGolem(user, ''.join(golemshape), time)
                   players.removeRes(user, golems.getStats(user))
-                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Once it crumbles, you can gather all the resources it harvested for you.\n")
+                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user)) + ".  It will decay as it works; once it crumbles entirely, you can gather all the resources it harvested for you.\n")
                   #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
                   logGolem(user)
             else:
@@ -216,32 +216,36 @@ def updateGolems(time):
         #if int(time) > golems.getDeath(x): # golem death
         if golems.getSize(x) == 0: # golem death
             golemDie(x, time)
+            continue
 
         elif strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
             target = players.getMines(x)[0]
             strikeCount = strikeDiff/interval
             i = 0
             elapsed = golems.getLastStrike(x)
+            dead = False
             while i < strikeCount:
                 if mines.getTotal(target) > 0:
                     if golems.getSize(x) > 0:
                         print "golemstrike"+ str(golems.strike(x, target))
                     else:
-                        golemDie(x, time)
+                        dead = golemDie(x, time)
                 elapsed += interval
                 i += 1
-
-            golems.updateLastStrike(x, elapsed)
+            if not dead:
+                golems.updateLastStrike(x, elapsed)
 
 def golemDie(user, time):
     life = formatter.prettyTime(golems.getLife(user, time))
-    golem = "Your golem"
     mined = players.printExcavation(golems.expire(user))
+
     golemgrave = "in front of you"
     if len(players.getMines(user)) > 0:
         golemgrave = "inside of "+players.getMines(user)[0].capitalize()
 
-    ircsock.send("PRIVMSG "+ user +" :After working for "+life+", "+golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined+"\n")
+    ircsock.send("PRIVMSG "+ user +" :After working for "+life+", your golem crumbles to dust "+golemgrave+" and leaves a wake of "+mined+"\n")
+
+    return True
 
 def strike(msg, channel, user, time):
     mineList = players.getMines(user)
