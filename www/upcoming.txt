@@ -6,13 +6,8 @@ SKILLS
 -tools: upgrade for depth/width/multi
 
 GOLEMS
--decay
--don't spend life when working on an empty mine
-  -auto-target non-empty mine
--golem termination
-  -bones
--show current res in report [rbenua]
--less shitty res printing
+-golem bones
+-more sophisticated generation
 
 EMPRESS
 -tithing
