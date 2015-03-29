@@ -13,7 +13,7 @@ def newGolem(player, golemstring, time):
     golemfile = open("../data/"+player+".golem", 'w+')
     golemfile.write(golemstring+"\n") # 0 golem string
     golemfile.write(j.join(golem)+"\n") # 1 golem stats
-    golemfile.write(str(calcHeight(golem))+"\n") # 2 height
+    golemfile.write(str(calcSize(golem))+"\n") # 2 size
     golemfile.write(str(calcWidth(golem))+"\n") # 3 width
     golemfile.write(str(calcStrength(golem))+"\n") # 4 strength
     golemfile.write(str(calcInterval(golem))+"\n") # 5 interval
@@ -48,12 +48,12 @@ def parse(golemstring):
     return golem
 
 def calcStrength(golem):
-    return calcHeight(golem) * random.randrange(1, max(2, min(int(golem[1]), 10)))
+    return calcSize(golem) * random.randrange(1, max(2, min(int(golem[1]), 10)))
 
 def calcInterval(golem):
     return 200/max(1, min(int(golem[3]), 100))
 
-def calcHeight(golem): # total number of res
+def calcSize(golem): # total number of res
     total = 0
     for x in golem:
         total += int(x)
@@ -94,16 +94,16 @@ def getShape(player): # return str of shape
 def getStats(player): # return str list of stats
     return openGolem(player)[1].split(',')
 
-def getHeight(player): # return int of height 
+def getSize(player): # return int of size
     return int(openGolem(player)[2])
 
 def getWidth(player): # return int of width
     return int(openGolem(player)[3])
 
-def getStrength(player): # return int of strength 
+def getStrength(player): # return int of strength
     return int(openGolem(player)[4])
 
-def getInterval(player): # return int of strength 
+def getInterval(player): # return int of strength
     return int(openGolem(player)[5])
 
 def getDeath(player): # return int of death time
@@ -120,6 +120,9 @@ def getHeld(player): # return str list of held res
 
 def getLifeRemaining(player, time): # return int of seconds left
     return getDeath(player) - int(time)
+
+def getLife(player, time): # return int of total seconds alive
+    return int(time) - getBirth(player)
 
 def getHeldTotal(player): #returns int of current held assets
     total = 0
@@ -165,7 +168,7 @@ def strike(player, target): # performs mining action
 
     writeGolem(player, golemdata)
 
-    if random.randrange(1,100) < 15:
+    if random.randrange(1,100) < 50:
         print decay(player, 1)
 
     return excavation
@@ -176,7 +179,7 @@ def decay(player, pieces):
 
     i = 0
     while i < pieces:
-        chunk = random.randrange(0,len(golemshape)-1)
+        chunk = random.randrange(0,len(golemshape))
         if golemshape[chunk] != " ":
             golemshape[chunk] = " "
             i += 1
@@ -184,10 +187,12 @@ def decay(player, pieces):
     newshape = ''
     for x in golemshape:
         newshape += x
+
     golemdata[0] = newshape
+    golemdata[2] = str(int(golemdata[2]) - pieces)
     writeGolem(player, golemdata)
 
-    return len(golemshape)-1
+    return golemdata[2]
 
 def expire(player):
     golemheld = getHeld(player)

@@ -175,7 +175,8 @@ def newMine(channel, user, rates="standardrates"):
 
 def newGolem(channel, user, time, golemstring):
     if hasGolem(user):
-        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".\n")
+        ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!\n")
+        #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".\n")
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
@@ -191,7 +192,8 @@ def newGolem(channel, user, time, golemstring):
 
                   golem = golems.newGolem(user, ''.join(golemshape), time)
                   players.removeRes(user, golems.getStats(user))
-                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
+                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Once it crumbles, you can gather all the resources it harvested for you.\n")
+                  #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
                   logGolem(user)
             else:
                 ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You don't have the resources to make that golem, friend.\n")
@@ -211,27 +213,35 @@ def updateGolems(time):
         strikeDiff = int(time) - golems.getLastStrike(x)
         interval = golems.getInterval(x)
 
-        if strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
+        #if int(time) > golems.getDeath(x): # golem death
+        if golems.getSize(x) == 0: # golem death
+            golemDie(x, time)
+
+        elif strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
             target = players.getMines(x)[0]
             strikeCount = strikeDiff/interval
             i = 0
             elapsed = golems.getLastStrike(x)
             while i < strikeCount:
                 if mines.getTotal(target) > 0:
-                    print "golemstrike"+ str(golems.strike(x, target))
+                    if golems.getSize(x) > 0:
+                        print "golemstrike"+ str(golems.strike(x, target))
+                    else:
+                        golemDie(x, time)
                 elapsed += interval
                 i += 1
 
             golems.updateLastStrike(x, elapsed)
 
-        if int(time) > golems.getDeath(x): # golem death
-            golem = golems.getShape(x)
-            mined = players.printExcavation(golems.expire(x))
-            golemgrave = "in front of you"
-            if len(players.getMines(x)) > 0:
-                golemgrave = "inside of "+players.getMines(x)[0].capitalize()
+def golemDie(user, time):
+    life = formatter.prettyTime(golems.getLife(user, time))
+    golem = "Your golem"
+    mined = players.printExcavation(golems.expire(user))
+    golemgrave = "in front of you"
+    if len(players.getMines(user)) > 0:
+        golemgrave = "inside of "+players.getMines(user)[0].capitalize()
 
-            ircsock.send("PRIVMSG "+ x +" :"+golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined+"\n")
+    ircsock.send("PRIVMSG "+ user +" :After working for "+life+", "+golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined+"\n")
 
 def strike(msg, channel, user, time):
     mineList = players.getMines(user)
@@ -363,7 +373,9 @@ def statsFormatted(channel, user):
 
 def golemStats(channel, user, time):
     status = golems.getShape(user)+" is hard at work!  "
-    status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(user, time))
+    status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user)) + ".  "
+    status += "It's been going for "+formatter.prettyTime(golems.getLife(user, time))
+    #status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(user, time))
 
     return status
 
@@ -392,14 +404,24 @@ def listen():
   while 1:
     #####
     now = int(systime.time())
-    if now - lastcheck > 0: #updates
-        #print "tick: " + str(now - lastcheck)
-        lastcheck = now
-        updateGolems(now)
+    #if now - lastcheck > 0: #updates
+    #    print "tick: " + str(now - lastcheck)
+    #    lastcheck = now
+    #    updateGolems(now)
     #####
     #print "waiting " + str(now)
     msg = ircsock.recv(2048)
-    #print msg
+    print msg
+
+    if msg == "":
+        continue
+
+    ## every tick
+    if now - lastcheck > 0:
+        print "tick: " + str(now - lastcheck)
+        lastcheck = now
+        updateGolems(now)
+    ##
 
     if msg.find("PING") != -1: 
         ping()
@@ -557,7 +579,6 @@ def listen():
                     if hasGolem(user):
                         ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golemStats(channel, user, time)+".\n")
                         ircsock.send("PRIVMSG "+ channel + " :" + user + ": It's holding the following resources: "+golems.heldFormatted(user)+".\n")
-                        #ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golems.getShape(user)+" is hard at work!  It'll last for another "+p.no("second", golems.getLifeRemaining(user, time))+".\n")
                     else:
                         ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with '!golem {resources}'.\n")
                 else: # check for mines??
@@ -568,7 +589,9 @@ def listen():
         elif msg.find(":!"+COMMANDS[8]) != -1: # !rankings
             rankings(msg, channel, user)
 
+
 #########################
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connect(options.server, options.channel, options.nick)
 listen()
+ircsock.close()
