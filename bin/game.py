@@ -66,10 +66,33 @@ def logGolem(user):
 
 def itemizeRes(resources): # takes list of res and outputs as human-readable
     total = 0
-    for x in resources:
-        total += int(x)
+    output = []
+    i = 0
+    item = ""
+    for res in resources:
+        x = int(res)
+        total += x
+        if i == 0: item = "tilde"
+        elif i == 1: item = "pound"
+        elif i == 2: item = "spiral"
+        elif i == 3: item = "amper"
+        elif i == 4: item = "splat"
+        elif i == 5: item = "lbrack"
+        elif i == 6: item = "rbrack"
+        elif i == 7: item = "carat"
 
-    return str(resources[0])+" tilde, "+str(resources[1])+" pound, "+str(resources[2])+" spiral, "+str(resources[3])+" amper, "+str(resources[4])+" splat, "+str(resources[5])+" lbrack, "+str(resources[6])+" rbrack, and "+str(resources[7])+" carat, for a total of "+str(total)+" units"
+        if x > 0:
+          output.append(p.no(item, x))
+
+        i += 1
+
+    if total > 0:
+      output.append("for a total of "+p.no("unit", total))
+    else:
+      output.append("nothing useful")
+
+    return ", ".join(output)
+    #return str(resources[0])+" tilde, "+str(resources[1])+" pound, "+str(resources[2])+" spiral, "+str(resources[3])+" amper, "+str(resources[4])+" splat, "+str(resources[5])+" lbrack, "+str(resources[6])+" rbrack, and "+str(resources[7])+" carat, for a total of "+str(total)+" units"
 
 def statsFormatted(channel, user):
     stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - players.getEndurance(user))+" without experiencing fatigue.  "
@@ -84,13 +107,12 @@ def statsFormatted(channel, user):
 def golemStats(channel, user, time):
     status = golems.getShape(user)+" is hard at work!  "
     status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user)) + ".  "
-    status += "It's been going for "+formatter.prettyTime(golems.getLife(user, time))
-    #status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(user, time))
+    status += "It's been going for "+formatter.prettyTime(golems.getLife(user, time))+"."
 
     return status
 
 def resourcesFormatted(channel, user):
-    return "You're holding the following resources: "+players.heldFormatted(user)
+    return "You're holding the following resources: "+itemizeRes(players.getHeld(user))
 
 def mineListFormatted(msg, channel, user):
     plural = ''
