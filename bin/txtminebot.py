@@ -183,15 +183,15 @@ def golemHandler(channel, user, time, golemstring):
 
 def updateGolems(time):
     for x in game.listGolems():
-        strikeDiff = int(time) - golems.getLastStrike(x)
-        interval = golems.getInterval(x)
-
         #if int(time) > golems.getDeath(x): # golem death
         if golems.getSize(x) == 0: # golem death
             golemDie(x, time)
             continue
 
-        elif strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
+        strikeDiff = int(time) - golems.getLastStrike(x)
+        interval = golems.getInterval(x)
+
+        if strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
             target = players.getMines(x)[0]
             strikeCount = strikeDiff/interval
             i = 0
