@@ -152,6 +152,30 @@ def updateOwned(player, minelist): # overwrites previous minelist with passed in
 
     return mines
 
+def updateCleared(player, minelist): # overwrites previous minelist with passed in one
+    playerdata = openDossier(player)
+    playerdata[6] = j.join(minelist)
+    writeDossier(player, playerdata)
+
+    return mines
+
+def addTithe(player, res):
+    tithed = getTithed(player)
+    total = int(getTithedTotal(player))
+
+    i = 0
+    for x in res:
+        r = int(tithed[i]) + int(x)
+        total += int(x)
+        tithed[i] = str(r)
+        i += 1
+
+    playerdata = openDossier(player)
+    playerdata[4] = j.join(held)
+    playerdata[5] = total 
+
+    writeDossier(player, playerdata)
+
 def removeRes(player, reslist): # subtracts reslist from player
     held = getHeld(player)
     res = int(getTotalMined(player))
@@ -170,6 +194,25 @@ def removeRes(player, reslist): # subtracts reslist from player
     writeDossier(player, playerdata)
 
     return reslist
+
+def acquireRes(player, excavation): # adds res to held
+    held = getHeld(player)
+    res = int(getTotalMined(player))
+
+    i = 0
+    for x in excavation:
+        r = int(held[i]) + int(x)
+        res += int(x)
+        held[i] = str(r)
+        i += 1
+
+    playerdata = openDossier(player)
+    playerdata[2] = j.join(held)
+    playerdata[3] = res
+
+    writeDossier(player, playerdata)
+
+    return excavation
 
 def updateEmpressStats(player, statlist): # overwrites previous empress stats
     playerdata = openDossier(player)
@@ -297,24 +340,7 @@ def strike(player, mine): # performs mining action
 
     return mines.excavate(mine, strikeDepth)
 
-def acquireRes(player, excavation): # adds res to held
-    held = getHeld(player)
-    res = int(getTotalMined(player))
-
-    i = 0
-    for x in excavation:
-        r = int(held[i]) + int(x)
-        res += int(x)
-        held[i] = str(r)
-        i += 1
-
-    playerdata = openDossier(player)
-    playerdata[2] = j.join(held)
-    playerdata[3] = res
-
-    writeDossier(player, playerdata)
-
-    return excavation
+### etc.
 
 def canAfford(player, cost): # checks list of res against held
     held = getHeld(player)
@@ -358,8 +384,3 @@ def printExcavation(excavation):
         y += 1
 
     return mined
-
-def heldFormatted(player):
-    held = getHeld(player)
-
-    return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"

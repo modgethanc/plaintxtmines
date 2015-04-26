@@ -448,7 +448,7 @@ def listen():
                 if players.getAvailableMines(user) > 0:
                      newMine(channel, user)
                 else:
-                    say(channel, "You do not have permission to open a new nmine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.", user)
+                    say(channel, "You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.", user)
             else:
                 say(channel, "I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.", user)
 

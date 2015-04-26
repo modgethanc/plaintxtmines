@@ -5,6 +5,7 @@ import golems
 import players
 import mines
 import empress
+import market
 import gibber
 import inflect
 from datetime import datetime
@@ -13,6 +14,7 @@ import os.path
 import time as systime
 
 p = inflect.engine()
+p.defnoun("kyno", "kynoti")
 j = ", "
 baseFatigue = 10
 
@@ -92,7 +94,14 @@ def itemizeRes(resources): # takes list of res and outputs as human-readable
       output.append("nothing useful")
 
     return ", ".join(output)
-    #return str(resources[0])+" tilde, "+str(resources[1])+" pound, "+str(resources[2])+" spiral, "+str(resources[3])+" amper, "+str(resources[4])+" splat, "+str(resources[5])+" lbrack, "+str(resources[6])+" rbrack, and "+str(resources[7])+" carat, for a total of "+str(total)+" units"
+
+def sumRes(resources): # takes reslist and outputs total as int
+  total = 0
+  for res in resources:
+    x = int(res)
+    total += x
+
+  return total
 
 def statsFormatted(channel, user):
     stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - min(9, players.getEndurance(user)))+" without experiencing fatigue.  "
@@ -156,4 +165,35 @@ def mineListFormatted(msg, channel, user):
     return "You're working on the following mine"+plural+": "+j.join(prejoin)
 
 #### status updating
+#### game actions
+def subtractRes(res, subtract): #this is broken don't use it
+  left = []
+  i = 0
+  for x in subtract:
+    r = int(res[i]) - int(x)
+    left.append(r)
+    i += 1
 
+  return left
+
+def tithe(player, res):
+  if players.canAfford(player, res):
+    players.removeRes(player, res)
+    empress.acceptTithe(res)
+    print itemizeRes(empress.getTithed())
+    payment, leftover = market.toKyno(res)
+    leftover = empress.processPayment(leftover)
+    empress.removeTithe(leftover)
+    players.acquireRes(player, leftover)
+
+    result = ""
+    if payment > 0:
+      result += "The empress graciously accepts your tithe and awards you with "+p.no("kyno", payment)+".  "
+      if sumRes(leftover) > 0:
+        result += "She returns some resources to your holdings: "+itemizeRes(leftover)
+    else:
+       result += "After picking through your offering, the empress returns the following to your holdings: "+itemizeRes(leftover)
+
+    return result
+  else:
+    return "You don't have enough resources to tithe that, friend."
