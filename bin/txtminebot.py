@@ -198,14 +198,16 @@ def updateGolems(time):
             elapsed = golems.getLastStrike(x)
             dead = False
             while i < strikeCount:
-                if mines.getTotal(target) > 0:
+                if dead:
+                    continue
+                elif mines.getTotal(target) > 0:
                     if golems.getSize(x) > 0:
                         #print "golemstrike"+ str(golems.strike(x, target))
                         golems.strike(x, target)
                     else:
                         dead = golemDie(x, time)
-                elapsed += interval
-                i += 1
+                    elapsed += interval
+                    i += 1
             if not dead:
                 golems.updateLastStrike(x, elapsed)
 
