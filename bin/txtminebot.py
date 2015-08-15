@@ -199,8 +199,8 @@ def updateGolems(time):
             dead = False
             while i < strikeCount:
                 if dead:
-                    continue
-                elif mines.getTotal(target) > 0:
+                    break
+                if mines.getTotal(target) > 0:
                     if golems.getSize(x) > 0:
                         #print "golemstrike"+ str(golems.strike(x, target))
                         golems.strike(x, target)
@@ -492,8 +492,8 @@ def listen():
 
         elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
             if isPlaying(user):
-                #grovel(msg, channel, user, time)
-                say(channel, "The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.", user)
+                grovel(msg, channel, user, time)
+                #say(channel, "The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.", user)
             else:
                 say(channel, "I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.", user)
 
