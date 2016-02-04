@@ -11,7 +11,7 @@ import os
 DATA = os.path.join("..", "data")
 CONFIG = os.path.join("config")
 MINES = {}
-RESOURCES = {}
+RESOURCES = {}   # this might not even be relevant
 STATUS = ["new", "active", "depleted"]
 
 p = inflect.engine()

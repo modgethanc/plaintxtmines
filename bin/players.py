@@ -1,11 +1,79 @@
 #!/usr/bin/python
 
-import random
 import mines
 import gibber
-import os
+import util
 
-j = ','
+import inflect
+import json
+import os
+import random
+import time
+
+DATA = os.path.join("..", "data")
+ATS = "playersautosave.json"
+CONFIG = os.path.join("config")
+PLAYERS = {}
+DEFAULTS = {
+    "joined":0,
+    "last seen":0,
+    "mines owned":[],
+    "mines assigned":[],
+    "mines available":1,
+    "stats":{
+      "str":1,
+      "end":0,
+      "strikes":0
+    },
+    "favor level":0,
+    "held res":{},
+    "held total":0,
+    "tithed res":{},
+    "tithed total":0,
+    "last strike":0,
+    "inventory":[]
+  }
+
+p = inflect.engine()
+
+## file i/o
+
+def load_players(playerfile=os.path.join(DATA, ATS)):
+    # takes a json from playerfile and loads it into memory
+    # returns number of players loaded
+    
+    global PLAYERS
+
+    infile = open(minefile, "r")
+    PLAYERS = json.load(infile)
+    infile.close()
+
+    return len(PLAYERS)
+
+def save(savefile=os.path.join(DATA, ATS)):
+    # save current MINES to savefile, returns save location
+
+    outfile = open(savefile, "w")
+    outfile.write(json.dumps(PLAYERS, sort_keys=True, indent=2, separators=(',', ':')))
+    outfile.close()
+
+    return savefile
+
+def new_player(defaults = DEFAULTS):
+    # generates new player entry from given
+
+    playerdata = {}
+
+    playerID = util.genID(5)
+    while playerID in PLAYERS:
+        playerID = util.genID(5)
+
+    for x in defaults:
+        playerdata.update({x:defaults[x]})
+
+    return {playerID:playerdata}
+
+##### LINE OF DEATH 
 
 def newDossier(player): # makes a new .dossier file for named player
     playerfile = open('../data/'+player+'.dossier', 'w+')

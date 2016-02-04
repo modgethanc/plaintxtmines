@@ -1,0 +1,25 @@
+{
+  "12345":{
+    "nick":"hvincent",
+    "aliases": ["hvincent", "hvncnt"],
+    "home": "zoneID",
+    "location": "zoneID",
+    "joined":0,
+    "last seen":0,
+    "mines owned": ["12345677", "298273498"],
+    "mines assigned": ["123124", "23424"],
+    "mines available":1,
+    "stats":{
+      "str":1,
+      "end":0,
+      "strikes":0
+    },
+    "favor level": 0,
+    "held res": {},
+    "held total": 0,
+    "tithed res": {},
+    "tithed total": 0,
+    "last strike": 0,
+    "inventory": ["123", "123"]
+  }
+}
