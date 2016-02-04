@@ -82,7 +82,7 @@ def new_mine(ownerID, zoneID, minerate=load_rate()):
     minedata.update({"status":STATUS[0]})
     minedata.update({"starting resources":starting_res})
     minedata.update({"starting total":starting_total})
-    minedata.update({"current resources":starting_res})
+    minedata.update({"current resources":starting_res.copy()})
     minedata.update({"current total":starting_total})
     minedata.update({"workers":[]})
 
@@ -169,8 +169,8 @@ def close(mineID):
     # clear out all res and mark mine as dead
 
     mine = data(mineID)
-    mine.update({"current resources":{}})
-    mine.update({"status":STATUS[2]})
+    mine[mineID].update({"current resources":{}})
+    mine[mineID].update({"status":STATUS[2]})
 
     return mineID
 
@@ -200,23 +200,32 @@ def excavate(mineID, rate=10, width=3):
     ## strike!
     i = rate
     veinsLeft = width
+
     while i > 0:
         if veinsLeft > 0:
             target = random.choice(veins)
         else:
             break
 
-        if res.get(target) > 0:
-            if target in excavated:
-                held = excavated[target] + 1
-            else:
-                held = 1
-            excavated.update({target:held})
+        remaining = res.get(target)
+
+        if target in excavated:
+            held = excavated[target] + 1
+        else:
+            held = 1
+
+        excavated.update({target:held})
+        i -= 1
+
+        # cleaning up vein
+        if remaining > 1:
             res[target] -= 1
-            i -= 1
-        else: # stop striking empy vein
-            veins.pop(target)
+        else: # taking last res from vein
+            del res[target]
+            veins.remove(target)
             veinsLeft -= 1
+
+    mine[mineID].update({"current total":sum_res(res)})
 
     return excavated
 
@@ -246,12 +255,7 @@ def test():
     load_mines()
     load_res()
 
-    print("mines: ", MINES)
-    MINES.update(new_mine("001", "003"))
-    MINES.update(new_mine("001", "003"))
-    MINES.update(new_mine("001", "003"))
-    MINES.update(new_mine("001", "003"))
-    MINES.update(new_mine("001", "003"))
-    print("mines: ", MINES)
+    #MINES.update(new_mine("001", "003", load_rate("config/tinyrates.json")))
+    print(json.dumps(MINES, sort_keys=True, indent=2, separators=(",",":")))
 
     return
