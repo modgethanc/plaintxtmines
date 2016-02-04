@@ -90,7 +90,7 @@ def new_mine(ownerID, zoneID, minerate=load_rate()):
 
 ## mine output
 
-def mine(mineID):
+def data(mineID):
     # takes str mineID and returns mine data, or none
 
     if mineID in MINES:
@@ -165,55 +165,58 @@ def sum_res(res):
 
 ## mine actions
 
-def excavate(mine, rate=10, width=3):
-    ## TODO: getRes
+def close(mineID):
+    # clear out all res and mark mine as dead
 
-    excavated = [0,0,0,0,0,0,0,0]
-    res = getRes(mine)
+    mine = data(mineID)
+    mine.update({"current resources":{}})
+    mine.update({"status":STATUS[2]})
 
-    mineData = openMine(mine)
+    return mineID
+
+def excavate(mineID, rate=10, width=3):
+    # strikes rate times from width different veins
+    # returns a dict of mined resources
+    # closes mine if it's empty
+    # won't target empty veins
+
+    excavated = {}
+    mine = data(mineID)
+    res = get(mineID, "current resources")
     veins = []
 
-    if getTotal(mine) <= rate: # clear the mine
+    if get(mineID, "current total") <= rate: # clear the mine
+        excavated = res.copy()
+        return close(mineID)
 
-        excavated = getRes(mine)
-        mineData[0] = "0,0,0,0,0,0,0,0"
-        writeMine(mine, mineData)
-        return excavated
-
+    ## pick veins to target
     i = width
-    mineChoices = [0,1,2,3,4,5,6,7]
-    while i > 0: # pick veins
-        vein = random.choice(mineChoices)
+    while i > 0:
+        #vein = random.choice(res)
+        vein = random.choice(list(res.keys()))
         veins.append(vein)
-        mineChoices.remove(vein)
         i -= 1
 
+    ## strike!
     i = rate
     veinsLeft = width
-    while i > 0: # strike!
+    while i > 0:
         if veinsLeft > 0:
-            strike = random.choice(veins)
+            target = random.choice(veins)
         else:
             break
 
-        if int(res[strike]) > excavated[strike]: # check for remaining res
-            excavated[strike] += 1
+        if res.get(target) > 0:
+            if target in excavated:
+                held = excavated[target] + 1
+            else:
+                held = 1
+            excavated.update({target:held})
+            res[target] -= 1
             i -= 1
         else: # stop striking empy vein
-            veins.remove(strike)
+            veins.pop(target)
             veinsLeft -= 1
-
-    i = 0
-    while i < 8: # clear out res
-       vein = int(res[i])
-       vein -= excavated[i]
-       res[i] = str(vein)
-       i += 1
-
-    j = ','
-    mineData[0] = j.join(res)
-    writeMine(mine, mineData)
 
     return excavated
 
