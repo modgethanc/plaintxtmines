@@ -1,0 +1,20 @@
+JSON FORMAT
+
+{
+  "mineID":{
+    "name":"",
+    "owner":"playerID",
+    "location":"zoneID",
+    "status":"",
+    "resources":{"tilde":0,
+                 "spiral":0,
+                 "pound":0,
+                 "amper":0,
+                 "splat":0,
+                 "lbrack":0,
+                 "rbrack":0,
+                 "carat":0,
+                }
+    "workers":["playerID","playerID"]
+  }
+}

@@ -157,3 +157,15 @@ def mineListFormatted(msg, channel, user):
 
 #### status updating
 
+#### MOVING IRC BOT STUFF HERE
+
+# status checking
+
+def isPlaying(user):
+    return os.path.isfile('../data/'+user+'.dossier')
+
+def isMine(mine):
+    return os.path.isfile('../data/'+mine+'.mine')
+
+def hasGolem(user):
+    return os.path.isfile('../data/'+user+'.golem')

@@ -1,0 +1,51 @@
+{
+  "init":{
+    "help":"",
+    "player_only":false
+  },
+  "report":{
+    "help":"",
+    "player_only":true
+  },
+  "fatigue":{
+    "help":"Do not overwork your body; if you find yourself running into exhaustion, a brief self-inspection will reveal how long you must rest before it is safe to raise your tool again. (Usage: \"!fatigue\")",
+    "player_only":true
+  },
+  "rankings":{
+    "help":"",
+    "player_only":false
+  },
+  "grovel":{
+    "help":"",
+    "player_only":true
+  },
+  "golem":{
+    "help":"",
+    "player_only":true
+  },
+  "strike":{
+    "help":"",
+    "player_only":true
+  },
+  "info":{
+    "help":"I am the mining assistant, here to facilitate your ventures by order of the empress. Feel free to inquire further if you need advice. (Usage: !help <topic>)",
+    "topics":[],
+    "player_only":false
+  },
+  "stats":{
+    "help":"",
+    "player_only":true
+  },
+  "res":{
+    "help":"",
+    "player_only":true
+  },
+  "open":{
+    "help":"",
+    "player_only":true
+  },
+  "mines":{
+    "help":"",
+    "player_only":true
+  }
+}

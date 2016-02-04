@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+## stuff with doublehash is stuff being moved
+## TODO: make this all only bot speaking; call kbot.say to
+## actually communicate. move meta stuff to game.py. 
+
 import socket
 import os
 import os.path
@@ -17,6 +21,7 @@ import players
 import gibber
 import empress
 import golems
+from game import isPlaying, isMine, hasGolem
 
 ### CONFIG
 p = inflect.engine()
@@ -117,14 +122,14 @@ def multisay(channel, msglist, nick=""):
 
 ### meta functions
 
-def isPlaying(user):
-    return os.path.isfile('../data/'+user+'.dossier')
-
-def isMine(mine):
-    return os.path.isfile('../data/'+mine+'.mine')
-
-def hasGolem(user):
-    return os.path.isfile('../data/'+user+'.golem')
+##def isPlaying(user):
+##    return os.path.isfile('../data/'+user+'.dossier')
+##
+##def isMine(mine):
+##    return os.path.isfile('../data/'+mine+'.mine')
+##
+##def hasGolem(user):
+##    return os.path.isfile('../data/'+user+'.golem')
 
 ### gameplay functions
 
@@ -289,8 +294,7 @@ def report(msg, channel, user, time):
     say(user, game.statsFormatted(channel, user))
 
 def grovel(msg, channel, user, time):
-    players.incGrovel(user)
-    statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
+    players.incGrovel(user) statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
 
     say(channel, "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP_NEU), user)
 
@@ -523,6 +527,7 @@ def listen():
 
 
 #########################
+configure()
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connect(options.server, options.channel, options.nick)
 listen()

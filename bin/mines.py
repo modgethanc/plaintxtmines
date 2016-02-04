@@ -4,12 +4,34 @@ import random
 import gibber
 import os
 
+PATH = os.path.join("..", "data")
+MINES = {}
+RESOURCES = ["tilde", "pound", "spiral", "amper", "splat", "lbrack", "rbrack", "carat"]
+
+## file i/o
+
+def load_mines(minefile="default.json"):
+    # takes a json from minefile and loads it into memory
+    # returns number of mines loaded
+    
+    global MINES
+
+    infile = open(os.path.join(PATH, minefile), "r")
+    MINES = json.load(infile)
+    infile.close()
+    
+    return len(MINES)
+
+def exists(minename):
+    #TODO check to see if mine has already been created
+    return
+
 def newMine(owner, minerate="standardrates"):
     minename = gibber.medium()
-    while os.path.isfile('../data/'+minename+'.mine'): # check for mine colision
+    if exists(minename):
         minename = gibber.medium()
 
-    res = generateRes(minerate)
+    res = generate_res(minerate)
     total = sumRes(res)
 
     j = ','
@@ -23,7 +45,9 @@ def newMine(owner, minerate="standardrates"):
 
     return minename # for mine name confirmation
 
-def generateRes(minerate): #takes a minerate file; returns a list of resource amounts for a generated mine
+def generate_res(minerate):
+    # takes a minerate file; returns a list of resource amounts for a generated mine
+
     ratefile = open(minerate,'r')
     rates = []
     for x in ratefile:
@@ -32,11 +56,12 @@ def generateRes(minerate): #takes a minerate file; returns a list of resource am
 
     bound = rates[8]
     seed = random.randrange(1,bound)
-    resources = [0,0,0,0,0,0,0,0]
-    i = 0
+    #resources = [0,0,0,0,0,0,0,0]
+    resources = {}
 
-    for x in resources:
-        resources[i] = str(seed * rates[i] + random.randrange(1,bound))
+    i = 0
+    while i < len(RESOURCES):
+        resources.update({RESOURCES[i]: seed * rates[i] + random.randrange(1,bound)})
         i += 1
 
     return resources
@@ -156,19 +181,19 @@ def starting(record): # REDUNDANT
     return getStarting(record.split('/')[-1].split('.')[0])
 
 def printMine(mine):
-    print mine[-1]
+    print(mine[-1])
     remaining = mine[-2].split(',')[0]
     if int(remaining) == 0:
-        print "mine depleted"
+        print("mine depleted")
     else:
-        print "~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(remaining))
-        print "# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(remaining))
-        print "@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(remaining))
-        print "& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(remaining))
-        print "* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(remaining))
-        print "[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(remaining))
-        print "] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(remaining))
-        print "^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(remaining))
-        print "\ntotal: %s" % (remaining)
+        print("~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(remaining)))
+        print("# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(remaining)))
+        print("@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(remaining)))
+        print("& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(remaining)))
+        print("* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(remaining)))
+        print("[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(remaining)))
+        print("] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(remaining)))
+        print("^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(remaining)))
+        print("\ntotal: %s" % (remaining))
 
     return mine
