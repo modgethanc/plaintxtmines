@@ -17,7 +17,7 @@ p = inflect.engine()
 
 ## file i/o
 
-def load_mines(minefile=os.path.join(DATA,"default.json")):
+def load_mines(minefile=os.path.join(DATA,"mineautosave.json")):
     # takes a json from minefile and loads it into memory
     # returns number of mines loaded
 
@@ -40,6 +40,24 @@ def load_res(resfile=os.path.join(CONFIG, "resources.json")):
     infile.close()
 
     return len(RESOURCES)
+
+def load_rate(ratefile=os.path.join(CONFIG, "baserate.json")):
+    # takes a json from ratefile and returns dict of it
+
+    infile = open(ratefile, "r")
+    rates = json.load(infile)
+    infile.close()
+
+    return rates
+
+def save(savefile=os.path.join(DATA, "mineautosave.json")):
+    # save current MINES to savefile, returns save location
+
+    outfile = open(savefile, "w")
+    outfile.write(json.dumps(MINES, sort_keys=True, indent=2, separators=(',', ':')))
+    outfile.close()
+
+    return savefile
 
 ##
 
@@ -75,8 +93,6 @@ def new_mine(ownerID, zoneID, minerate="standardrates"):
     minedata.update({"workers":[]})
 
     return {mineID:minedata}
-
-    #### LINE OF DEATH
 
 def generate_res(resrate):
     # takes a resrate dict; returns a dict of resource amounts for a generated mine
@@ -132,7 +148,7 @@ def sum_res(res):
 
     return total
 
-## mine input
+## mine interaction
 
 def writeMine(mine, minedata):
     minefile = open('../data/'+mine+'.mine', 'w')
