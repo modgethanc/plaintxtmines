@@ -4,6 +4,7 @@ import gibber
 import util
 import inflect
 
+import json
 import random
 import os
 
@@ -59,14 +60,7 @@ def save(savefile=os.path.join(DATA, "mineautosave.json")):
 
     return savefile
 
-##
-
-def exists(minename):
-    # check to see if mine has already been created
-
-    return 
-
-def new_mine(ownerID, zoneID, minerate="standardrates"):
+def new_mine(ownerID, zoneID, minerate=load_rate()):
     # generates a new mine entry from givens
 
     minedata = {}
@@ -94,8 +88,58 @@ def new_mine(ownerID, zoneID, minerate="standardrates"):
 
     return {mineID:minedata}
 
-def generate_res(resrate):
-    # takes a resrate dict; returns a dict of resource amounts for a generated mine
+## mine output
+
+def mine(mineID):
+    # takes str mineID and returns mine data, or none
+
+    if mineID in MINES:
+        return {mineID:MINES[mineID]}
+    else:
+        return None
+
+def get(mineID, field):
+    # takes str mineID and field and returns whatever it is
+    # returns None if mine or field doesn't exist
+
+    if mineID in MINES:
+        return MINES[mineID].get(field)
+    else:
+        return None
+
+def find(searchdict):
+    # returns a list of str IDs that match search dict
+
+    matches = []
+
+    for x in MINES:
+        found = True
+        mine = MINES[x]
+
+        for y in searchdict:
+            if mine.get(y) == searchdict.get(y):
+                found = True
+            else:
+                found = False
+                break
+
+        if found:
+            matches.append(x)
+
+    return matches
+
+def exists(minename):
+    # check to see if mine has already been created
+
+    for x in MINES:
+        if MINES[x].get("name") == minename:
+            return True
+
+    return False
+
+## meta helpers
+
+def generate_res(resrate): # takes a resrate dict; returns a dict of resource amounts for a generated mine
 
     bound = resrate.get("size")
     seed = random.randrange(1,bound)
@@ -109,35 +153,6 @@ def generate_res(resrate):
 
     return resources
 
-## mine output
-
-def get_mine(mineID):
-    # takes str mineID and returns mine data, or none
-
-    minedata = None
-
-    if mineID in MINES:
-        return {mineID:MINES[mineID]}
-
-    return minedata
-
-def get_from_mine(mineID, field):
-    # takes str mineID and field and returns whatever it is
-    # returns None if mine or field doesn't exist
-
-    if mineID in MINES:
-        return MINES[mineID].get(field)
-    else:
-        return None
-
-def find_by_field(searchterm):
-    # returns a list of str IDs that match search dict
-
-    found = []
-
-    return found
-
-## meta helpers
 
 def sum_res(res):
     # takes a dict of str res and int quantities, returns int sum
@@ -148,18 +163,11 @@ def sum_res(res):
 
     return total
 
-## mine interaction
-
-def writeMine(mine, minedata):
-    minefile = open('../data/'+mine+'.mine', 'w')
-    for x in minedata:
-        minefile.write(str(x) + "\n")
-    minefile.close()
-
 ## mine actions
 
 def excavate(mine, rate=10, width=3):
     ## TODO: getRes
+
     excavated = [0,0,0,0,0,0,0,0]
     res = getRes(mine)
 
@@ -211,12 +219,6 @@ def excavate(mine, rate=10, width=3):
 
 ######## LINE OF DEATH
 
-def remaining(record): # REDUNDANT
-    return getTotal(record.split('/')[-1].split('.')[0])
-
-def starting(record): # REDUNDANT
-    return getStarting(record.split('/')[-1].split('.')[0])
-
 def printMine(mine):
     print(mine[-1])
     remaining = mine[-2].split(',')[0]
@@ -234,3 +236,19 @@ def printMine(mine):
         print("\ntotal: %s" % (remaining))
 
     return mine
+
+def test():
+    global MINES
+
+    load_mines()
+    load_res()
+
+    print("mines: ", MINES)
+    MINES.update(new_mine("001", "003"))
+    MINES.update(new_mine("001", "003"))
+    MINES.update(new_mine("001", "003"))
+    MINES.update(new_mine("001", "003"))
+    MINES.update(new_mine("001", "003"))
+    print("mines: ", MINES)
+
+    return
