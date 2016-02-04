@@ -153,7 +153,6 @@ def generate_res(resrate): # takes a resrate dict; returns a dict of resource am
 
     return resources
 
-
 def sum_res(res):
     # takes a dict of str res and int quantities, returns int sum
 
@@ -162,6 +161,12 @@ def sum_res(res):
         total += res.get(x)
 
     return total
+
+def percentage_left(mineID):
+    # returns an integer of remaining res percentage
+
+    return = int(100*float(get(mineID, "current total"))/float(get(mineID, "starting total")))
+
 
 ## mine actions
 
@@ -198,7 +203,7 @@ def excavate(mineID, depth=10, width=3):
         veins.append(vein)
         i -= 1
 
-    print("targets: "+str(veins))
+    #print("targets: "+str(veins))
 
     ## strike!
     i = depth
@@ -210,9 +215,9 @@ def excavate(mineID, depth=10, width=3):
         else:
             break
 
-        print("target: "+ target)
+        #print("target: "+ target)
         remaining = res.get(target)
-        print("remaining: "+str(remaining))
+        #print("remaining: "+str(remaining))
 
         if target in excavated:
             held = excavated[target] + 1
@@ -227,7 +232,7 @@ def excavate(mineID, depth=10, width=3):
             res[target] -= 1
             #remaining -= 1
         else: # taking last res from vein
-            print("taking last from "+target)
+            #print("taking last from "+target)
             del res[target]
             veins.remove(target)
             veinsLeft -= 1
