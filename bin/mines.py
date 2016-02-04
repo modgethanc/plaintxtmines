@@ -13,13 +13,13 @@ RESOURCES = ["tilde", "pound", "spiral", "amper", "splat", "lbrack", "rbrack", "
 def load_mines(minefile="default.json"):
     # takes a json from minefile and loads it into memory
     # returns number of mines loaded
-    
+
     global MINES
 
     infile = open(os.path.join(PATH, minefile), "r")
     MINES = json.load(infile)
     infile.close()
-    
+
     return len(MINES)
 
 def exists(minename):
@@ -32,7 +32,10 @@ def newMine(owner, minerate="standardrates"):
         minename = gibber.medium()
 
     res = generate_res(minerate)
-    total = sumRes(res)
+    # a dict of str res and int quantities
+
+    #### LINE OF DEATH
+    total = sum_res(res)
 
     j = ','
     minefile = open('../data/'+minename+'.mine', 'w+')
@@ -89,7 +92,7 @@ def getStarting(mine): # return original starting res
     return minedata[1]
 
 def getTotal(mine): # return int of res total
-    return sumRes(getRes(mine))
+    return sum_res(getRes(mine))
 
 def getOwner(mine): # return str of owner
     minedata = openMine(mine)
@@ -106,10 +109,13 @@ def getWorkers(mine): # return str list of contracted workers
 
     return workerList
 
-def sumRes(res): # returns total for a list of res
+def sum_res(res): 
+    # takes a dict of str res and int quantities, returns int sum
+
     total = 0
     for x in res:
-        total += int(x)
+        total += res.get(x)
+
     return total
 
 ## mine input
