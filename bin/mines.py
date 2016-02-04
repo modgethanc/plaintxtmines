@@ -7,30 +7,46 @@ import inflect
 import random
 import os
 
-PATH = os.path.join("..", "data")
+DATA = os.path.join("..", "data")
+CONFIG = os.path.join("config")
 MINES = {}
-RESOURCES = ["tilde", "pound", "spiral", "amper", "splat", "lbrack", "rbrack", "carat"]
+RESOURCES = {}
 STATUS = ["new", "active", "depleted"]
 
 p = inflect.engine()
 
 ## file i/o
 
-def load_mines(minefile="default.json"):
+def load_mines(minefile=os.path.join(DATA,"default.json")):
     # takes a json from minefile and loads it into memory
     # returns number of mines loaded
 
     global MINES
 
-    infile = open(os.path.join(PATH, minefile), "r")
+    infile = open(minefile, "r")
     MINES = json.load(infile)
     infile.close()
 
     return len(MINES)
 
+def load_res(resfile=os.path.join(CONFIG, "resources.json")):
+    # takes a json from resfile and loads into memory
+    # returns number of different kinds of res
+
+    global RESOURES
+
+    infile = open(resfile, "r")
+    RESOURCES = json.load(infile)
+    infile.close()
+
+    return len(RESOURCES)
+
+##
+
 def exists(minename):
-    #TODO check to see if mine has already been created
-    return
+    # check to see if mine has already been created
+
+    return 
 
 def new_mine(ownerID, zoneID, minerate="standardrates"):
     # generates a new mine entry from givens
@@ -62,79 +78,50 @@ def new_mine(ownerID, zoneID, minerate="standardrates"):
 
     #### LINE OF DEATH
 
-    minefile.close()
+def generate_res(resrate):
+    # takes a resrate dict; returns a dict of resource amounts for a generated mine
 
-    return minename # for mine name confirmation
-
-def generate_res(minerate):
-    # takes a minerate file; returns a list of resource amounts for a generated mine
-
-    ratefile = open(minerate,'r')
-    rates = []
-    for x in ratefile:
-        rates.append(int(x.rstrip()))
-    ratefile.close()
-
-    bound = rates[8]
+    bound = resrate.get("size")
     seed = random.randrange(1,bound)
-    #resources = [0,0,0,0,0,0,0,0]
+
     resources = {}
 
-    i = 0
-    while i < len(RESOURCES):
-        resources.update({RESOURCES[i]: seed * rates[i] + random.randrange(1,bound)})
-        i += 1
+    for x in resrate:
+        if x != "size":
+            spawn = seed * resrate[x] + random.randrange(1,bound)
+            resources.update({x: spawn})
 
     return resources
 
 ## mine output
 
-def openMine(mine): # returns str list of entire mine file
-    minefile = open('../data/'+mine+'.mine', 'r')
+def get_mine(mineID):
+    # takes str mineID and returns mine data, or none
 
-    minedata = []
-    for x in minefile:
-        minedata.append(x.rstrip())
-
-    minefile.close()
-    return minedata
-
-def get_res(mineID):
-    # takes str mineID and returns dict of resources
-    # returns None if mine doesn't exist
+    minedata = None
 
     if mineID in MINES:
-        return MINES[mineID].get("current resources")
+        return {mineID:MINES[mineID]}
+
+    return minedata
+
+def get_from_mine(mineID, field):
+    # takes str mineID and field and returns whatever it is
+    # returns None if mine or field doesn't exist
+
+    if mineID in MINES:
+        return MINES[mineID].get(field)
     else:
         return None
-    minedata = openMine(mine)
 
-    return minedata[0].rstrip().split(',')
+def find_by_field(searchterm):
+    # returns a list of str IDs that match search dict
 
-def getStarting(mine): # return original starting res
-    minedata = openMine(mine)
+    found = []
 
-    return minedata[10]
+    return found
 
-def getTotal(mineID):
-    # return int of res total from given str mineID
-
-    return sum_res(get_res(mineID))
-
-def getOwner(mine): # return str of owner
-    minedata = openMine(mine)
-
-    return minedata[2]
-
-def getWorkers(mine): # return str list of contracted workers
-    minedata = openMine(mine)
-
-    workerlist = minedata[2].rstrip().split[',']
-
-    while workerlist.count('') > 0:
-        workerlist.remove('') #dirty hack
-
-    return workerList
+## meta helpers
 
 def sum_res(res):
     # takes a dict of str res and int quantities, returns int sum

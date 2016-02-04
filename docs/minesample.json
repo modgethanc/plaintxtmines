@@ -1,8 +1,6 @@
-JSON FORMAT
-
 {
-  "mineID":{
-    "name":"",
+  "03488":{
+    "name":"Ipakyno",
     "owner":"playerID",
     "location":"zoneID",
     "status":"",
@@ -13,8 +11,8 @@ JSON FORMAT
                  "splat":0,
                  "lbrack":0,
                  "rbrack":0,
-                 "carat":0,
-                }
+                 "carat":0
+                },
     "starting total":0,
     "current resources":{"tilde":0,
                  "spiral":0,
@@ -23,8 +21,8 @@ JSON FORMAT
                  "splat":0,
                  "lbrack":0,
                  "rbrack":0,
-                 "carat":0,
-                }
+                 "carat":0
+                },
     "current total":0,
     "workers":["playerID","playerID"]
   }

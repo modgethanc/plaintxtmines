@@ -1,0 +1,20 @@
+{
+  "regionID":{
+    "name":"name",
+    "residents":["playerID", "playerID"],
+    "mines":["mineID", "mineID"],
+    "minecap": 100,
+    "residentcap": 10,
+    "rates": {
+      "size":100,
+      "tilde":40,
+      "pound":20,
+      "spiral":15,
+      "amper":10,
+      "splat":6,
+      "lbrack":4,
+      "rbrack":4,
+      "carat":1 },
+    "level": 0
+  }
+}

@@ -1,0 +1,6 @@
+bot => game => www
+        |
+        |
+        v
+  |------|-------|--------|-------|
+mines  golems  players  empress  world
