@@ -170,11 +170,12 @@ def close(mineID):
 
     mine = data(mineID)
     mine[mineID].update({"current resources":{}})
+    mine[mineID].update({"current total":0})
     mine[mineID].update({"status":STATUS[2]})
 
     return mineID
 
-def excavate(mineID, rate=10, width=3):
+def excavate(mineID, depth=10, width=3):
     # strikes rate times from width different veins
     # returns a dict of mined resources
     # closes mine if it's empty
@@ -185,20 +186,22 @@ def excavate(mineID, rate=10, width=3):
     res = get(mineID, "current resources")
     veins = []
 
-    if get(mineID, "current total") <= rate: # clear the mine
+    if get(mineID, "current total") <= depth: # clear the mine
         excavated = res.copy()
-        return close(mineID)
+        close(mineID)
+        return res # but we need a way to know if this is going to happen???
 
     ## pick veins to target
     i = width
     while i > 0:
-        #vein = random.choice(res)
         vein = random.choice(list(res.keys()))
         veins.append(vein)
         i -= 1
 
+    print("targets: "+str(veins))
+
     ## strike!
-    i = rate
+    i = depth
     veinsLeft = width
 
     while i > 0:
@@ -207,7 +210,9 @@ def excavate(mineID, rate=10, width=3):
         else:
             break
 
+        print("target: "+ target)
         remaining = res.get(target)
+        print("remaining: "+str(remaining))
 
         if target in excavated:
             held = excavated[target] + 1
@@ -220,7 +225,9 @@ def excavate(mineID, rate=10, width=3):
         # cleaning up vein
         if remaining > 1:
             res[target] -= 1
+            #remaining -= 1
         else: # taking last res from vein
+            print("taking last from "+target)
             del res[target]
             veins.remove(target)
             veinsLeft -= 1
