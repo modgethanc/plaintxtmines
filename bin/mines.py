@@ -1,12 +1,18 @@
 #!/usr/bin/python
 
-import random
 import gibber
+import util
+import inflect
+
+import random
 import os
 
 PATH = os.path.join("..", "data")
 MINES = {}
 RESOURCES = ["tilde", "pound", "spiral", "amper", "splat", "lbrack", "rbrack", "carat"]
+STATUS = ["new", "active", "depleted"]
+
+p = inflect.engine()
 
 ## file i/o
 
@@ -26,23 +32,35 @@ def exists(minename):
     #TODO check to see if mine has already been created
     return
 
-def newMine(owner, minerate="standardrates"):
-    minename = gibber.medium()
-    if exists(minename):
+def new_mine(ownerID, zoneID, minerate="standardrates"):
+    # generates a new mine entry from givens
+
+    minedata = {}
+
+    mineID = util.genID(10)
+    while mineID in MINES:
+        mineID = util.genID(10)
+
+    minename = gibber.medium().capitalize()
+    while exists(minename):
         minename = gibber.medium()
 
-    res = generate_res(minerate)
-    # a dict of str res and int quantities
+    starting_res = generate_res(minerate)
+    starting_total = sum_res(starting_res)
+
+    minedata.update({"name":minename})
+    minedata.update({"owner":ownerID})
+    minedata.update({"location":zoneID})
+    minedata.update({"status":STATUS[0]})
+    minedata.update({"starting resources":starting_res})
+    minedata.update({"starting total":starting_total})
+    minedata.update({"current resources":starting_res})
+    minedata.update({"current total":starting_total})
+    minedata.update({"workers":[]})
+
+    return {mineID:minedata}
 
     #### LINE OF DEATH
-    total = sum_res(res)
-
-    j = ','
-    minefile = open('../data/'+minename+'.mine', 'w+')
-    minefile.write(j.join(res)+'\n') # 0 res counts
-    minefile.write(str(total)+'\n') # 1 original total
-    minefile.write(owner+'\n') # 2 owner
-    minefile.write('\n') # 3 workers
 
     minefile.close()
 
@@ -81,7 +99,14 @@ def openMine(mine): # returns str list of entire mine file
     minefile.close()
     return minedata
 
-def getRes(mine): # return list of res
+def get_res(mineID):
+    # takes str mineID and returns dict of resources
+    # returns None if mine doesn't exist
+
+    if mineID in MINES:
+        return MINES[mineID].get("current resources")
+    else:
+        return None
     minedata = openMine(mine)
 
     return minedata[0].rstrip().split(',')
@@ -89,10 +114,12 @@ def getRes(mine): # return list of res
 def getStarting(mine): # return original starting res
     minedata = openMine(mine)
 
-    return minedata[1]
+    return minedata[10]
 
-def getTotal(mine): # return int of res total
-    return sum_res(getRes(mine))
+def getTotal(mineID):
+    # return int of res total from given str mineID
+
+    return sum_res(get_res(mineID))
 
 def getOwner(mine): # return str of owner
     minedata = openMine(mine)
@@ -109,7 +136,7 @@ def getWorkers(mine): # return str list of contracted workers
 
     return workerList
 
-def sum_res(res): 
+def sum_res(res):
     # takes a dict of str res and int quantities, returns int sum
 
     total = 0
@@ -129,6 +156,7 @@ def writeMine(mine, minedata):
 ## mine actions
 
 def excavate(mine, rate=10, width=3):
+    ## TODO: getRes
     excavated = [0,0,0,0,0,0,0,0]
     res = getRes(mine)
 
