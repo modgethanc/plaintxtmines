@@ -59,7 +59,7 @@ def save(savefile=os.path.join(DATA, ATS)):
 
     return savefile
 
-def new_player(defaults = DEFAULTS):
+def new_player(init = DEFAULTS):
     # generates new player entry from given
 
     playerdata = {}
@@ -68,8 +68,12 @@ def new_player(defaults = DEFAULTS):
     while playerID in PLAYERS:
         playerID = util.genID(5)
 
-    for x in defaults:
-        playerdata.update({x:defaults[x]})
+    for x in DEFAULTS:  # checking for required things
+        if x not in init:
+            init.update({x:DEFAULTS[x]})
+
+    for x in init:
+        playerdata.update({x:init[x]})
 
     return {playerID:playerdata}
 
