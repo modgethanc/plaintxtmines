@@ -3,6 +3,7 @@
 import mines
 import gibber
 import util
+from util import sum_res
 
 import inflect
 import json
@@ -46,7 +47,7 @@ def load_players(playerfile=os.path.join(DATA, ATS)):
 
     global PLAYERS
 
-    infile = open(minefile, "r")
+    infile = open(playerfile, "r")
     PLAYERS = json.load(infile)
     infile.close()
 
@@ -78,54 +79,6 @@ def new_player(init = DEFAULTS):
         playerdata.update({x:init[x]})
 
     return {playerID:playerdata}
-
-##### LINE OF DEATH 
-
-def newDossier(player): # makes a new .dossier file for named player
-    playerfile = open('../data/'+player+'.dossier', 'w+')
-
-    playerfile.write('\n') # 0 owned mines
-    playerfile.write('\n') # 1 contracted mines
-    playerfile.write("0,0,0,0,0,0,0,0\n") # 2 held res
-    playerfile.write("0\n") # 3 total mined 
-    playerfile.write("0,0,0,0,0,0,0,0\n") # 4 tithed res
-    playerfile.write("0\n") # 5 tithed total
-    playerfile.write("\n") # 6 finished mines
-    playerfile.write("1,0,0,0\n") # 7 empress stats 
-    # 0 available mines
-    # 1 grovel count
-    # 2 tithe count
-    # 3 favor level
-
-    playerfile.close()
-
-    return player # for name confirmation
-
-def newPlayer(player): # makes new player instance, including dossier
-    newDossier(player)
-
-    playerfile = open('../data/'+player+'.stats', 'w+')
-
-    playerfile.write("0\n") # 0 last strike
-    playerfile.write("0,0,0\n") # 1 tool
-    playerfile.write("1\n") # 2 strength
-    playerfile.write("0\n") # 3 endurance
-    playerfile.write("0\n") # 4 strike count
-    playerfile.write("0\n") # 5 mine completion count
-    # player.golem
-
-    playerfile.close()
-
-    return player # for name confirmation
-
-def openDossier(player): # returns str list of the entire dossier
-    playerfile = open('../data/'+player+'.dossier', 'r')
-    playerdata = []
-    for x in playerfile:
-        playerdata.append(x.rstrip())
-    playerfile.close()
-
-    return playerdata
 
 ## player output
 
@@ -192,32 +145,39 @@ def fatigue_left(playerID, time):
 
     return (BASEFATIGUE - min(BASEFATIGUE - 1, stat(playerID, "end"))) - int(time) - get(playerID, "last strike")
 
-## 
-def removeRes(player, reslist): # subtracts reslist from player
-    held = getHeld(player)
-    res = int(getTotalMined(player))
+##### LINE OF DEATH
 
-    i = 0
-    for x in reslist:
-        r = int(held[i]) - int(x)
-        res -= int(x)
-        held[i] = str(r)
-        i += 1
+## player actions
 
-    playerdata = openDossier(player)
-    playerdata[2] = j.join(held)
-    playerdata[3] = res
+def update(playerID, updateDict):
+    # updates the stuff in updateDict for a given player
 
-    writeDossier(player, playerdata)
+    player = data(playerID)
 
-    return reslist
+    for x in updateDict:
+        player.update({x:updateDict[x]})
 
-def updateEmpressStats(player, statlist): # overwrites previous empress stats
-    playerdata = openDossier(player)
-    playerdata[7] = j.join(statlist)
-    writeDossier(player, playerdata)
+    return playerID
 
-    return statlist
+def remove_res(playerID, res):
+    # for given dict res, removes those from playerID held
+    # returns player's held res, or False if player does not
+    # have enough of any res
+
+    held = get(playerID, "held res")
+
+    for x in res:
+        resValue = held.get(x)
+        if not resValue:
+            return False
+        elif resValue < res.get(x):
+            return False
+        else:
+            held[x] -= res.get(x)
+   
+    update(playerID, {"held total":sum_res(held)})
+
+    return held
 
 def incAvailableMines(player): # increase mine permission
     statlist = getEmpressStats(player)
@@ -232,13 +192,6 @@ def decAvailableMines(player): # decrease mine permission
     updateEmpressStats(player, statlist)
 
     return int(statlist[0])
-
-def incGrovel(player): # increase grovel count
-    statlist = getEmpressStats(player)
-    statlist[1] = str(int(statlist[1]) + 1)
-    updateEmpressStats(player, statlist)
-
-    return int(statlist[1])
 
 def incTithe(player): # increase tithe count
     statlist = getEmpressStats(player)
@@ -404,3 +357,10 @@ def heldFormatted(player):
     held = getHeld(player)
 
     return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
+
+#################
+
+def test():
+    load_players()
+    PLAYERS.update(new_player())
+
