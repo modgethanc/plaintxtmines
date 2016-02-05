@@ -34,6 +34,8 @@ DEFAULTS = {
     "inventory":[]
   }
 
+BASEFAATIGUE = 10
+
 p = inflect.engine()
 
 ## file i/o
@@ -41,7 +43,7 @@ p = inflect.engine()
 def load_players(playerfile=os.path.join(DATA, ATS)):
     # takes a json from playerfile and loads it into memory
     # returns number of players loaded
-    
+
     global PLAYERS
 
     infile = open(minefile, "r")
@@ -116,8 +118,6 @@ def newPlayer(player): # makes new player instance, including dossier
 
     return player # for name confirmation
 
-### dossier outputting
-
 def openDossier(player): # returns str list of the entire dossier
     playerfile = open('../data/'+player+'.dossier', 'r')
     playerdata = []
@@ -127,103 +127,72 @@ def openDossier(player): # returns str list of the entire dossier
 
     return playerdata
 
-def getOwned(player): # returns str list of owned mines
-    ownedlist = openDossier(player)[0].rstrip().split(',')
+## player output
 
-    while ownedlist.count('') > 0:
-        ownedlist.remove('') #dirty hack
+def data(playerID):
+    # takes str playerID and returns player data, or none
 
-    return ownedlist
+    if playerID in PLAYERS:
+        return {playerID:PLAYERS[playerID]}
+    else:
+        return None
 
-def getContracted(player): #returns str list of contracted mines
-    contractedlist = openDossier(player)[1].rstrip().split(',')
+def get(playerID, field):
+    # takes str mineID and field and returns whatever it is
+    # returns None if player or field doesn't exist
 
-    while contractedlist.count('') > 0:
-        contractedlist.remove('') #dirty hack
+    if playerID in PLAYERS:
+        return PLAYERS[playerID].get(field)
+    else:
+        return None
 
-    return contractedlist
+def stat(playerID, stat):
+    # takes str playerID and stat and returns dict of stats
 
-def getHeld(player): #returns list of held resources
-    return openDossier(player)[2].rstrip().split(',')
+    if playerID in PLAYERS:
+        return PLAYERS[playerID].get("stats").get(stat)
+    else:
+        return None
 
-def getHeldTotal(player): #returns int of current held assets
-    total = 0
-    for x in getHeld(player):
-        total += int(x)
+def find(searchdict):
+    # returns a list of str IDs that match search dict
 
-    return total
+    matches = []
 
-def getTotalMined(player): #returns int of all-time mined
-    return int(openDossier(player)[3].rstrip())
+    for x in PLAYERS:
+        found = True
+        player = PLAYERS[x]
 
-def getTithed(player): #returns list of tithed resources
-    return openDossier(player)[4].rstrip().split(',')
+        for y in searchdict:
+            if player.get(y) == searchdict.get(y):
+                found = True
+            else:
+                found = False
+                break
 
-def getTithedTotal(player): #returns int of tithed total
-    return int(openDossieer(player)[5].rstrip())
+        if found:
+            matches.append(x)
 
-def getFinished(player): #returns str list of finished mines
-    finishedlist = openDossier(player)[6].rstrip().split(',')
+    return matches
 
-    while finishedlist .count('') > 0:
-        finishedlist.remove('') #dirty hack
+def registered(playername):
+    # check to see if playername shows up in any alias list
+    # returns either False or some playerID that triggers true
 
-    return finishedlist
+    for x in PLAYERS:
+        if playername in get(x, "aliases"):
+            return x
 
-def getEmpressStats(player): #returns list of empress stats
-    return openDossier(player)[7].rstrip().split(',')
+    return False
 
-def getAvailableMines(player): # returns int of number of free mines
-    return int(getEmpressStats(player)[0])
+## meta helpers
 
-### stats outputting
+def fatigue_left(playerID, time):
+    # returns seconds untiil fatigue depletes after given time
 
-def openStats(player): # returns str list of the entire stats
-    playerfile = open('../data/'+player+'.stats', 'r')
-    playerdata = []
-    for x in playerfile:
-        playerdata.append(x.rstrip())
-    playerfile.close()
+    return (BASEFATIGUE - min(BASEFATIGUE - 1, stat(playerID, "end"))) - int(time) - get(playerID, "last strike")
 
-    return playerdata
-
-def getLastStrike(player): #returns int of last strike time
-    return int(openStats(player)[0])
-
-def getTool(player): #returns str list of tool
-    return openStats(player)[1].rstrip().split(',')
-
-def getStrength(player): #returns int of strength
-    return int(openStats(player)[2])
-
-def getEndurance(player): #returns int of endurance
-    return int(openStats(player)[3])
-
-def getStrikes(player): #returns int of strike count
-    return int(openStats(player)[4])
-
-def getClearedCount(player): #returns int of cleared mines count
-    return int(openStats(player)[5])
-
-def fatigueCheck(player, time): # return remaining fatigue in seconds
-    baseFatigue = 10 # hardcode bs
-    return (baseFatigue - min(9, getEndurance(player))) - (int(time) - int(getLastStrike(player)))
-
-### dossier updating
-
-def writeDossier(player, playerdata):
-    playerfile = open('../data/'+player+'.dossier', 'w')
-    for x in playerdata:
-        playerfile.write(str(x) + "\n")
-    playerfile.close()
-
-def updateOwned(player, minelist): # overwrites previous minelist with passed in one
-    playerdata = openDossier(player)
-    playerdata[0] = j.join(minelist)
-    writeDossier(player, playerdata)
-
-    return mines
-
+## 
 def removeRes(player, reslist): # subtracts reslist from player
     held = getHeld(player)
     res = int(getTotalMined(player))

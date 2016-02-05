@@ -3,6 +3,7 @@
 import gibber
 import util
 import inflect
+from util import sum_res
 
 import json
 import random
@@ -129,7 +130,7 @@ def find(searchdict):
     return matches
 
 def exists(minename):
-    # check to see if mine has already been created
+    # check to see if minename exists
 
     for x in MINES:
         if MINES[x].get("name") == minename:
@@ -153,19 +154,19 @@ def generate_res(resrate): # takes a resrate dict; returns a dict of resource am
 
     return resources
 
-def sum_res(res):
-    # takes a dict of str res and int quantities, returns int sum
-
-    total = 0
-    for x in res:
-        total += res.get(x)
-
-    return total
+#def sum_res(res):
+#    # takes a dict of str res and int quantities, returns int sum
+#
+#    total = 0
+#    for x in res:
+#        total += res.get(x)
+#
+#    return total
 
 def percentage_left(mineID):
     # returns an integer of remaining res percentage
 
-    return = int(100*float(get(mineID, "current total"))/float(get(mineID, "starting total")))
+    return int(100*float(get(mineID, "current total"))/float(get(mineID, "starting total")))
 
 
 ## mine actions

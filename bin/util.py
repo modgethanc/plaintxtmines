@@ -12,3 +12,13 @@ def genID(digits=5):
         x += 1
 
     return id
+
+def sum_res(res):
+    # takes a dict of str res and int quantities, returns int sum
+
+    total = 0
+    for x in res:
+        total += res.get(x)
+
+    return total
+
