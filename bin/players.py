@@ -3,7 +3,6 @@
 import mines
 import gibber
 import util
-from util import sum_res
 
 import inflect
 import json
@@ -35,7 +34,7 @@ DEFAULTS = {
     "inventory":[]
   }
 
-BASEFAATIGUE = 10
+BASEFATIGUE = 10
 
 p = inflect.engine()
 
@@ -155,11 +154,45 @@ def update(playerID, updateDict):
     player = data(playerID)
 
     for x in updateDict:
-        print(x)
+        #print(x)
         player[playerID].update({x:updateDict[x]})
-        print(player)
+        #print(player)
 
     return playerID
+
+def inc(playerID, field):
+    # increases an integer counter named field, returns new value
+
+    value = get(playerID, field) + 1
+    update(playerID, {field:value})
+
+    return value 
+
+def dec(playerID, field):
+    # decreases an integer counter named field, returns new value
+
+    value = get(playerID, field) + 1
+    update(playerID, {field:value})
+
+    return value
+
+def add_res(playerID, res):
+    # for given dict res, add to player's held
+
+    held = get(playerID, "held res")
+
+    for x in res:
+        current = held.get(x)
+        if current:
+            current += res.get(x)
+        else:
+            held.update({x:res.get(x)})
+        
+        #held[x] += res.get(x)
+   
+    update(playerID, {"held total":util.sum_res(held)})
+
+    return held
 
 def remove_res(playerID, res):
     # for given dict res, removes those from playerID held
@@ -177,73 +210,11 @@ def remove_res(playerID, res):
         else:
             held[x] -= res.get(x)
    
-    update(playerID, {"held total":sum_res(held)})
+    update(playerID, {"held total":util.sum_res(held)})
 
     return held
 
-def incAvailableMines(player): # increase mine permission
-    statlist = getEmpressStats(player)
-    statlist[0] = str(int(statlist[0]) + 1)
-    updateEmpressStats(player, statlist)
-
-    return int(statlist[0])
-
-def decAvailableMines(player): # decrease mine permission
-    statlist = getEmpressStats(player)
-    statlist[0] = str(int(statlist[0]) - 1)
-    updateEmpressStats(player, statlist)
-
-    return int(statlist[0])
-
-def incTithe(player): # increase tithe count
-    statlist = getEmpressStats(player)
-    statlist[2] = str(int(statlist[2]) + 1)
-    updateEmpressStats(player, statlist)
-
-    return int(statlist[2])
-
-def incFavor(player): # increase favor level
-    statlist = getEmpressStats(player)
-    statlist[3] = str(int(statlist[3]) + 1)
-    updateEmpressStats(player, statlist)
-
-    return int(statlist[3])
-
-def decFavor(player): # decrease favor level
-    statlist = getEmpressStats(player)
-    statlist[3] = str(int(statlist[3]) - 1)
-    updateEmpressStats(player, statlist)
-
-    return int(statlist[3])
-
 ### stats updating
-
-def writeStats(player, playerdata):
-    playerfile = open('../data/'+player+'.stats', 'w')
-    for x in playerdata:
-        playerfile.write(str(x) + "\n")
-    playerfile.close()
-
-def updateLastStrike(player, time):
-    playerdata = openStats(player)
-    playerdata[0] = str(time)
-    writeStats(player, playerdata)
-
-    return time
-
-def incStrength(player): # increment strength
-    playerdata = openStats(player)
-    playerdata[2] = str(int(playerdata[2]) + 1)
-    writeStats(player, playerdata)
-
-    return playerdata[2]
-
-def incEndurance(player): # increment endurance
-    playerdata = openStats(player)
-    playerdata[3] = str(int(playerdata[3]) + 1)
-    writeStats(player, playerdata)
-
-    return playerdata[3]
 
 def incStrikes(player): # increment strike count
     status = '' #level up message
@@ -260,13 +231,6 @@ def incStrikes(player): # increment strike count
 
     return status
 
-def incCleared(player): # increment cleared count
-    playerdata = openStats(player)
-    playerdata[5] = str(int(playerdata[5]) + 1)
-    writeStats(player, playerdata)
-
-    return int(playerdata[5])
-
 #### mine wrangling
 
 def newMine(player, rates):
@@ -279,38 +243,11 @@ def newMine(player, rates):
 
     return minename
 
-def getMines(player):
-    minelist = getOwned(player)
-
-    for x in getContracted(player):
-        minelist.append(x)
-
-    return minelist
-
 def strike(player, mine): # performs mining action
     baseDepth = 3
     strikeDepth = baseDepth * getStrength(player)
 
     return mines.excavate(mine, strikeDepth)
-
-def acquireRes(player, excavation): # adds res to held
-    held = getHeld(player)
-    res = int(getTotalMined(player))
-
-    i = 0
-    for x in excavation:
-        r = int(held[i]) + int(x)
-        res += int(x)
-        held[i] = str(r)
-        i += 1
-
-    playerdata = openDossier(player)
-    playerdata[2] = j.join(held)
-    playerdata[3] = res
-
-    writeDossier(player, playerdata)
-
-    return excavation
 
 def canAfford(player, cost): # checks list of res against held
     held = getHeld(player)

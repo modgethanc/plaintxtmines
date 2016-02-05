@@ -3,7 +3,6 @@
 import gibber
 import util
 import inflect
-from util import sum_res
 
 import json
 import random
@@ -75,7 +74,7 @@ def new_mine(ownerID, zoneID, minerate=load_rate()):
         minename = gibber.medium()
 
     starting_res = generate_res(minerate)
-    starting_total = sum_res(starting_res)
+    starting_total = util.sum_res(starting_res)
 
     minedata.update({"name":minename})
     minedata.update({"owner":ownerID})
@@ -238,7 +237,7 @@ def excavate(mineID, depth=10, width=3):
             veins.remove(target)
             veinsLeft -= 1
 
-    mine[mineID].update({"current total":sum_res(res)})
+    mine[mineID].update({"current total":util.sum_res(res)})
 
     return excavated
 

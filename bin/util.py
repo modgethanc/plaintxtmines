@@ -24,4 +24,4 @@ def sum_res(res):
     return total
 
 def pretty(indict):
-    print(json.dumps(indict, sort_keys=True, indent=2, separators=(",", ";")))
+    print(json.dumps(indict, sort_keys=True, indent=2, separators=(",", ":")))
