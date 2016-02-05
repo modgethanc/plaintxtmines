@@ -74,24 +74,45 @@ def new_mine(playerID, zoneID="", minerate=load_rate()):
     # creates a new mine belonging to given playerID in area zoneID with either given minerate, or default
     # does all the proper linking
 
-    newID = mines.new(playerID, zoneID, minerate)
-    players.get(playerID, "mines owned").append(newID)
+    newID = ""
+
+    if players.get(playerID, "mines available") > 0:
+        players.dec(playerID, "mines available")
+        newID = mines.new(playerID, zoneID, minerate)
+        players.get(playerID, "mines owned").append(newID)
 
     return newID
 
 ## player actions
 
-def strike(playerID, mineID):
-    # does all the striking actions:
-    # check if player has permission to strike at mine
-    # check for fatigue
-    # strike at mine
-    # remove res from mine, add to player
-    # returns ???
+def strike(playerID, mineID, now):
+    # step through strike checks
+    # TODO: figure out what this should return at each condition
+
+    if may_strike(playerID, mineID):
+        if players.fatigue_left(playerID, now) <= 0:
+            successful_strike(playerID, mineID)
+
+            if mines.get(mineID, "status") == "depleted":
+                mine_depleted(playerID, mineID)
+        else: # increase fatigue
+            return
+    else:  # not permitted to strike
+        return
+
+## meta helpers
+
+def mine_depleted(playerID, mineID):
+    # TODO: give player end boost
 
     return
 
-## meta helpes
+def successful_strike(playerID, mineID):
+    # takes players's strikerate, applies to mine, adds excavation to player's held
+
+    strike = players.strikerate(playerID)
+    reslist = mines.excavate(mineID, strike[0], strike[1])
+    players.add_res(playerID, reslist)
 
 def may_strike(playerID, mineID):
     # returns True if player is permitted to strike
