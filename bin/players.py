@@ -39,7 +39,7 @@ p = inflect.engine()
 
 ## file i/o
 
-def load_players(playerfile=os.path.join(DATA, ATS)):
+def load(playerfile=os.path.join(DATA, ATS)):
     # takes a json from playerfile and loads it into memory
     # returns number of players loaded
 
@@ -60,8 +60,8 @@ def save(savefile=os.path.join(DATA, ATS)):
 
     return savefile
 
-def new_player(init = DEFAULTS):
-    # generates new player entry from given
+def new(init=DEFAULTS):
+    # generates new player entry from given inits, adds to memory, returns new playerID
 
     playerdata = {}
 
@@ -76,7 +76,8 @@ def new_player(init = DEFAULTS):
     for x in init:
         playerdata.update({x:init[x]})
 
-    return {playerID:playerdata}
+    PLAYERS.update({playerID:playerdata})
+    return playerID
 
 ## player output
 
@@ -135,7 +136,7 @@ def fatigue_left(playerID, time):
 
     return (BASEFATIGUE - min(BASEFATIGUE - 1, get(playerID, "end"))) - int(time) - get(playerID, "last strike")
 
-def strike(playerID):
+def strikerate(playerID):
     # calculates strike depth and width for playerID and does and returns that as a tuple
 
     depth = BASESTRIKE * get(playerID, "str")
@@ -238,6 +239,6 @@ def remove_res(playerID, reslist):
 #################
 
 def test():
-    load_players()
+    load()
     util.pretty(PLAYERS)
-    #PLAYERS.update(new_player())
+    #PLAYERS.update(new())

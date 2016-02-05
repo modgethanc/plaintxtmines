@@ -1,22 +1,96 @@
 #!/usr/bin/python
-import formatter
-import random
+
 import golems
 import players
 import mines
 import empress
 import gibber
+import util
+
 import inflect
+import formatter
+
 from datetime import datetime
+import json
 import os
-import os.path
+import random
 import time as systime
 
 p = inflect.engine()
 j = ", "
 baseFatigue = 10
 
-## THIS IS NEW STUFF
+RESOURCES = {}
+CONFIG = os.path.join("config")
+DATA = os.path.join("..", "data")
+
+## file i/o 
+
+def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.join(DATA,"mineautosave.json"), worldfile=""):
+    # game init stuff
+
+    players.load(playerfile)
+    mines.load(minefile)
+    #util.pretty_dict(players.PLAYERS)
+    #util.pretty_dict(mines.MINES)
+
+def load_res(resfile=os.path.join(CONFIG, "resources.json")):
+    # takes a json from resfile and loads into memory
+    # returns number of different kinds of res
+
+    global RESOURES
+
+    infile = open(resfile, "r")
+    RESOURCES = json.load(infile)
+    infile.close()
+
+    return len(RESOURCES)
+
+def load_rate(ratefile=os.path.join(CONFIG, "baserate.json")):
+    # takes a json from ratefile and returns dict of it
+
+    infile = open(ratefile, "r")
+    rates = json.load(infile)
+    infile.close()
+
+    return rates
+
+## object creation
+
+def new_player(init):
+    # creates a new player with passed in defaults
+
+    newID = players.new(init)
+
+    return newID
+
+def new_mine(playerID, zoneID="", minerate=load_rate()):
+    # creates a new mine belonging to given playerID in area zoneID with either given minerate, or default
+    # does all the proper linking
+
+    newID = mines.new(playerID, zoneID, minerate)
+    players.get(playerID, "mines owned").append(newID)
+
+    return newID
+
+## player actions
+
+def strike(playerID, mineID):
+    # does all the striking actions:
+    # check if player has permission to strike at mine
+    # check for fatigue
+    # strike at mine
+    # remove res from mine, add to player
+    # returns ???
+
+    return
+
+## meta helpes
+
+def can_strike(playerID, mineID):
+    # returns True if player is permitted to strike
+
+    return True
 
 ## NEW STUFF ENDS HERE
 
@@ -170,7 +244,7 @@ def statsFormatted(channel, user):
 def golemStats(channel, user, time):
     status = golems.getShape(user)+" is hard at work!  "
     status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user)) + ".  "
-    status += "It's been going for "+formatter.prettyTime(golems.getLife(user, time))+"."
+    status += "It's been going for "+util.pretty_time(golems.getLife(user, time))+"."
 
     return status
 

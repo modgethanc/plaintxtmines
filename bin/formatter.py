@@ -5,19 +5,21 @@ import inflect
 p = inflect.engine()
 
 def format_message(message):
-	#pattern = r'^:.*\!~(.*)@.* (.*) (.*) :(.*)'
-	pattern = r'^:.*\!(.*)@.* (.*) (.*) :(.*)'
-	now = int(time.time())
-	matches = re.match(pattern, message)
-	if not matches:
-		return ''
+    # this came from tilde.town
 
-	nick    = matches.group(1).strip()
-        command = matches.group(2).strip()
-        channel = matches.group(3).strip()
-	message = matches.group(4).strip()
+    #pattern = r'^:.*\!~(.*)@.* (.*) (.*) :(.*)'
+    pattern = r'^:.*\!(.*)@.* (.*) (.*) :(.*)'
+    now = int(time.time())
+    matches = re.match(pattern, message)
+    if not matches:
+        return ''
 
-	return "%s\t%s\t%s\t%s\t%s" % (now, nick, command, channel, message)
+    nick    = matches.group(1).strip()
+    command = matches.group(2).strip()
+    channel = matches.group(3).strip()
+    message = matches.group(4).strip()
+
+    return "%s\t%s\t%s\t%s\t%s" % (now, nick, command, channel, message)
 
 def prettyTime(time):
     m, s = divmod(time, 60)

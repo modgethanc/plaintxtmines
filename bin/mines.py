@@ -9,16 +9,16 @@ import random
 import os
 
 DATA = os.path.join("..", "data")
+ATS = "mineautosave.json"
 CONFIG = os.path.join("config")
 MINES = {}
-RESOURCES = {}   # this might not even be relevant
 STATUS = ["new", "active", "depleted"]
 
 p = inflect.engine()
 
 ## file i/o
 
-def load_mines(minefile=os.path.join(DATA,"mineautosave.json")):
+def load(minefile=os.path.join(DATA,ATS)):
     # takes a json from minefile and loads it into memory
     # returns number of mines loaded
 
@@ -30,28 +30,7 @@ def load_mines(minefile=os.path.join(DATA,"mineautosave.json")):
 
     return len(MINES)
 
-def load_res(resfile=os.path.join(CONFIG, "resources.json")):
-    # takes a json from resfile and loads into memory
-    # returns number of different kinds of res
-
-    global RESOURES
-
-    infile = open(resfile, "r")
-    RESOURCES = json.load(infile)
-    infile.close()
-
-    return len(RESOURCES)
-
-def load_rate(ratefile=os.path.join(CONFIG, "baserate.json")):
-    # takes a json from ratefile and returns dict of it
-
-    infile = open(ratefile, "r")
-    rates = json.load(infile)
-    infile.close()
-
-    return rates
-
-def save(savefile=os.path.join(DATA, "mineautosave.json")):
+def save(savefile=os.path.join(DATA,ATS)):
     # save current MINES to savefile, returns save location
 
     outfile = open(savefile, "w")
@@ -60,8 +39,8 @@ def save(savefile=os.path.join(DATA, "mineautosave.json")):
 
     return savefile
 
-def new_mine(ownerID, zoneID, minerate=load_rate()):
-    # generates a new mine entry from givens
+def new(ownerID, zoneID, minerate):
+    # generates a new mine entry from givens, adds to memory, returns new mineID
 
     minedata = {}
 
@@ -84,9 +63,11 @@ def new_mine(ownerID, zoneID, minerate=load_rate()):
     minedata.update({"starting total":starting_total})
     minedata.update({"current resources":starting_res.copy()})
     minedata.update({"current total":starting_total})
-    minedata.update({"workers":[]})
+    minedata.update({"workers":[ownerID]})
 
-    return {mineID:minedata}
+    MINES.update({mineID:minedata})
+
+    return mineID
 
 ## mine output
 
@@ -264,7 +245,7 @@ def printMine(mine):
 def test():
     global MINES
 
-    load_mines()
+    load()
     load_res()
 
     #MINES.update(new_mine("001", "003", load_rate("config/tinyrates.json")))
