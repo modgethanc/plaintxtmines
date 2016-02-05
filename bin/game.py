@@ -55,6 +55,12 @@ def load_rate(ratefile=os.path.join(CONFIG, "baserate.json")):
 
     return rates
 
+def save():
+    # call save on everything
+    
+    mines.save()
+    players.save()
+
 ## object creation
 
 def new_player(init):
@@ -87,10 +93,13 @@ def strike(playerID, mineID):
 
 ## meta helpes
 
-def can_strike(playerID, mineID):
+def may_strike(playerID, mineID):
     # returns True if player is permitted to strike
 
-    return True
+    permitted = players.get(playerID, "mines owned")
+    permitted.extend(players.get(playerID, "mines assigned"))
+
+    return mineID in permitted
 
 ## NEW STUFF ENDS HERE
 
