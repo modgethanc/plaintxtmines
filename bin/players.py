@@ -20,11 +20,9 @@ DEFAULTS = {
     "mines owned":[],
     "mines assigned":[],
     "mines available":1,
-    "stats":{
-      "str":1,
-      "end":0,
-      "strikes":0
-    },
+    "str":1,
+    "end":0,
+    "strikes":0,
     "favor level":0,
     "held res":{},
     "held total":0,
@@ -34,7 +32,8 @@ DEFAULTS = {
     "inventory":[]
   }
 
-BASEFATIGUE = 10
+BASEFATIGUE = 10  # starting seconds of fatigue
+BASESTRIKE = 3    # strike depth multiplier
 
 p = inflect.engine()
 
@@ -98,14 +97,6 @@ def get(playerID, field):
     else:
         return None
 
-def stat(playerID, stat):
-    # takes str playerID and stat and returns dict of stats
-
-    if playerID in PLAYERS:
-        return PLAYERS[playerID].get("stats").get(stat)
-    else:
-        return None
-
 def find(searchdict):
     # returns a list of str IDs that match search dict
 
@@ -142,7 +133,35 @@ def registered(playername):
 def fatigue_left(playerID, time):
     # returns seconds untiil fatigue depletes after given time
 
-    return (BASEFATIGUE - min(BASEFATIGUE - 1, stat(playerID, "end"))) - int(time) - get(playerID, "last strike")
+    return (BASEFATIGUE - min(BASEFATIGUE - 1, get(playerID, "end"))) - int(time) - get(playerID, "last strike")
+
+def strike(playerID):
+    # calculates strike depth and width for playerID and does and returns that as a tuple
+
+    depth = BASESTRIKE * get(playerID, "str")
+
+    tool = get(playerID, "equipped")
+    if tool:
+        # TODO calculate strike width
+        width = 1
+    else:
+        width = 1
+
+    return (depth, width)
+
+def can_afford(playerID, resllist):
+    # checks list of res against held and returns True if player can afford it
+
+    held = get(playerID, "held res")
+
+    for x in reslist:
+        current = held.get(x)
+        if not current:
+            return False
+        elif reslist.get(x) > current:
+            return False
+
+    return True
 
 ##### LINE OF DEATH
 
@@ -163,54 +182,58 @@ def update(playerID, updateDict):
 def inc(playerID, field):
     # increases an integer counter named field, returns new value
 
-    value = get(playerID, field) + 1
-    update(playerID, {field:value})
+    value = get(playerID, field)
 
-    return value 
+    if value:
+        value += 1
+        update(playerID, {field:value})
+
+    return value
 
 def dec(playerID, field):
     # decreases an integer counter named field, returns new value
 
-    value = get(playerID, field) + 1
-    update(playerID, {field:value})
+    value = get(playerID, field)
+
+    if value:
+        value -= 1
+        update(playerID, {field:value})
 
     return value
 
-def add_res(playerID, res):
-    # for given dict res, add to player's held
+def add_res(playerID, reslist):
+    # for given dict reslist, add to player's held
 
     held = get(playerID, "held res")
 
-    for x in res:
+    for x in reslist:
         current = held.get(x)
         if current:
-            current += res.get(x)
+            current += reslist.get(x)
         else:
-            held.update({x:res.get(x)})
-        
-        #held[x] += res.get(x)
-   
-    update(playerID, {"held total":util.sum_res(held)})
+            held.update({x:reslist.get(x)})
+
+    update(playerID, {"held total":util.sum_reslist(held)})
 
     return held
 
-def remove_res(playerID, res):
-    # for given dict res, removes those from playerID held
-    # returns player's held res, or False if player does not
+def remove_res(playerID, reslist):
+    # for given dict reslist, removes those from playerID held
+    # returns player's held reslist, or False if player does not
     # have enough of any res
 
     held = get(playerID, "held res")
 
-    for x in res:
+    for x in reslist:
         resValue = held.get(x)
         if not resValue:
             return False
-        elif resValue < res.get(x):
+        elif resValue < reslist.get(x):
             return False
         else:
-            held[x] -= res.get(x)
-   
-    update(playerID, {"held total":util.sum_res(held)})
+            held[x] -= reslist.get(x)
+
+    update(playerID, {"held total":util.sum_reslist(held)})
 
     return held
 
@@ -230,34 +253,6 @@ def incStrikes(player): # increment strike count
     writeStats(player, playerdata)
 
     return status
-
-#### mine wrangling
-
-def newMine(player, rates):
-    minename = mines.newMine(player, rates)
-
-    currentMines = getOwned(player)
-    currentMines.append(minename)
-
-    updateOwned(player, currentMines)
-
-    return minename
-
-def strike(player, mine): # performs mining action
-    baseDepth = 3
-    strikeDepth = baseDepth * getStrength(player)
-
-    return mines.excavate(mine, strikeDepth)
-
-def canAfford(player, cost): # checks list of res against held
-    held = getHeld(player)
-    i = 0
-    while i < 8:
-        if int(held[i]) < int(cost[i]):
-            return False
-        i += 1
-
-    return True
 
 def printExcavation(excavation):
     total = 0
@@ -301,4 +296,5 @@ def heldFormatted(player):
 
 def test():
     load_players()
-    PLAYERS.update(new_player())
+    util.pretty(PLAYERS)
+    #PLAYERS.update(new_player())

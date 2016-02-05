@@ -20,6 +20,48 @@ baseFatigue = 10
 
 ## NEW STUFF ENDS HERE
 
+## BRINGING SOME FORMATTING SHIT OVER
+
+def printExcavation(excavation):
+    total = 0
+
+    for x in excavation:
+        total += int(x)
+
+    if total == 0:
+        return "nothing but rubble."
+
+    if total > 100:
+        return "a lot of resources!"
+
+    mined = ''
+    y = 0
+    for x in excavation:
+        if y == 0: item = '~'
+        elif y == 1: item = '#'
+        elif y == 2: item = '@'
+        elif y == 3: item = '&'
+        elif y == 4: item = '*'
+        elif y == 5: item = '['
+        elif y == 6: item = ']'
+        elif y == 7: item = '^'
+
+        i = 0
+        while i < int(x):
+            mined += item
+            i += 1
+
+        y += 1
+
+    return mined
+
+def heldFormatted(player):
+    held = getHeld(player)
+
+    return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
+
+## END FORMAT IMPORT
+
 ## meta functions
 
 def listDossiers():
