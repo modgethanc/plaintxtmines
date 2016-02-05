@@ -155,7 +155,9 @@ def update(playerID, updateDict):
     player = data(playerID)
 
     for x in updateDict:
-        player.update({x:updateDict[x]})
+        print(x)
+        player[playerID].update({x:updateDict[x]})
+        print(player)
 
     return playerID
 
@@ -363,4 +365,3 @@ def heldFormatted(player):
 def test():
     load_players()
     PLAYERS.update(new_player())
-

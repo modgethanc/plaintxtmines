@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import random
+import json
 
 def genID(digits=5):
     # makes a string of digits
@@ -22,3 +23,5 @@ def sum_res(res):
 
     return total
 
+def pretty(indict):
+    print(json.dumps(indict, sort_keys=True, indent=2, separators=(",", ";")))
