@@ -163,8 +163,6 @@ def can_afford(playerID, resllist):
 
     return True
 
-##### LINE OF DEATH
-
 ## player actions
 
 def update(playerID, updateDict):
@@ -236,61 +234,6 @@ def remove_res(playerID, reslist):
     update(playerID, {"held total":util.sum_reslist(held)})
 
     return held
-
-### stats updating
-
-def incStrikes(player): # increment strike count
-    status = '' #level up message
-
-    playerdata = openStats(player)
-    playerdata[4] = str(int(playerdata[4]) + 1)
-
-    x = int(playerdata[2])
-    if random.randrange(0,99) < 20/x: # scaling level up
-        playerdata[2] = str(x+1)
-        status = "You're feeling strong!  "
-
-    writeStats(player, playerdata)
-
-    return status
-
-def printExcavation(excavation):
-    total = 0
-
-    for x in excavation:
-        total += int(x)
-
-    if total == 0:
-        return "nothing but rubble."
-
-    if total > 100:
-        return "a lot of resources!"
-
-    mined = ''
-    y = 0
-    for x in excavation:
-        if y == 0: item = '~'
-        elif y == 1: item = '#'
-        elif y == 2: item = '@'
-        elif y == 3: item = '&'
-        elif y == 4: item = '*'
-        elif y == 5: item = '['
-        elif y == 6: item = ']'
-        elif y == 7: item = '^'
-
-        i = 0
-        while i < int(x):
-            mined += item
-            i += 1
-
-        y += 1
-
-    return mined
-
-def heldFormatted(player):
-    held = getHeld(player)
-
-    return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
 
 #################
 

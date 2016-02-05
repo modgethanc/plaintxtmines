@@ -20,6 +20,23 @@ baseFatigue = 10
 
 ## NEW STUFF ENDS HERE
 
+def incStrikes(player): # increment strike count
+    ## TODO brought this over from players to save it
+
+    status = '' #level up message
+
+    playerdata = openStats(player)
+    playerdata[4] = str(int(playerdata[4]) + 1)
+
+    x = int(playerdata[2])
+    if random.randrange(0,99) < 20/x: # scaling level up
+        playerdata[2] = str(x+1)
+        status = "You're feeling strong!  "
+
+    writeStats(player, playerdata)
+
+    return status
+
 ## BRINGING SOME FORMATTING SHIT OVER
 
 def printExcavation(excavation):
