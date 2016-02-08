@@ -194,7 +194,7 @@ def dec(playerID, field):
 
     value = get(playerID, field)
 
-    if value:
+    if value > 0:
         value -= 1
         update(playerID, {field:value})
 
