@@ -183,7 +183,7 @@ def inc(playerID, field):
 
     value = get(playerID, field)
 
-    if value:
+    if value is not None:
         value += 1
         update(playerID, {field:value})
 
@@ -212,7 +212,7 @@ def add_res(playerID, reslist):
         else:
             held.update({x:reslist.get(x)})
 
-    update(playerID, {"held total":util.sum_reslist(held)})
+    update(playerID, {"held total":util.sum_res(held)})
 
     return held
 

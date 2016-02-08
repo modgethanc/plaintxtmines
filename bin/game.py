@@ -91,7 +91,7 @@ def strike(playerID, mineID, now):
 
     if may_strike(playerID, mineID):
         if players.fatigue_left(playerID, now) <= 0:
-            successful_strike(playerID, mineID)
+            successful_strike(playerID, mineID, now)
 
             if mines.get(mineID, "status") == "depleted":
                 mine_depleted(playerID, mineID)
@@ -107,17 +107,34 @@ def mine_depleted(playerID, mineID):
 
     return
 
-def successful_strike(playerID, mineID):
+def successful_strike(playerID, mineID, now):
     # takes players's strikerate, applies to mine, adds excavation to player's held
 
     strike = players.strikerate(playerID)
     reslist = mines.excavate(mineID, strike[0], strike[1])
     players.add_res(playerID, reslist)
+    players.update(playerID, {"last strike":now})
+    players.inc(playerID, "strikes")
+
+    strength_roll(playerID)
+
+def strength_roll(playerID):
+    # rolls for an increase in strength
+
+    strength  = players.get(playerID, "str")
+
+    if random.randrange(0,99) < 20/strength: # scaling level up
+        players.inc(playerID, "str")
+        # "You're feeling strong!"
+        return True
+    else:
+        return False
 
 def may_strike(playerID, mineID):
     # returns True if player is permitted to strike
 
-    permitted = players.get(playerID, "mines owned")
+    permitted = []
+    permitted.extend(players.get(playerID, "mines owned"))
     permitted.extend(players.get(playerID, "mines assigned"))
 
     return mineID in permitted
