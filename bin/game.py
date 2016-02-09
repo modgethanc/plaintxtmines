@@ -3,6 +3,7 @@
 import golems
 import players
 import mines
+import world
 import empress
 import gibber
 import util
@@ -24,13 +25,19 @@ RESOURCES = {}
 CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
 
-## file i/o 
+## file i/o
 
-def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.join(DATA,"mineautosave.json"), worldfile=""):
+def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.join(DATA,"mineautosave.json"), worldfile=os.path.join(DATA,"worldautosave.json")):
     # game init stuff
 
-    players.load(playerfile)
-    mines.load(minefile)
+    print("players: "+str(players.load(playerfile)))
+    print("mines: "+str(mines.load(minefile)))
+    print("zones: " +str(world.load(worldfile)))
+
+    #players.load(playerfile)
+    #mines.load(minefile)
+    #world.load(worldfile)
+
     #util.pretty_dict(players.PLAYERS)
     #util.pretty_dict(mines.MINES)
 
@@ -60,6 +67,7 @@ def save():
     
     mines.save()
     players.save()
+    world.save()
 
 ## object creation
 
@@ -70,16 +78,30 @@ def new_player(init):
 
     return newID
 
-def new_mine(playerID, zoneID="", minerate=load_rate()):
-    # creates a new mine belonging to given playerID in area zoneID with either given minerate, or default
+def new_mine(playerID, customRate=False):
+    # creates a new mine belonging to given playerID in player's current location
+    # pulls standard rate for that zone, or custom rate if player has a boost
     # does all the proper linking
 
-    newID = ""
+    newID = None
 
     if players.get(playerID, "mines available") > 0:
-        players.dec(playerID, "mines available")
+        zoneID = players.get(playerID, "location")
+        if customeRate:
+            minerate = customeRate
+        else:
+            minerate = world.get(zoneID, "rates")
         newID = mines.new(playerID, zoneID, minerate)
+
+        players.dec(playerID, "mines available")
         players.get(playerID, "mines owned").append(newID)
+
+    return newID
+
+def new_zone(init):
+    # creates a new zone with passed in defaults
+
+    newID = world.new(init)
 
     return newID
 
