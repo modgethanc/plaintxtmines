@@ -61,7 +61,7 @@ def new(init=DEFAULTS):
     zonedata = {}
 
     zoneID = util.genID(3)
-    while zoneID in ZONES:
+    while zoneID in WORLD:
         zoneID = util.genID(3)
 
     zonename = gibber.medium().capitalize()
@@ -77,7 +77,7 @@ def new(init=DEFAULTS):
     for x in init:
         zonedata.update({x:init[x]})
 
-    ZONES.update({zoneID:zonedata})
+    WORLD.update({zoneID:zonedata})
     return zoneID
 
 ## world output
@@ -128,3 +128,39 @@ def exists(zonename):
             return True
 
     return False
+
+## world actions
+
+def update(zoneID, updateDict):
+    # updates the stuff in updateDict for a given zone
+
+    zone = data(zoneID)
+
+    for x in updateDict:
+        #print(x)
+        zone[zoneID].update({x:updateDict[x]})
+        #print(player)
+
+    return zoneID
+
+def inc(zoneID, field):
+    # increases an integer counter named field, returns new value
+
+    value = get(zoneID, field)
+
+    if value is not None:
+        value += 1
+        update(zoneID, {field:value})
+
+    return value
+
+def dec(zoneID, field):
+    # decreases an integer counter named field, returns new value
+
+    value = get(zoneID, field)
+
+    if value > 0:
+        value -= 1
+        update(zoneID, {field:value})
+
+    return value

@@ -64,7 +64,7 @@ def load_rate(ratefile=os.path.join(CONFIG, "baserate.json")):
 
 def save():
     # call save on everything
-    
+
     mines.save()
     players.save()
     world.save()
@@ -74,6 +74,8 @@ def save():
 def new_player(init):
     # creates a new player with passed in defaults
 
+    if init.get("home"):
+        init.update({"location":init.get("home")})
     newID = players.new(init)
 
     return newID
@@ -121,6 +123,25 @@ def strike(playerID, mineID, now):
             return
     else:  # not permitted to strike
         return
+
+def move(playerID, newzone):
+    # moves playerID to named newzone
+    # updates worldfile and playerfile
+
+    moved = False
+
+    if zoneID in world.ZONES:
+        old = player.get("playerID", "location")
+        world.get(old, "residents").remove(playerID)
+        world.dec(old, "residents")
+
+        player.update({"location":newzone})
+        world.get(newzone, "residents").append(playerID)
+        world.inc(newzone, "residents")
+        
+        moved = True
+
+    return moved
 
 ## meta helpers
 
