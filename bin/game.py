@@ -124,24 +124,34 @@ def strike(playerID, mineID, now):
     else:  # not permitted to strike
         return
 
-def move(playerID, newzone):
+def move(playerID, newzoneID):
     # moves playerID to named newzone
     # updates worldfile and playerfile
+    # TODO: check for player move permission, zone population
 
     moved = False
+    hasSpace = False
+    mayMove = False
 
-    if zoneID in world.ZONES:
+    if newzoneID in world.WORLD:
+        mayMove = True   # placeholder
+
+        if world.get(newzoneID, "residentcap") < len(world.get(newzoneID, "residents")):
+            hasSpace = True
+
+    if hasSpace and mayMove:
+
         old = player.get("playerID", "location")
         world.get(old, "residents").remove(playerID)
         world.dec(old, "residents")
 
-        player.update({"location":newzone})
-        world.get(newzone, "residents").append(playerID)
-        world.inc(newzone, "residents")
-        
+        player.update({"location":newzoneID})
+        world.get(newzoneID, "residents").append(playerID)
+        world.inc(newzoneID, "residents")
+
         moved = True
 
-    return moved
+    return moved, hasSpace, mayMove
 
 ## meta helpers
 
