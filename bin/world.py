@@ -15,8 +15,8 @@ WORLD = {}
 DEFAULTS = {
     "residents":[],
     "mines":[],
-    "minecap":100,
-    "residentcap": 10,
+    "max mines":100,
+    "max residents": 10,
     "rates": {
       "size":100,
       "tilde":40,
@@ -128,6 +128,15 @@ def exists(zonename):
             return True
 
     return False
+
+def has_space(zoneID, target):
+    # check to see if named zoneID can take one more of named target
+    # target should be an array, with "max {target}" as the limit
+
+    if get(zoneID, "max "+target) > len(get(zoneID, target)):
+        return True
+    else:
+        return False
 
 ## world actions
 

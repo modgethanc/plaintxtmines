@@ -16,6 +16,7 @@ import json
 import os
 import random
 import time as systime
+import imp
 
 p = inflect.engine()
 j = ", "
@@ -29,6 +30,10 @@ DATA = os.path.join("..", "data")
 
 def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.join(DATA,"mineautosave.json"), worldfile=os.path.join(DATA,"worldautosave.json")):
     # game init stuff
+
+    imp.reload(players)
+    imp.reload(world)
+    imp.reload(mines)
 
     print("players: "+str(players.load(playerfile)))
     print("mines: "+str(mines.load(minefile)))
@@ -74,29 +79,35 @@ def save():
 def new_player(init):
     # creates a new player with passed in defaults
 
-    if init.get("home"):
+    newID = None
+    hasSpace = False
+    localID = init.get("home")
+
+    if localID:
         init.update({"location":init.get("home")})
-    newID = players.new(init)
+        hasSpace = world.has_space(localID, "residents")
+
+    if hasSpace:
+        newID = players.new(init)
+        world.get(localID, "residents").append(newID)
 
     return newID
 
 def new_mine(playerID, customRate=False):
-    # creates a new mine belonging to given playerID in player's current location
-    # pulls standard rate for that zone, or custom rate if player has a boost
-    # does all the proper linking
+    # checks if a new mine can be created
 
     newID = None
+    hasSpace = False
+    mayCreate = False
+    localID = players.get(playerID, "location")
 
     if players.get(playerID, "mines available") > 0:
-        zoneID = players.get(playerID, "location")
-        if customeRate:
-            minerate = customeRate
-        else:
-            minerate = world.get(zoneID, "rates")
-        newID = mines.new(playerID, zoneID, minerate)
+        mayCreate = True
 
-        players.dec(playerID, "mines available")
-        players.get(playerID, "mines owned").append(newID)
+    hasSpace = world.has_space(localID, "mines")
+
+    if hasSpace and mayCreate:
+        newID = successful_open(playerID, customRate)
 
     return newID
 
@@ -125,30 +136,22 @@ def strike(playerID, mineID, now):
         return
 
 def move(playerID, newzoneID):
-    # moves playerID to named newzone
-    # updates worldfile and playerfile
-    # TODO: check for player move permission, zone population
+    # checks if playerID can move to newzoneID and calls move if possible
+    # returns boolean moved (True if move happened), hasSpace (True if
+    # new zone has space), and mayMove (True if player has move
+    # permission)
 
     moved = False
     hasSpace = False
     mayMove = False
 
     if newzoneID in world.WORLD:
-        mayMove = True   # placeholder
-
-        if world.get(newzoneID, "residentcap") < len(world.get(newzoneID, "residents")):
-            hasSpace = True
+        hasSpace = world.has_space(newzoneID, "residents")
+        if 1:  # placeholder check for player move permission
+            mayMove = True
 
     if hasSpace and mayMove:
-
-        old = player.get("playerID", "location")
-        world.get(old, "residents").remove(playerID)
-        world.dec(old, "residents")
-
-        player.update({"location":newzoneID})
-        world.get(newzoneID, "residents").append(playerID)
-        world.inc(newzoneID, "residents")
-
+        successful_move(playerID, newzoneID)
         moved = True
 
     return moved, hasSpace, mayMove
@@ -159,6 +162,37 @@ def mine_depleted(playerID, mineID):
     # TODO: give player end boost
 
     return
+
+def successful_open(playerID, customRate=False):
+    # opens a new mine for playerID
+    # updates worldfile, playerfile, and minefile
+    # pulls standard rate for that zone, or custom rate if player has a boost
+    # returns ID of new mine
+
+    localID = players.get(playerID, "location")
+
+    if customeRate:
+        minerate = customeRate
+    else:
+        minerate = world.get(localID, "rates")
+
+    newID = mines.new(playerID, localID, minerate)
+    world.get(localID, "mines").append(newID)
+
+    players.dec(playerID, "mines available")
+    players.get(playerID, "mines owned").append(newID)
+
+    return newID
+
+def successful_move(playerID, newzoneID):
+    # moves playerID to named newzone
+    # updates worldfile and playerfile
+
+    localID = player.get("playerID", "location")
+
+    world.get(localID, "residents").remove(playerID)
+    player.update({"location":newzoneID})
+    world.get(newzoneID, "residents").append(playerID)
 
 def successful_strike(playerID, mineID, now):
     # takes players's strikerate, applies to mine, adds excavation to player's held
