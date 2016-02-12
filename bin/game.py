@@ -171,8 +171,8 @@ def successful_open(playerID, customRate=False):
 
     localID = players.get(playerID, "location")
 
-    if customeRate:
-        minerate = customeRate
+    if customRate:
+        minerate = customRate
     else:
         minerate = world.get(localID, "rates")
 
@@ -218,7 +218,7 @@ def strength_roll(playerID):
         return False
 
 def may_strike(playerID, mineID):
-    # returns True if player is permitted to strike
+    # returns True if player is permitted to strike at selected mine
 
     permitted = []
     permitted.extend(players.get(playerID, "mines owned"))

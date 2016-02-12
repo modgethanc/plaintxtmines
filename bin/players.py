@@ -131,10 +131,11 @@ def registered(playername):
 
 ## meta helpers
 
-def fatigue_left(playerID, time):
+def fatigue_left(playerID, now):
     # returns seconds untiil fatigue depletes after given time
 
-    return (BASEFATIGUE - min(BASEFATIGUE - 1, get(playerID, "end"))) - int(time) - get(playerID, "last strike")
+    #return (BASEFATIGUE - min(BASEFATIGUE - 1, get(playerID, "end"))) - int(time) - get(playerID, "last strike")
+    return max(0,(BASEFATIGUE - min(BASEFATIGUE - 1, get(playerID, "end"))) - now + get(playerID, "last strike"))
 
 def strikerate(playerID):
     # calculates strike depth and width for playerID and does and returns that as a tuple
