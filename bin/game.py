@@ -170,7 +170,10 @@ def move(playerID, newzoneID):
 ## meta helpers
 
 def mine_depleted(playerID, mineID):
-    # TODO: give player end boost
+    # increase player endurance and mines available
+
+    players.inc(playerID, "mines available")
+    players.inc(playerID, "end")
 
     return
 
