@@ -135,7 +135,12 @@ def fatigue_left(playerID, now):
     # returns seconds untiil fatigue depletes after given time
 
     #return (BASEFATIGUE - min(BASEFATIGUE - 1, get(playerID, "end"))) - int(time) - get(playerID, "last strike")
-    return max(0,(BASEFATIGUE - min(BASEFATIGUE - 1, get(playerID, "end"))) - now + get(playerID, "last strike"))
+    return max(0, fatigue_shift(playerID) - now + get(playerID, "last strike"))
+
+def fatigue_shift(playerID):
+    # returns modified fatigue, calculated from base fatigue and player endurance
+
+    return BASEFATIGUE - min(BASEFATIGUE-9, get(playerID, "end"))
 
 def strikerate(playerID):
     # calculates strike depth and width for playerID and does and returns that as a tuple
@@ -236,6 +241,14 @@ def remove_res(playerID, reslist):
     update(playerID, {"held total":util.sum_reslist(held)})
 
     return held
+
+def double_fatigue(playerID, now):
+    # modifies strike time to double the fatigue from specified now
+
+    fatigue = fatigue_left(playerID, now) * 2
+    newLast = fatigue + fatigue_shift(playerID) + now
+
+    update(playerID, {"last strike":newLast})
 
 #################
 

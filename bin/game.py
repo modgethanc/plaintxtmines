@@ -122,18 +122,29 @@ def new_zone(init):
 
 def strike(playerID, mineID, now):
     # step through strike checks
-    # TODO: figure out what this should return at each condition
+    # returns if player is fatigued, if player is permitted to strike, if mine is depleted, and res list
+
+    fatigued = True
+    permitted = False
+    depleted = False
+    reslist = None
 
     if may_strike(playerID, mineID):
-        if players.fatigue_left(playerID, now) <= 0:
-            successful_strike(playerID, mineID, now)
+        permitted = True
+        fatigue = players.fatigue_left(playerID, now)
+        if fatigue <= 0:
+            fatigued = False
+        else:
+            players.double_fatigue(playerID, now)
 
-            if mines.get(mineID, "status") == "depleted":
-                mine_depleted(playerID, mineID)
-        else: # increase fatigue
-            return
-    else:  # not permitted to strike
-        return
+    if not fatigued and permitted:
+        reslist = successful_strike(playerID, mineID, now)
+
+    if mines.get(mineID, "status") == "depleted":
+        mine_depleted(playerID, mineID)
+        depleted = True
+
+    return fatigued, permitted, depleted, reslist
 
 def move(playerID, newzoneID):
     # checks if playerID can move to newzoneID and calls move if possible
@@ -205,6 +216,8 @@ def successful_strike(playerID, mineID, now):
 
     strength_roll(playerID)
 
+    return reslist
+
 def strength_roll(playerID):
     # rolls for an increase in strength
 
@@ -225,25 +238,6 @@ def may_strike(playerID, mineID):
     permitted.extend(players.get(playerID, "mines assigned"))
 
     return mineID in permitted
-
-## NEW STUFF ENDS HERE
-
-def incStrikes(player): # increment strike count
-    ## TODO brought this over from players to save it
-
-    status = '' #level up message
-
-    playerdata = openStats(player)
-    playerdata[4] = str(int(playerdata[4]) + 1)
-
-    x = int(playerdata[2])
-    if random.randrange(0,99) < 20/x: # scaling level up
-        playerdata[2] = str(x+1)
-        status = "You're feeling strong!  "
-
-    writeStats(player, playerdata)
-
-    return status
 
 ## BRINGING SOME FORMATTING SHIT OVER
 
@@ -285,47 +279,11 @@ def heldFormatted(player):
 
     return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
 
-## END FORMAT IMPORT
+############################# LINE OF DEATH ################
 
 ## meta functions
 
-def listDossiers():
-    gamedata = os.listdir('../data/')
-    playerlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "dossier":
-            playerlist.append(entry[0])
-    return playerlist
-
-def listPlayers():
-    gamedata = os.listdir('../data/')
-    playerlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "stats":
-            playerlist.append(entry[0])
-    return playerlist
-
-def listGolems():
-    gamedata = os.listdir('../data/')
-    golemlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "golem":
-            golemlist.append(entry[0])
-    return golemlist
-
-def listMines():
-    gamedata = os.listdir('../data/')
-    minelist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "mine":
-            minelist.append(entry[0].capitalize())
-    return minelist
-
-def logGolem(user): 
+def logGolem(user):
   golemarchive = open("../data/golems.txt", 'a')
   golemtext = golems.getShape(user) + "\t"
   golemtext += str(golems.getStrength(user)) + "/" + str(golems.getInterval(user)) + "\t"
@@ -425,18 +383,3 @@ def mineListFormatted(msg, channel, user):
         prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
 
     return "You're working on the following mine"+plural+": "+j.join(prejoin)
-
-#### status updating
-
-#### MOVING IRC BOT STUFF HERE
-
-# status checking
-
-def isPlaying(user):
-    return os.path.isfile('../data/'+user+'.dossier')
-
-def isMine(mine):
-    return os.path.isfile('../data/'+mine+'.mine')
-
-def hasGolem(user):
-    return os.path.isfile('../data/'+user+'.golem')
