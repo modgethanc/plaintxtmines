@@ -34,23 +34,18 @@ def send(msg):
 ### irc functions
 
 def ping():
-  #ircsock.send("PONG :pingis\n")
   send("PONG :pingis\n")
 
 def joinchan(chan):
   channels.append(chan)
-  #ircsock.send("JOIN "+ chan +"\n")
   send("JOIN "+ chan +"\n")
 
 def part(chan):
   channels.remove(chan)
-  #ircsock.send("PART "+ chan +"\n")
   send("PART "+ chan +"\n")
 
 def connect(server, channel, botnick):
   ircsock.connect((server, 6667))
-  #ircsock.send("USER "+botnick+" "+botnick+" "+botnick+" :"+ADMIN+"\n")
-  #ircsock.send("NICK "+botnick+"\n")
 
   send("USER "+botnick+" "+botnick+" "+botnick+" :"+ADMIN+"\n")
   send("NICK "+botnick+"\n")
@@ -58,7 +53,6 @@ def connect(server, channel, botnick):
   joinchan(channel)
 
 def disconnect():
-  #ircsock.send("QUIT " +"\n")
   send("QUIT " +"\n")
 
 def say(channel, msg, nick=""):
@@ -69,7 +63,6 @@ def say(channel, msg, nick=""):
 
   #print "trying to say: " + channel + ":>" + nick+msg
   #print ":::PRIVMSG "+channel+" :"+nick+msg+":::"
-  #ircsock.send("PRIVMSG "+channel+" :"+nick+msg+"\n")
   send("PRIVMSG "+channel+" :"+nick+msg+"\n")
 
 def multisay(channel, msglist, nick=""):
