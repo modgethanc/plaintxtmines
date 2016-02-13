@@ -122,10 +122,11 @@ def find(searchdict):
 
 def exists(zonename):
     # check to see if zonename exists
+    # return found ID, or false
 
     for x in WORLD:
         if WORLD[x].get("name") == zonename:
-            return True
+            return x
 
     return False
 

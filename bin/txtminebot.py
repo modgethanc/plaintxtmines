@@ -21,7 +21,7 @@ DATA = os.path.join("..", "data")
 CMD_DEF = "commands.json"
 COMMANDS = []
 
-## config
+## i/o
 
 def init():
     # reloads all modules and initializes them
@@ -39,14 +39,19 @@ def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
     handlers.load(commandfile)
     COMMANDS = handlers.list()
 
+def save():
+    # calls game save 
+
+    game.save()
+
 ## input processing
 
-def process(channel, user, time, message):
+def handle(user, time, message):
     # main command processing
 
     response = []
-
-    if re.match('^!', message):
+    print("handling: "+message)
+    if re.match('^:!', message):
         inputs = message.split(" ")
         command = inputs[0].split("!")[1]
 

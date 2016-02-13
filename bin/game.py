@@ -39,10 +39,6 @@ def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.
     print("mines: "+str(mines.load(minefile)))
     print("zones: " +str(world.load(worldfile)))
 
-    #players.load(playerfile)
-    #mines.load(minefile)
-    #world.load(worldfile)
-
     #util.pretty_dict(players.PLAYERS)
     #util.pretty_dict(mines.MINES)
 
@@ -78,18 +74,20 @@ def save():
 
 def new_player(init):
     # creates a new player with passed in defaults
+    # returns new player's ID
 
     newID = None
-    hasSpace = False
     localID = init.get("home")
+    nick = init.get("nick")
 
     if localID:
-        init.update({"location":init.get("home")})
-        hasSpace = world.has_space(localID, "residents")
+        init.update({"location":localID})
 
-    if hasSpace:
-        newID = players.new(init)
-        world.get(localID, "residents").append(newID)
+    if nick:
+        init.update({"aliases":[nick]})
+
+    newID = players.new(init)
+    world.get(localID, "residents").append(newID)
 
     return newID
 
@@ -117,6 +115,25 @@ def new_zone(init):
     newID = world.new(init)
 
     return newID
+
+## game state querying
+
+def is_playing(nick):
+    # checks for nick in playerdata
+    # returns playerID if listed
+
+    return players.registered(nick)
+
+def is_zone(province):
+    # checks for named province in world data
+    # returns  zoneID if listed
+
+    return world.exists(province)
+
+def has_space(zoneID, target):
+    # checks if zoneID has space
+
+    return world.has_space(zoneID, target)
 
 ## player actions
 

@@ -160,6 +160,7 @@ def receive(msg):
         else:
             message = " ".join(process[3:])
 
+    #print("command: "+command)
     formatted = formatter.format_message(msg)
 
     if formatted != "":
@@ -176,10 +177,10 @@ def receive(msg):
       #  say(channel, kvincent.seen(channel, user))
 
     if user == ADMIN:
-        return adminPanel(channel, user, time, message)
+        code = adminPanel(channel, user, time, message)
 
     if command == "PRIVMSG":
-        response = txtminebot.process(channel, user, time, message)
+        response = txtminebot.handle(user, time, message)
 
         if response:
             multisay(channel, response, user)
