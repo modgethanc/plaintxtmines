@@ -3,7 +3,6 @@
 import socket
 import os
 import sys
-from optparse import OptionParser
 import fileinput
 import random
 import re
@@ -13,50 +12,54 @@ import imp
 import formatter
 import txtminebot
 
-configfile = open("ircconfig", 'r')
 config = []
 channels = []
 
+configfile = open("ircconfig", "r")
 for x in configfile:
     config.append(x.rstrip())
-
 configfile.close()
 
-botName = config[2]
-admin   = config[3]
-
-parser = OptionParser()
-
-parser.add_option("-s", "--server", dest="server", default=config[0], help="the server to connect to", metavar="SERVER")
-parser.add_option("-c", "--channel", dest="channel", default=config[1], help="the channel to join", metavar="CHANNEL")
-parser.add_option("-n", "--nick", dest="nick", default=botName, help="the nick to use", metavar="NICK")
-
-(options, args) = parser.parse_args()
+SERVER = config[0]
+CHAN = config[1]
+BOTNAME = config[2]
+ADMIN = config[3]
+TEST = "testicles"
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+def send(msg):
+    ircsock.send(msg.encode())
 
 ### irc functions
 
 def ping():
-  ircsock.send("PONG :pingis\n")
+  #ircsock.send("PONG :pingis\n")
+  send("PONG :pingis\n")
 
 def joinchan(chan):
   channels.append(chan)
-  ircsock.send("JOIN "+ chan +"\n")
+  #ircsock.send("JOIN "+ chan +"\n")
+  send("JOIN "+ chan +"\n")
 
 def part(chan):
   channels.remove(chan)
-  ircsock.send("PART "+ chan +"\n")
+  #ircsock.send("PART "+ chan +"\n")
+  send("PART "+ chan +"\n")
 
 def connect(server, channel, botnick):
   ircsock.connect((server, 6667))
-  ircsock.send("USER "+botnick+" "+botnick+" "+botnick+" :"+admin+"\n")
-  ircsock.send("NICK "+botnick+"\n")
+  #ircsock.send("USER "+botnick+" "+botnick+" "+botnick+" :"+ADMIN+"\n")
+  #ircsock.send("NICK "+botnick+"\n")
+
+  send("USER "+botnick+" "+botnick+" "+botnick+" :"+ADMIN+"\n")
+  send("NICK "+botnick+"\n")
 
   joinchan(channel)
 
 def disconnect():
-  ircsock.send("QUIT " +"\n")
+  #ircsock.send("QUIT " +"\n")
+  send("QUIT " +"\n")
 
 def say(channel, msg, nick=""):
   if nick == channel: #don't repeat nick if in PM
@@ -66,7 +69,8 @@ def say(channel, msg, nick=""):
 
   #print "trying to say: " + channel + ":>" + nick+msg
   #print ":::PRIVMSG "+channel+" :"+nick+msg+":::"
-  ircsock.send("PRIVMSG "+channel+" :"+nick+msg+"\n")
+  #ircsock.send("PRIVMSG "+channel+" :"+nick+msg+"\n")
+  send("PRIVMSG "+channel+" :"+nick+msg+"\n")
 
 def multisay(channel, msglist, nick=""):
  for x in msglist:
@@ -124,70 +128,75 @@ def adminPanel(channel, user, time, msg):
 
 def listen():
   while 1:
-    msg = ircsock.recv(2048)
+    msg = ircsock.recv(2048).decode()
+    print(msg)
     if msg:
       receive(msg)
 
 def receive(msg):
       #print msg
 
-      if msg.find("PING :") != -1:
+    if msg.find("PING :") != -1:
         return ping()
 
-      msg = msg.strip('\n\r')
-      process = msg.split(" ")
+    msg = msg.strip('\n\r')
+    process = msg.split(" ")
 
-      nick = ""
+    nick = ""
 
-      if len(msg.split("!")[0].split(":")) > 1:
+    if len(msg.split("!")[0].split(":")) > 1:
         nick = msg.split("!")[0].split(":")[1]
 
-      time = int(systime.time())
-      user = nick
-      command = ""
-      channel = ""
-      mode = ""
-      target = ""
-      message = ""
+    time = int(systime.time())
+    user = nick
+    command = ""
+    channel = ""
+    mode = ""
+    target = ""
+    message = ""
 
-      if len(process) > 1:
+    if len(process) > 1:
         command = process[1]
-      if len(process) > 2:
+    if len(process) > 2:
         channel = process[2]
-      if len(process) > 3:
+    if len(process) > 3:
         if command == "MODE":
-          mode = process[3]
-          if len(process) > 4:
-            target = process[4]
+            mode = process[3]
+            if len(process) > 4:
+                target = process[4]
         else:
-          message = " ".join(process[3:])
+            message = " ".join(process[3:])
 
-      formatted = formatter.format_message(msg)
-      if formatted != "":
+    formatted = formatter.format_message(msg)
+
+    if formatted != "":
         user = formatted.split("\t")[1]
 
-      if nick != user: #check for weird identity stuff
+    if nick != user: #check for weird identity stuff
           user = nick
 
-      #if msg.find("JOIN #") != -1:
+    if channel == BOTNAME:  #check for PM
+        channel = user
+
+    #if msg.find("JOIN #") != -1:
       #  ircsock.send("MODE "+channel+" +o "+user+"\n")
       #  say(channel, kvincent.seen(channel, user))
 
-      if channel == botName:  #check for PM
-        channel = user
-
-      if user == admin:
+    if user == ADMIN:
         return adminPanel(channel, user, time, message)
 
-      if command == "PRIVMSG":
-          multisay(channel, txtminebot.process(channel, user, time, message), user)
+    if command == "PRIVMSG":
+        response = txtminebot.process(channel, user, time, message)
 
-      sys.stdout.flush()
+        if response:
+            multisay(channel, response, user)
+
+    sys.stdout.flush()
 
 #########################
 def start():
-  connect(options.server, options.channel, options.nick)
+    connect(SERVER, CHAN, BOTNAME)
 
 def reload():
-  imp.reload(txtminebot)
-  txtminebot.init()
+    imp.reload(txtminebot)
+    txtminebot.init()

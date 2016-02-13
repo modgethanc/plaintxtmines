@@ -8,33 +8,26 @@ import random
 import inflect
 import json
 import imp
+import re
 
 import util
+import handlers
 
-import world
 import game
-import mines
-import players
 
-### CONFIG
 p = inflect.engine()
 CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
 CMD_DEF = "commands.json"
+COMMANDS = []
 
-COMMANDS = {}
-
-## lang import
+## config
 
 def init():
     # reloads all modules and initializes them
 
     imp.reload(game)
-    imp.reload(players)
-    imp.reload(world)
-    imp.reload(mines)
     game.init()
-
     load_cmd()
 
 def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
@@ -42,13 +35,24 @@ def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
 
     global COMMANDS
 
-    infile = open(commandfile, "r")
-    COMMANDS = json.load(infile)
-    infile.close()
+    imp.reload(handlers)
+    handlers.load(commandfile)
+    COMMANDS = handlers.list()
 
-### gameplay functions
+## input processing
 
 def process(channel, user, time, message):
     # main command processing
 
-    return "hi"
+    response = []
+
+    if re.match('^!', message):
+        inputs = message.split(" ")
+        command = inputs[0].split("!")[1]
+
+        if command in COMMANDS:
+            print("found command "+ command)
+            handler = getattr(handlers, command)
+            response.extend(handler(user, time, inputs))
+
+    return response
