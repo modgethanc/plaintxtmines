@@ -151,7 +151,7 @@ def list_mines(playerID):
 
     for mineID in players.get(playerID, "mines owned"):
         prefix = ""
-        depletion = 0
+        depletion = None
 
         if mineID == players.get(playerID, "targetted"):
             prefix = ">"
@@ -169,7 +169,7 @@ def list_mines(playerID):
     for mine in rawlist:
         postfix = ""
 
-        if mine[1]:
+        if mine[1] is not None:   # True if depletion has been set
             postfix = " ("+str(mine[1])+"%)"
 
         minelist.append(mine[0]+postfix)

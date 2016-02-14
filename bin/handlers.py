@@ -78,7 +78,9 @@ def mines(playerID, user, time, inputs):
 
     response = []
 
-    response.append("called mines")
+    msg = "You own the following mines: "
+    msg += ", ".join(game.list_mines(playerID))
+
     return response
 
 def info(playerID, user, time, inputs):
