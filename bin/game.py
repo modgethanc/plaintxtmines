@@ -107,7 +107,7 @@ def new_mine(playerID, customRate=False):
     if hasSpace and mayCreate:
         newID = successful_open(playerID, customRate)
 
-    return newID
+    return newID, hasSpace, mayCreate
 
 def new_zone(init):
     # creates a new zone with passed in defaults
@@ -134,6 +134,11 @@ def has_space(zoneID, target):
     # checks if zoneID has space
 
     return world.has_space(zoneID, target)
+
+def name_mine(mineID):
+    # returns name of mine
+
+    return mines.get(mineID, "name")
 
 ## player actions
 

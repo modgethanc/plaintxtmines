@@ -11,6 +11,7 @@ CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
 CMD_DEF = "commands.json"
 COMMANDS = {}
+STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\"."
 
 ## file i/o
 
@@ -69,6 +70,29 @@ def successful_join(user, now, zoneID):
 def new(user, time, inputs):
 
     response = []
+
+    print("creating new mine for "+user)
+
+    playerID = game.is_playing(user)
+
+    if playerID:
+        mineID, hasSpace, mayCreate = game.new_mine(playerID)
+        if mineID:
+            minename = game.name_mine(mineID)
+            response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+minename+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic \'!strike\".")
+        else:
+            failed = "I could not open a new mine on your behalf because"
+            if not hasSpace:
+                failed += " your current locale cannot support an additional mining venture"
+            if not mayCreate:
+                if not hasSpace:
+                    failed += " and"
+
+                failed += " you do not have permission to open any more mines"
+            failed += "."
+            response.append(failed)
+    else:
+        response.append(STRANGER)
 
     return response
 
