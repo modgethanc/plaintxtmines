@@ -144,6 +144,38 @@ def name_mine(mineID):
 
     return mines.get(mineID, "name")
 
+def list_mines(playerID):
+    # returns list of mine names
+
+    rawlist = []
+
+    for mineID in players.get(playerID, "mines owned"):
+        prefix = ""
+        depletion = 0
+
+        if mineID == players.get(playerID, "targetted"):
+            prefix = ">"
+
+        if players.get(playerID, "surveying"):
+            depletion = int(100*float(mines.get(mineID, "current total"))/float(mines.get(mineID, "starting total")))
+
+        rawlist.append([prefix+mines.get(mineID, "name"), depletion])
+
+    if players.get(playerID, "surveying"):
+        rawlist.sort(key = lambda mine:mine[1])
+
+    minelist = []
+
+    for mine in rawlist:
+        postfix = ""
+
+        if mine[1]:
+            postfix = " ("+str(mine[1])+"%)"
+
+        minelist.append(mine[0]+postfix)
+
+    return minelist
+
 ## player actions
 
 def strike(playerID, mineID, now):
@@ -221,6 +253,8 @@ def successful_open(playerID, customRate=False):
 
     players.dec(playerID, "mines available")
     players.get(playerID, "mines owned").append(newID)
+
+    players.update(playerID, {"targetted":newID})
 
     return newID
 
