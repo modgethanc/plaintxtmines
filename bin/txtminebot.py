@@ -19,7 +19,8 @@ p = inflect.engine()
 CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
 CMD_DEF = "commands.json"
-COMMANDS = []
+COMMANDS = {}
+STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\"."
 
 ## i/o
 
@@ -37,7 +38,7 @@ def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
 
     imp.reload(handlers)
     handlers.load(commandfile)
-    COMMANDS = handlers.list()
+    COMMANDS = handlers.COMMANDS 
 
 def save():
     # calls game save 
@@ -57,7 +58,16 @@ def handle(user, time, message):
 
         if command in COMMANDS:
             print("found command "+ command)
-            handler = getattr(handlers, command)
-            response.extend(handler(user, time, inputs))
+            playerID = game.is_playing(user)
+
+            if COMMANDS[command].get("player only"):
+                if playerID:
+                    handler = getattr(handlers, command)
+                    response.extend(handler(playerID, user, time, inputs))
+                else:
+                    response.append(STRANGER)
+            else:
+                handler = getattr(handlers, command)
+                response.extend(handler(playerID, user, time, inputs))
 
     return response

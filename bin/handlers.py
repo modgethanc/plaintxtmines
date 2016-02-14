@@ -31,12 +31,10 @@ def list():
 
 ## base handler functions
 
-def join(user, now, inputs):
+def join(playerID, user, now, inputs):
     # creates a new player
 
     response = []
-
-    playerID = game.is_playing(user)
 
     if playerID:
         response.append("You are already registered, my friend.")
@@ -54,8 +52,88 @@ def join(user, now, inputs):
 
     return response
 
+def new(playerID, user, time, inputs):
+    # new mine creation
+    print("creating new mine for "+user)
+
+    response = []
+
+    mineID, hasSpace, mayCreate = game.new_mine(playerID)
+
+    if mineID:
+        minename = game.name_mine(mineID)
+        response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+minename+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic \'!strike\".")
+    else:
+        response.append(failed_new(hasSpace, mayCreate))
+
+    return response
+
+def grovel(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def mines(playerID, user, time, inputs):
+
+    response = []
+
+    response.append("called mines")
+    return response
+
+def info(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def stats(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def fatigue(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def report(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def strike(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def rankings(playeID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def golem(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+def res(playerID, user, time, inputs):
+
+    response = []
+
+    return response
+
+
+## helper functions
+
 def make_player(user, now, zoneID):
-    # creates a new player
+    # creates new inits for a player
 
     playerdata = {}
     playerdata.update({"nick":user})
@@ -73,27 +151,8 @@ def failed_join(hasSpace, zoneExists):
     if not hasSpace:
         return "I'm sorry, friend, but that province cannot support any additional residents.  Please choose a different one in order to prevent overcrowding."
 
-def new(user, time, inputs):
-    # new mine creation
-    print("creating new mine for "+user)
-
-    response = []
-    playerID = game.is_playing(user)
-
-    if playerID:
-        mineID, hasSpace, mayCreate = game.new_mine(playerID)
-        if mineID:
-            minename = game.name_mine(mineID)
-            response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+minename+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic \'!strike\".")
-        else:
-            response.append(failed_new(hasSpace, mayCreate))
-    else:
-        response.append(STRANGER)
-
-    return response
-
 def failed_new(hasSpace, mayCreate):
-    # generated mine failure message
+    # generates mine failure message
 
     msg = "I could not open a new mine on your behalf because"
 
@@ -107,64 +166,4 @@ def failed_new(hasSpace, mayCreate):
         msg += " you do not have permission to open any more mines"
 
     return msg + "."
-
-def grovel(user, time, inputs):
-
-    response = []
-
-    return response
-
-def mines(user, time, inputs):
-
-    response = []
-
-    return response
-
-def info(user, time, inputs):
-
-    response = []
-
-    return response
-
-def stats(user, time, inputs):
-
-    response = []
-
-    return response
-
-def fatigue(user, time, inputs):
-
-    response = []
-
-    return response
-
-def report(user, time, inputs):
-
-    response = []
-
-    return response
-
-def strike(user, time, inputs):
-
-    response = []
-
-    return response
-
-def rankings(user, time, inputs):
-
-    response = []
-
-    return response
-
-def golem(user, time, inputs):
-
-    response = []
-
-    return response
-
-def res(user, time, inputs):
-
-    response = []
-
-    return response
 

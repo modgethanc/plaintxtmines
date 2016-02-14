@@ -190,6 +190,7 @@ def receive(msg):
 #########################
 def start():
     connect(SERVER, CHAN, BOTNAME)
+    txtminebot.init()
 
 def reload():
     imp.reload(txtminebot)
