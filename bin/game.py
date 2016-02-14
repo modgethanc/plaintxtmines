@@ -77,19 +77,23 @@ def new_player(init):
     # returns new player's ID
 
     newID = None
+    hasSpace = False
     localID = init.get("home")
     nick = init.get("nick")
 
     if localID:
         init.update({"location":localID})
+        if has_space(localID, "residents"):
+            hasSpace = True
 
     if nick:
         init.update({"aliases":[nick]})
 
-    newID = players.new(init)
-    world.get(localID, "residents").append(newID)
+    if hasSpace:
+        newID = players.new(init)
+        world.get(localID, "residents").append(newID)
 
-    return newID
+    return newID, hasSpace, localID
 
 def new_mine(playerID, customRate=False):
     # checks if a new mine can be created
