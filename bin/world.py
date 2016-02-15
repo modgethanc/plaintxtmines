@@ -90,6 +90,16 @@ def data(zoneID):
     else:
         return None
 
+def list_names():
+    # returns a list of zone names
+
+    zonelist = []
+
+    for zoneID in WORLD:
+        zonelist.append(get(zoneID, "name"))
+
+    return zonelist
+
 def get(zoneID, field):
     # takes str zoneID and field and returns whatever it is
     # returns None if zone or field doesn't exist
@@ -125,7 +135,7 @@ def exists(zonename):
     # return found ID, or false
 
     for x in WORLD:
-        if WORLD[x].get("name") == zonename:
+        if WORLD[x].get("name").lower() == zonename.lower():
             return x
 
     return False

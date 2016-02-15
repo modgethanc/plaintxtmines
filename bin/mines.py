@@ -112,9 +112,9 @@ def find(searchdict):
 def exists(minename):
     # check to see if minename exists
 
-    for x in MINES:
-        if MINES[x].get("name") == minename:
-            return True
+    for mineID in MINES:
+        if MINES[mineID].get("name") == minename:
+            return mineID
 
     return False
 

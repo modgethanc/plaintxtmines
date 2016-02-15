@@ -134,6 +134,12 @@ def is_zone(province):
 
     return world.exists(province)
 
+def is_mine(minename):
+    # checks for named mine in mine data
+    # returrns mineID if listed
+
+    return mine.exists(minename)
+
 def has_space(zoneID, target):
     # checks if zoneID has space
 
@@ -143,6 +149,13 @@ def name_mine(mineID):
     # returns name of mine
 
     return mines.get(mineID, "name")
+
+def list_zones():
+    # returns sorted list of zone names
+
+    zonelist = world.list_names()
+    
+    return zonelist
 
 def list_mines(playerID):
     # returns list of mine names
@@ -175,6 +188,11 @@ def list_mines(playerID):
         minelist.append(mine[0]+postfix)
 
     return minelist
+
+def targetted(playerID):
+    # returns mineID that player has targetted
+
+    return players.get(playerID, "targetted")
 
 ## player actions
 

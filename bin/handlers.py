@@ -40,7 +40,7 @@ def join(playerID, user, now, inputs):
         response.append("You are already registered, my friend.")
     else:
         if len(inputs) < 2:
-            response.append("You must declare a province to which you call home, stranger.")
+            response.append("You must declare a province to which you call home, stranger.  "+provinces())
         else:
             zoneID = game.is_zone(inputs[1])
             newID, hasSpace, zoneExists = game.new_player(make_player(user, now, zoneID))
@@ -78,8 +78,10 @@ def mines(playerID, user, time, inputs):
 
     response = []
 
-    msg = "You own the following mines: "
-    msg += ", ".join(game.list_mines(playerID))
+    minelist = game.list_mines(playerID)
+
+    msg = "You own the following "+p.plural("mines", len(minelist))+": "
+    msg += ", ".join(minelist)
 
     return response
 
@@ -107,9 +109,23 @@ def report(playerID, user, time, inputs):
 
     return response
 
-def strike(playerID, user, time, inputs):
+def strike(playerID, user, now, inputs):
 
     response = []
+
+    if len(inputs) < 2:
+        targetted = game.targetted(playerID)
+    else:
+        targetted = game.is_mine(inputs[1])
+        if not targetted:
+            targetted = game.targetted(playerID)
+
+    fatigued, permitted, depleted, reslist = game.strike(playerID, targetted, now)
+
+    if reslist:
+        response += "strike successful"
+    else:
+        response.append(strike_failure(fatigued, permitted))
 
     return response
 
@@ -148,10 +164,21 @@ def failed_join(hasSpace, zoneExists):
     # processes join failure
 
     if not zoneExists:
-        return "I've never heard of that province, stranger."
+        return "I've never heard of that province, stranger.  "+provinces()
 
     if not hasSpace:
         return "I'm sorry, friend, but that province cannot support any additional residents.  Please choose a different one in order to prevent overcrowding."
+
+def provinces():
+    # returns list of provinces
+
+    zones = game.list_zones()
+
+    msg = "The following "+p.plural("provinces", len(zones))+" fall under the empress's rule: "
+    msg += ", ".join(zones)
+    msg += "."
+
+    return msg
 
 def failed_new(hasSpace, mayCreate):
     # generates mine failure message
@@ -169,3 +196,8 @@ def failed_new(hasSpace, mayCreate):
 
     return msg + "."
 
+def strike_failure(fatigued, permitted):
+    # generates strike failure message
+    msg = ""
+
+    return msg
