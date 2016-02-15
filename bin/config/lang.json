@@ -6,5 +6,31 @@
     "KLANG!",
     "CLUNK!",
     "PLINK!",
-    "DINK!"]
+    "DINK!"
+  ],
+  "interp neutral":[
+    "I am honestly not certain of her intent, friend."
+  ],
+  "interp neg":[
+    "You must have caught her in a bad mood, friend.",
+    "Are you sure you meant to bother her right now?",
+    "Perhaps she really meant well."
+  ],
+  "interp pos":[
+    "This sounds fortuitous for you."
+  ],
+  "emp neutral":[
+    "says",
+    "states",
+    "replies"
+  ],
+  "emp neg":[
+    "snaps",
+    "mumbles",
+    "mutters"
+  ],
+  "emp pos":[
+    "purrs",
+    "coos"
+  ]
 }

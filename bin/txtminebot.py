@@ -20,7 +20,7 @@ CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
 CMD_DEF = "commands.json"
 COMMANDS = {}
-STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\"."
+STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\".  "+handlers.provinces()
 
 ## i/o
 

@@ -8,8 +8,8 @@ import empress
 import gibber
 import util
 
+from fuzzywuzzy import process
 import inflect
-import formatter
 
 from datetime import datetime
 import json
@@ -151,6 +151,11 @@ def name_mine(mineID):
 
     return mines.get(mineID, "name")
 
+def name_zone(zoneID):
+    # returns name of zoneID 
+
+    return world.get(zoneID, "name")
+
 def list_zones():
     # returns sorted list of zone names
 
@@ -194,6 +199,11 @@ def targetted(playerID):
     # returns mineID that player has targetted
 
     return players.get(playerID, "targetted")
+
+def fatigue_left(playerID, now):
+    # returns fatigue left for playerID from passed in no
+
+    return players.fatigue_left(playerID, now)
 
 ## player actions
 
@@ -333,6 +343,15 @@ def print_reslist(reslist):
             i += 1
 
     return resprint
+
+def match_province(target):
+    # takes entered string and picks closest matching zone name
+    # returns zoneID
+
+    zones = world.list_names()
+    match = process.extractOne(target, zones)[0]
+
+    return world.exists(match)
 
 ## BRINGING SOME FORMATTING SHIT OVER
 

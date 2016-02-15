@@ -60,11 +60,12 @@ def join(playerID, user, now, inputs):
         if len(inputs) < 2:
             response.append("You must declare a province to which you call home, stranger.  "+provinces())
         else:
-            zoneID = game.is_zone(inputs[1])
+            #zoneID = game.is_zone(inputs[1])
+            zoneID = game.match_province(inputs[1])
             newID, hasSpace, zoneExists = game.new_player(make_player(user, now, zoneID))
             if newID:
                 print("new player: "+newID)
-                response.append("Your citizenship is now acknowledged.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with \"!new\".")
+                response.append("Your citizenship of the province of "+game.name_zone(zoneID)+" is now acknowledged.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with \"!new\".")
             else:
                 response.append(failed_join(hasSpace, zoneExists))
 
@@ -90,11 +91,15 @@ def grovel(playerID, user, time, inputs):
 
     response = []
 
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+
     return response
 
 def mines(playerID, user, time, inputs):
 
     response = []
+
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
 
     minelist = game.list_mines(playerID)
 
@@ -107,23 +112,36 @@ def info(playerID, user, time, inputs):
 
     response = []
 
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+
     return response
 
 def stats(playerID, user, time, inputs):
 
     response = []
 
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+
     return response
 
-def fatigue(playerID, user, time, inputs):
+def fatigue(playerID, user, now, inputs):
 
     response = []
+
+    fatigue = game.fatigue_left(playerID, now)
+
+    if fatigue:
+        response.append("You'll be ready to strike again in "+util.pretty_time(fatigue)+".  Please rest patiently so you do not stress your body.")
+    else:
+        response.append("You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.")
 
     return response
 
 def report(playerID, user, time, inputs):
 
     response = []
+
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
 
     return response
 
@@ -140,10 +158,12 @@ def strike(playerID, user, now, inputs):
 
     fatigue, permitted, depleted, reslist = game.strike(playerID, targetted, now)
 
+    mineName = game.name_mine(targetted)
+
     if reslist:
-        response.append(random.choice(LANG.get("wham")) + "  You struck at "+ game.name_mine(targetted) + " and mined the following: "+ game.print_reslist(reslist))
+        response.append(random.choice(LANG.get("wham")) + "  You struck at "+ mineName + " and mined the following: "+ game.print_reslist(reslist))
         if depleted:
-            response.append(" mine depleted")
+            response.append("As you clear the last of the rubble from "+mineName+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
     else:
         response.append(strike_failure(fatigue, permitted))
 
@@ -153,17 +173,23 @@ def rankings(playeID, user, time, inputs):
 
     response = []
 
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+
     return response
 
 def golem(playerID, user, time, inputs):
 
     response = []
 
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+
     return response
 
 def res(playerID, user, time, inputs):
 
     response = []
+
+    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
 
     return response
 
@@ -222,9 +248,14 @@ def strike_failure(fatigue, permitted):
     msg = ""
 
     if fatigue:
-        msg += str(fatigue) + " seconds remaining"
+        msg += "You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
 
     if not permitted:
-        msg += "not permitted to strike that mine"
+        if fatigue:
+            msg += "  Additionally, y"
+        else:
+            msg += "Y"
+
+        msg += "ou do not have permission to work on that mine, friend."
 
     return msg
