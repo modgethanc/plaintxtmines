@@ -140,7 +140,7 @@ def fatigue_left(playerID, now):
 def fatigue_shift(playerID):
     # returns modified fatigue, calculated from base fatigue and player endurance
 
-    return BASEFATIGUE - min(BASEFATIGUE-9, get(playerID, "end"))
+    return BASEFATIGUE - min(9, get(playerID, "end"))
 
 def strikerate(playerID):
     # calculates strike depth and width for playerID and does and returns that as a tuple
@@ -244,11 +244,14 @@ def remove_res(playerID, reslist):
 
 def double_fatigue(playerID, now):
     # modifies strike time to double the fatigue from specified now
+    # returns new fatigue left in seconds
 
     fatigue = fatigue_left(playerID, now) * 2
-    newLast = fatigue + fatigue_shift(playerID) + now
+    newLast = fatigue - fatigue_shift(playerID) + now
 
     update(playerID, {"last strike":newLast})
+
+    return fatigue
 
 #################
 

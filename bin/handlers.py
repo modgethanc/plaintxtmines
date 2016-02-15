@@ -198,6 +198,7 @@ def failed_new(hasSpace, mayCreate):
 
 def strike_failure(fatigued, permitted):
     # generates strike failure message
+
     msg = ""
 
     return msg

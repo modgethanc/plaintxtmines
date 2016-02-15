@@ -200,7 +200,6 @@ def strike(playerID, mineID, now):
     # step through strike checks
     # returns if player is fatigued, if player is permitted to strike, if mine is depleted, and res list
 
-    fatigued = True
     permitted = False
     depleted = False
     reslist = None
@@ -208,19 +207,17 @@ def strike(playerID, mineID, now):
     if may_strike(playerID, mineID):
         permitted = True
         fatigue = players.fatigue_left(playerID, now)
-        if fatigue <= 0:
-            fatigued = False
-        else:
-            players.double_fatigue(playerID, now)
+        if fatigue > 0:
+            fatigue = players.double_fatigue(playerID, now)
 
-    if not fatigued and permitted:
+    if not fatigue and permitted:
         reslist = successful_strike(playerID, mineID, now)
 
     if mines.get(mineID, "status") == "depleted":
         mine_depleted(playerID, mineID)
         depleted = True
 
-    return fatigued, permitted, depleted, reslist
+    return fatigue, permitted, depleted, reslist
 
 def move(playerID, newzoneID):
     # checks if playerID can move to newzoneID and calls move if possible
