@@ -2,6 +2,9 @@
 
 import random
 import json
+import inflect
+
+p = inflect.engine()
 
 def genID(digits=5):
     # makes a string of digits

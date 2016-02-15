@@ -28,12 +28,14 @@ def init():
     # reloads all modules and initializes them
 
     global COMMANDS
+    global STRANGER
 
     imp.reload(game)
     imp.reload(handlers)
     game.init()
     handlers.init()
     COMMANDS = handlers.COMMANDS
+    STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\".  "+handlers.provinces()
 
 def save():
     # calls game save

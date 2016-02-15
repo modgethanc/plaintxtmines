@@ -40,9 +40,6 @@ def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.
     print("mines: "+str(mines.load(minefile)))
     print("zones: " +str(world.load(worldfile)))
 
-    #util.pretty_dict(players.PLAYERS)
-    #util.pretty_dict(mines.MINES)
-
 def load_res(resfile=os.path.join(CONFIG, "resources.json")):
     # takes a json from resfile and loads into memory
     # returns number of different kinds of res
@@ -152,7 +149,7 @@ def name_mine(mineID):
     return mines.get(mineID, "name")
 
 def name_zone(zoneID):
-    # returns name of zoneID 
+    # returns name of zoneID
 
     return world.get(zoneID, "name")
 
@@ -160,7 +157,7 @@ def list_zones():
     # returns sorted list of zone names
 
     zonelist = world.list_names()
-    
+
     return zonelist
 
 def list_mines(playerID):

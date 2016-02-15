@@ -4,7 +4,7 @@ import inflect
 import os
 import json
 import random
-
+import util
 import game
 
 p = inflect.engine()
@@ -15,6 +15,7 @@ LANG_DEF = "lang.json"
 COMMANDS = {}
 LANG = {}
 STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\"."
+UNIMP = "I'm sorry, friend, but this function is currently disabled.  I expect it to return with an improved ability to support your mining ventures."
 
 ## file i/o
 
@@ -91,15 +92,13 @@ def grovel(playerID, user, time, inputs):
 
     response = []
 
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+    response.append(UNIMP)
 
     return response
 
 def mines(playerID, user, time, inputs):
 
     response = []
-
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
 
     minelist = game.list_mines(playerID)
 
@@ -112,7 +111,7 @@ def info(playerID, user, time, inputs):
 
     response = []
 
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+    response.append(UNIMP)
 
     return response
 
@@ -120,7 +119,7 @@ def stats(playerID, user, time, inputs):
 
     response = []
 
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+    response.append(UNIMP)
 
     return response
 
@@ -141,13 +140,17 @@ def report(playerID, user, time, inputs):
 
     response = []
 
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+    response.append(UNIMP)
 
     return response
 
 def strike(playerID, user, now, inputs):
 
     response = []
+
+    if len(game.list_mines(playerID)) < 1:
+        response.append("I'm sorry, friend, but you have no mines at which to strike.  Open a new mine with \"!new\",")
+        return response
 
     if len(inputs) < 2:
         targetted = game.targetted(playerID)
@@ -173,7 +176,7 @@ def rankings(playeID, user, time, inputs):
 
     response = []
 
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+    response.append(UNIMP)
 
     return response
 
@@ -181,7 +184,7 @@ def golem(playerID, user, time, inputs):
 
     response = []
 
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+    response.append(UNIMP)
 
     return response
 
@@ -189,7 +192,7 @@ def res(playerID, user, time, inputs):
 
     response = []
 
-    response.append("I'm sorry, friend, but this function is currently disabled.  I expect to return with an improved ability to support your mining ventures.")
+    response.append(UNIMP)
 
     return response
 
@@ -220,9 +223,8 @@ def provinces():
 
     zones = game.list_zones()
 
-    msg = "The following "+p.plural("provinces", len(zones))+" fall under the empress's rule: "
+    msg = "The following "+p.plural("province", len(zones))+" "+p.plural("falls", len(zones))+" under the empress's rule: "
     msg += ", ".join(zones)
-    msg += "."
 
     return msg
 

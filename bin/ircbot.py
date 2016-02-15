@@ -27,6 +27,7 @@ ADMIN = config[3]
 TEST = "testicles"
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+txtminebot.init()
 
 def send(msg):
     ircsock.send(msg.encode())
@@ -191,8 +192,8 @@ def receive(msg):
 #########################
 def start():
     connect(SERVER, CHAN, BOTNAME)
-    txtminebot.init()
 
 def reload():
+    txtminebot.save()
     imp.reload(txtminebot)
     txtminebot.init()
