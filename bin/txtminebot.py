@@ -27,18 +27,12 @@ STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your ta
 def init():
     # reloads all modules and initializes them
 
+    global COMMANDS
+
     imp.reload(game)
     imp.reload(handlers)
     game.init()
     handlers.init()
-
-def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
-    # takes a commandfile and loads into memory via handlers
-
-    global COMMANDS
-
-    imp.reload(handlers)
-    handlers.load(commandfile)
     COMMANDS = handlers.COMMANDS
 
 def save():

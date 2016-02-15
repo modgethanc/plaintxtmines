@@ -11,7 +11,7 @@ p = inflect.engine()
 CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
 CMD_DEF = "commands.json"
-LANG_DEF "lang.json"
+LANG_DEF = "lang.json"
 COMMANDS = {}
 LANG = {}
 STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\"."
@@ -27,7 +27,7 @@ def init():
 def load_lang(langfile=os.path.join(CONFIG, LANG_DEF)):
     # takes a langfile and loads into memory
 
-    global LANG 
+    global LANG
 
     infile = open(langfile, "r")
     LANG = json.load(infile)

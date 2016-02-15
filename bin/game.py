@@ -204,6 +204,7 @@ def strike(playerID, mineID, now):
     permitted = False
     depleted = False
     reslist = None
+    fatigue = 1
 
     if may_strike(playerID, mineID):
         permitted = True
