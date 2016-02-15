@@ -3,6 +3,7 @@
 import inflect
 import os
 import json
+import random
 
 import game
 
@@ -124,7 +125,7 @@ def strike(playerID, user, now, inputs):
     fatigue, permitted, depleted, reslist = game.strike(playerID, targetted, now)
 
     if reslist:
-        response.append("strike successful: " + game.print_reslist(reslist))
+        response.append(random.choice(LANG.get("wham")) + "  You struck at "+ game.name_mine(targetted) + " and mined the following: "+ game.print_reslist(reslist))
         if depleted:
             response.append(" mine depleted")
     else:
