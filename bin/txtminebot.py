@@ -28,20 +28,21 @@ def init():
     # reloads all modules and initializes them
 
     imp.reload(game)
+    imp.reload(handlers)
     game.init()
-    load_cmd()
+    handlers.init()
 
 def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
-    # takes a commandfile and loads into memory
+    # takes a commandfile and loads into memory via handlers
 
     global COMMANDS
 
     imp.reload(handlers)
     handlers.load(commandfile)
-    COMMANDS = handlers.COMMANDS 
+    COMMANDS = handlers.COMMANDS
 
 def save():
-    # calls game save 
+    # calls game save
 
     game.save()
 

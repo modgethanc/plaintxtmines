@@ -34,6 +34,7 @@ def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.
     imp.reload(players)
     imp.reload(world)
     imp.reload(mines)
+    load_res()
 
     print("players: "+str(players.load(playerfile)))
     print("mines: "+str(mines.load(minefile)))
@@ -46,7 +47,7 @@ def load_res(resfile=os.path.join(CONFIG, "resources.json")):
     # takes a json from resfile and loads into memory
     # returns number of different kinds of res
 
-    global RESOURES
+    global RESOURCES
 
     infile = open(resfile, "r")
     RESOURCES = json.load(infile)
@@ -317,40 +318,22 @@ def may_strike(playerID, mineID):
 
     return mineID in permitted
 
-## BRINGING SOME FORMATTING SHIT OVER
+def print_reslist(reslist):
+    # processes a dict reslist into human-readable
 
-def printExcavation(excavation):
-    total = 0
+    resprint = ""
 
-    for x in excavation:
-        total += int(x)
-
-    if total == 0:
-        return "nothing but rubble."
-
-    if total > 100:
-        return "a lot of resources!"
-
-    mined = ''
-    y = 0
-    for x in excavation:
-        if y == 0: item = '~'
-        elif y == 1: item = '#'
-        elif y == 2: item = '@'
-        elif y == 3: item = '&'
-        elif y == 4: item = '*'
-        elif y == 5: item = '['
-        elif y == 6: item = ']'
-        elif y == 7: item = '^'
-
+    for res in reslist:
+        glyph = RESOURCES.get(res).get("glyph")
+        count = reslist.get(res)
         i = 0
-        while i < int(x):
-            mined += item
+        while i < count:
+            resprint += glyph
             i += 1
 
-        y += 1
+    return resprint
 
-    return mined
+## BRINGING SOME FORMATTING SHIT OVER
 
 def heldFormatted(player):
     held = getHeld(player)

@@ -11,11 +11,12 @@ CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
 CMD_DEF = "commands.json"
 COMMANDS = {}
+LANG = {}
 STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\"."
 
 ## file i/o
 
-def load(commandfile=os.path.join(CONFIG, CMD_DEF)):
+def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
     # takes a commandfile and loads into memory
 
     global COMMANDS
@@ -120,12 +121,14 @@ def strike(playerID, user, now, inputs):
         if not targetted:
             targetted = game.targetted(playerID)
 
-    fatigued, permitted, depleted, reslist = game.strike(playerID, targetted, now)
+    fatigue, permitted, depleted, reslist = game.strike(playerID, targetted, now)
 
     if reslist:
-        response += "strike successful"
+        response.append("strike successful: " + game.print_reslist(reslist))
+        if depleted:
+            response.append(" mine depleted")
     else:
-        response.append(strike_failure(fatigued, permitted))
+        response.append(strike_failure(fatigue, permitted))
 
     return response
 
@@ -196,9 +199,15 @@ def failed_new(hasSpace, mayCreate):
 
     return msg + "."
 
-def strike_failure(fatigued, permitted):
+def strike_failure(fatigue, permitted):
     # generates strike failure message
 
     msg = ""
+
+    if fatigue:
+        msg += str(fatigue) + " seconds remaining"
+
+    if not permitted:
+        msg += "not permitted to strike that mine"
 
     return msg

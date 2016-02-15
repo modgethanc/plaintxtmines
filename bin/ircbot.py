@@ -54,6 +54,7 @@ def connect(server, channel, botnick):
 
 def disconnect():
   send("QUIT " +"\n")
+  ircsock.close()
 
 def say(channel, msg, nick=""):
   if nick == channel: #don't repeat nick if in PM
