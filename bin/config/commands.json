@@ -47,5 +47,9 @@
   "mines":{
     "help":"",
     "player only":true
+  },
+  "alias":{
+    "help":"",
+    "player only":true
   }
 }

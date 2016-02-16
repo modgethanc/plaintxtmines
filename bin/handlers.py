@@ -14,7 +14,6 @@ CMD_DEF = "commands.json"
 LANG_DEF = "lang.json"
 COMMANDS = {}
 LANG = {}
-STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\"."
 UNIMP = "I'm sorry, friend, but this function is currently disabled.  I expect it to return with an improved ability to support your mining ventures."
 
 ## file i/o
@@ -105,6 +104,8 @@ def mines(playerID, user, time, inputs):
     msg = "You own the following "+p.plural("mines", len(minelist))+": "
     msg += ", ".join(minelist)
 
+    response.append(msg)
+
     return response
 
 def info(playerID, user, time, inputs):
@@ -193,6 +194,29 @@ def res(playerID, user, time, inputs):
     response = []
 
     response.append(UNIMP)
+
+    return response
+
+def alias(playerID, user, time, inputs):
+
+    response = []
+
+    if len(inputs) < 2:
+        response.append("You need to specify at least one alias to add to your dossier, friend.")
+    else:
+        inputs.pop(0)
+        added = []
+        unadded = []
+        print(inputs)
+        for alias in inputs:
+            if game.alias(playerID, alias):
+                added.append(alias)
+            else:
+                unadded.append(alias)
+        if added:
+            response.append("I've added "+",".join(added)+" to your alias list.")
+        if unadded:
+            response.append(", ".join(added)+" could not be added due to conflicting records.")
 
     return response
 

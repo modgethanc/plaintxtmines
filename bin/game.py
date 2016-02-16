@@ -202,6 +202,39 @@ def fatigue_left(playerID, now):
 
     return players.fatigue_left(playerID, now)
 
+def may_strike(playerID, mineID):
+    # returns True if player is permitted to strike at selected mine
+
+    permitted = []
+    permitted.extend(players.get(playerID, "mines owned"))
+    permitted.extend(players.get(playerID, "mines assigned"))
+
+    return mineID in permitted
+
+def print_reslist(reslist):
+    # processes a dict reslist into human-readable
+
+    resprint = ""
+
+    for res in reslist:
+        glyph = RESOURCES.get(res).get("glyph")
+        count = reslist.get(res)
+        i = 0
+        while i < count:
+            resprint += glyph
+            i += 1
+
+    return resprint
+
+def match_province(target):
+    # takes entered string and picks closest matching zone name
+    # returns zoneID
+
+    zones = world.list_names()
+    match = process.extractOne(target, zones)[0]
+
+    return world.exists(match)
+
 ## player actions
 
 def strike(playerID, mineID, now):
@@ -248,6 +281,17 @@ def move(playerID, newzoneID):
         moved = True
 
     return moved, hasSpace, mayMove
+
+def alias(playerID, newAlias):
+    # adds new alias to playerID
+
+    aliases = []
+
+    if not is_playing(newAlias):
+        players.get(playerID, "aliases").append(newAlias)
+        aliases = players.get(playerID, "aliases")
+
+    return aliases
 
 ## meta helpers
 
@@ -316,39 +360,6 @@ def strength_roll(playerID):
         return True
     else:
         return False
-
-def may_strike(playerID, mineID):
-    # returns True if player is permitted to strike at selected mine
-
-    permitted = []
-    permitted.extend(players.get(playerID, "mines owned"))
-    permitted.extend(players.get(playerID, "mines assigned"))
-
-    return mineID in permitted
-
-def print_reslist(reslist):
-    # processes a dict reslist into human-readable
-
-    resprint = ""
-
-    for res in reslist:
-        glyph = RESOURCES.get(res).get("glyph")
-        count = reslist.get(res)
-        i = 0
-        while i < count:
-            resprint += glyph
-            i += 1
-
-    return resprint
-
-def match_province(target):
-    # takes entered string and picks closest matching zone name
-    # returns zoneID
-
-    zones = world.list_names()
-    match = process.extractOne(target, zones)[0]
-
-    return world.exists(match)
 
 ## BRINGING SOME FORMATTING SHIT OVER
 
