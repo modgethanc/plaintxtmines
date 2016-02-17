@@ -25,6 +25,7 @@ DEFAULTS = {
     "end":0,
     "strikes":0,
     "favor level":0,
+    "favors":[],
     "held res":{},
     "held total":0,
     "tithed res":{},

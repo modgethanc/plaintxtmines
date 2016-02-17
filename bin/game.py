@@ -165,6 +165,8 @@ def list_mines(playerID):
 
     rawlist = []
 
+    showPercent = "foresight" in players.get(playerID, "favors")
+
     for mineID in players.get(playerID, "mines owned"):
         prefix = ""
         depletion = None
@@ -172,12 +174,12 @@ def list_mines(playerID):
         if mineID == players.get(playerID, "targetted"):
             prefix = ">"
 
-        if players.get(playerID, "surveying"):
+        if showPercent:
             depletion = int(100*float(mines.get(mineID, "current total"))/float(mines.get(mineID, "starting total")))
 
         rawlist.append([prefix+mines.get(mineID, "name"), depletion])
 
-    if players.get(playerID, "surveying"):
+    if showPercent:
         rawlist.sort(key = lambda mine:mine[1])
 
     minelist = []
@@ -191,11 +193,6 @@ def list_mines(playerID):
         minelist.append(mine[0]+postfix)
 
     return minelist
-
-def targetted(playerID):
-    # returns mineID that player has targetted
-
-    return players.get(playerID, "targetted")
 
 def fatigue_left(playerID, now):
     # returns fatigue left for playerID from passed in no
@@ -211,10 +208,20 @@ def may_strike(playerID, mineID):
 
     return mineID in permitted
 
-def held_res(player):
-    # returns dict of player's held res
+def player_get(playerID, field):
+    # retrieves field of playerID from playerdata
 
-    return players.get(player, "held res")
+    return players.get(playerID, field)
+
+def player_fatiguerate(playerID):
+    # return fatigue seconds
+
+    return players.fatigue_shift(playerID)
+
+def player_strikerate(playerID):
+    # return player strikerate
+
+    return players.strikerate(playerID)
 
 ###
 

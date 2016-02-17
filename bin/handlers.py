@@ -16,6 +16,8 @@ COMMANDS = {}
 LANG = {}
 UNIMP = "I'm sorry, friend, but this function is currently disabled.  I expect it to return with an improved ability to support your mining ventures."
 
+p.defnoun("mine", "mines")
+
 ## file i/o
 
 def init():
@@ -48,6 +50,17 @@ def list():
     return [command for command in iter(COMMANDS)]
 
 ## base handler functions
+
+def commands(playerID, user, now, inputs):
+    # returns a list of currently valid commands
+
+    msg = ""
+
+    for cmd in list():
+        msg += "!"+cmd
+
+    return [msg]
+
 
 def join(playerID, user, now, inputs):
     # creates a new player
@@ -133,6 +146,7 @@ def report(playerID, user, now, inputs):
 
     response.append(player_mines(playerID))
     response.append(player_res(playerID))
+    response.append(player_favors(playerID))
     response.extend(player_stats(playerID, now))
 
     return response
@@ -146,11 +160,11 @@ def strike(playerID, user, now, inputs):
         return response
 
     if len(inputs) < 2:
-        targetted = game.targetted(playerID)
+        targetted = game.player_get(playerID, "targetted")
     else:
         targetted = game.is_mine(inputs[1])
         if not targetted:
-            targetted = game.targetted(playerID)
+            targetted = game.player_get(playerID, "targetted")
 
     fatigue, permitted, depleted, reslist, lvlUp = game.strike(playerID, targetted, now)
 
@@ -296,17 +310,38 @@ def pretty_res(reslist):
 def player_res(playerID):
     # given playerID, generated held res list
 
-    res = pretty_res(game.held_res(playerID))
+    res = pretty_res(game.player_get(playerID, "held res"))
 
     if res:
         return "You're holding the following resources: "+res
     else:
         return "You don't have any resources in your possession.  On behalf of the empresss, I encoruage you to work on your mining endeavors."
 
+
 def player_stats(playerID, now):
     # given playerID, return formatted stats
 
-    return [player_fatigue(playerID, now), "stas placeholder"]
+    response = []
+
+    depth, width = game.player_strikerate(playerID)
+    fatigue = game.player_fatiguerate(playerID)
+
+    response.append("You can mine up to "+p.no("unit", depth)+" from "+p.no("vein", width)+" every strike, and strike every "+p.no("second", fatigue)+" without experiencing fatigue.")
+    response.append("You've cleared "+p.no("mine", len(game.player_get(playerID, "mines completed"))) +".")
+
+    response.append("Please continue working hard for the empress!")
+
+    return response
+
+def player_favors(playerID):
+    # format player favor list
+
+    favors = game.player_get(playerID, "favors")
+
+    if favors:
+        return "The empress has granted you the following "+p.no("favor", len(favors))+": "+", ".join(favors)
+    else:
+        return "You do not have any earned favors from the empress.  She will reward your dilligence and loyalty."
 
 def player_fatigue(playerID, now):
     # given playerID, return formatted fatigue message

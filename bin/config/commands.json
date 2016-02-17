@@ -51,5 +51,8 @@
   "alias":{
     "help":"",
     "player only":true
+  },
+  "commands":{
+    "player only": false
   }
 }
