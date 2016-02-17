@@ -9,7 +9,7 @@ import re
 import time as systime
 import imp
 
-import formatter
+import util
 import txtminebot
 
 config = []
@@ -163,7 +163,7 @@ def receive(msg):
             message = " ".join(process[3:])
 
     #print("command: "+command)
-    formatted = formatter.format_message(msg)
+    formatted = util.format_message(msg)
 
     if formatted != "":
         user = formatted.split("\t")[1]
