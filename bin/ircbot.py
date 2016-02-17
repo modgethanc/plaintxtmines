@@ -196,4 +196,5 @@ def start():
 def reload():
     txtminebot.save()
     imp.reload(txtminebot)
+    imp.reload(util)
     txtminebot.init()

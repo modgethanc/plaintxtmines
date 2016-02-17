@@ -3,8 +3,11 @@
 import random
 import json
 import inflect
+import time
+import re
 
 p = inflect.engine()
+p.defnoun("mine", "mines")
 
 def genID(digits=5):
     # makes a string of digits

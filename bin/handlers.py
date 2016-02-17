@@ -57,7 +57,7 @@ def commands(playerID, user, now, inputs):
     msg = ""
 
     for cmd in list():
-        msg += "!"+cmd
+        msg += "!"+cmd+" "
 
     return [msg]
 
