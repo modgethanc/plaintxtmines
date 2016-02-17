@@ -99,12 +99,7 @@ def mines(playerID, user, time, inputs):
 
     response = []
 
-    minelist = game.list_mines(playerID)
-
-    msg = "You own the following "+p.plural("mines", len(minelist))+": "
-    msg += ", ".join(minelist)
-
-    response.append(msg)
+    response.append(player_mines(playerID))
 
     return response
 
@@ -128,20 +123,17 @@ def fatigue(playerID, user, now, inputs):
 
     response = []
 
-    fatigue = game.fatigue_left(playerID, now)
-
-    if fatigue:
-        response.append("You'll be ready to strike again in "+util.pretty_time(fatigue)+".  Please rest patiently so you do not stress your body.")
-    else:
-        response.append("You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.")
+    response.append(player_fatigue(playerID, now))
 
     return response
 
-def report(playerID, user, time, inputs):
+def report(playerID, user, now, inputs):
 
     response = []
 
-    response.append(UNIMP)
+    response.append(player_mines(playerID))
+    response.append(player_res(playerID))
+    response.extend(player_stats(playerID, now))
 
     return response
 
@@ -160,14 +152,19 @@ def strike(playerID, user, now, inputs):
         if not targetted:
             targetted = game.targetted(playerID)
 
-    fatigue, permitted, depleted, reslist = game.strike(playerID, targetted, now)
+    fatigue, permitted, depleted, reslist, lvlUp = game.strike(playerID, targetted, now)
 
     mineName = game.name_mine(targetted)
 
     if reslist:
-        response.append(random.choice(LANG.get("wham")) + "  You struck at "+ mineName + " and mined the following: "+ game.print_reslist(reslist))
+        lvlMsg = ""
+        if lvlUp:
+            lvlMsg = "You're feeling strong!  "
+        response.append(random.choice(LANG.get("wham")) + lvlMsg + "  You struck at "+ mineName + " and mined the following: "+ game.print_reslist(reslist))
         if depleted:
             response.append("As you clear the last of the rubble from "+mineName+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
+            response.append(mineName+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
+
     else:
         response.append(strike_failure(fatigue, permitted))
 
@@ -193,7 +190,7 @@ def res(playerID, user, time, inputs):
 
     response = []
 
-    response.append(UNIMP)
+    response.append(player_res(playerID))
 
     return response
 
@@ -274,7 +271,7 @@ def strike_failure(fatigue, permitted):
     msg = ""
 
     if fatigue:
-        msg += "You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
+        msg += "You're still tired from your last attempt.  You'll be ready again in "+util.pretty_time(fatigue)+".  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
 
     if not permitted:
         if fatigue:
@@ -284,4 +281,51 @@ def strike_failure(fatigue, permitted):
 
         msg += "ou do not have permission to work on that mine, friend."
 
+    return msg
+
+def pretty_res(reslist):
+    # return a string of human-readable reslist
+    
+    readable = []
+
+    for res in reslist:
+        readable.append(p.no(res, reslist.get(res)))
+
+    return ", ".join(readable)
+
+def player_res(playerID):
+    # given playerID, generated held res list
+
+    res = pretty_res(game.held_res(playerID))
+
+    if res:
+        return "You're holding the following resources: "+res
+    else:
+        return "You don't have any resources in your possession.  On behalf of the empresss, I encoruage you to work on your mining endeavors."
+
+def player_stats(playerID, now):
+    # given playerID, return formatted stats
+
+    return [player_fatigue(playerID, now), "stas placeholder"]
+
+def player_fatigue(playerID, now):
+    # given playerID, return formatted fatigue message
+
+    fatigue = game.fatigue_left(playerID, now)
+
+    if fatigue:
+        return "You'll be ready to strike again in "+util.pretty_time(fatigue)+".  Please rest patiently so you do not stress your body."
+    else:
+        return "You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress."
+
+def player_mines(playerID):
+    # given playerID, return mine sentence
+
+    minelist = game.list_mines(playerID)
+    if minelist:
+        msg = "You own the following "+p.plural("mines", len(minelist))+": "
+        msg += ", ".join(minelist)
+    else:
+        msg = "You don't own any mines friend.  The empress expects all citizens to work productively; please consider making progress on your mining ventures."
+    
     return msg

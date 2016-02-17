@@ -19,6 +19,7 @@ DEFAULTS = {
     "last seen":0,
     "mines owned":[],
     "mines assigned":[],
+    "mines completed":[],
     "mines available":1,
     "str":1,
     "end":0,
@@ -28,6 +29,8 @@ DEFAULTS = {
     "held total":0,
     "tithed res":{},
     "tithed total":0,
+    "historic res":{},
+    "historic total":0,
     "last strike":0,
     "inventory":[]
   }
@@ -207,18 +210,30 @@ def dec(playerID, field):
     return value
 
 def add_res(playerID, reslist):
-    # for given dict reslist, add to player's held
+    # for given dict reslist, add to player's held and historical
 
     held = get(playerID, "held res")
+    history = get(playerID, "historic res")
 
-    for x in reslist:
-        current = held.get(x)
+    if not history:  # for backwards compatibility
+        update(playerID, {"historic res":{}})
+        update(playerID, {"historic total":0})
+        history = get(playerID, "historic res")
+
+    for res in reslist:
+        current = held.get(res)
+        historic = history.get(res)
         if current:
-            current += reslist.get(x)
+            current += reslist.get(res)
         else:
-            held.update({x:reslist.get(x)})
+            held.update({res:reslist.get(res)})
+        if historic:
+            historic += reslist.get(res)
+        else:
+            history.update({res:reslist.get(res)})
 
     update(playerID, {"held total":util.sum_res(held)})
+    update(playerID, {"historic total":util.sum_res(history)})
 
     return held
 

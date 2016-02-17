@@ -211,6 +211,13 @@ def may_strike(playerID, mineID):
 
     return mineID in permitted
 
+def held_res(player):
+    # returns dict of player's held res
+
+    return players.get(player, "held res")
+
+###
+
 def print_reslist(reslist):
     # processes a dict reslist into human-readable
 
@@ -253,13 +260,13 @@ def strike(playerID, mineID, now):
             fatigue = players.double_fatigue(playerID, now)
 
     if not fatigue and permitted:
-        reslist = successful_strike(playerID, mineID, now)
+        reslist, lvlUp  = successful_strike(playerID, mineID, now)
 
     if mines.get(mineID, "status") == "depleted":
         mine_depleted(playerID, mineID)
         depleted = True
 
-    return fatigue, permitted, depleted, reslist
+    return fatigue, permitted, depleted, reslist, lvlUp
 
 def move(playerID, newzoneID):
     # checks if playerID can move to newzoneID and calls move if possible
@@ -297,9 +304,11 @@ def alias(playerID, newAlias):
 
 def mine_depleted(playerID, mineID):
     # increase player endurance and mines available
+    # move mine to completed
 
     players.inc(playerID, "mines available")
     players.inc(playerID, "end")
+    players.get(playerID, "mines completed").append(mineID)
 
     return
 
@@ -345,9 +354,7 @@ def successful_strike(playerID, mineID, now):
     players.update(playerID, {"last strike":now})
     players.inc(playerID, "strikes")
 
-    strength_roll(playerID)
-
-    return reslist
+    return reslist, strength_roll(playerID)
 
 def strength_roll(playerID):
     # rolls for an increase in strength
@@ -356,7 +363,6 @@ def strength_roll(playerID):
 
     if random.randrange(0,99) < 20/strength: # scaling level up
         players.inc(playerID, "str")
-        # "You're feeling strong!"
         return True
     else:
         return False
