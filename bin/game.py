@@ -25,6 +25,7 @@ baseFatigue = 10
 RESOURCES = {}
 CONFIG = os.path.join("config")
 DATA = os.path.join("..", "data")
+IRC_COLORS = False
 
 ## file i/o
 
@@ -186,9 +187,27 @@ def list_mines(playerID):
 
     for mine in rawlist:
         postfix = ""
+        depletion = mine[1]
 
-        if mine[1] is not None:   # True if depletion has been set
-            postfix = " ("+str(mine[1])+"%)"
+        if depletion is not None:   # True if depletion has been set
+            color = ""
+            uncolor = ""
+            if IRC_COLORS:
+                uncolor = "\x03"
+                if depletion > 98:
+                    color = "\x0311"
+                elif depletion > 90:
+                    color = "\x0309"
+                elif depletion > 49:
+                    color = "\x0308"
+                elif depletion > 24:
+                    color = "\x0307"
+                elif depletion > 9:
+                    color = "\x0304"
+                else:
+                    color = "\x0305"
+
+            postfix = " ("+color+str(depletion)+"%"+uncolor+")"
 
         minelist.append(mine[0]+postfix)
 
@@ -374,13 +393,6 @@ def strength_roll(playerID):
     else:
         return False
 
-## BRINGING SOME FORMATTING SHIT OVER
-
-def heldFormatted(player):
-    held = getHeld(player)
-
-    return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(getHeldTotal(player))+" units"
-
 ############################# LINE OF DEATH ################
 
 ## meta functions
@@ -392,96 +404,3 @@ def logGolem(user):
   golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
   golemarchive.write(golemtext+"\n")
   golemarchive.close()
-
-## output formatting
-
-def itemizeRes(resources): # takes list of res and outputs as human-readable
-    total = 0
-    output = []
-    i = 0
-    item = ""
-    for res in resources:
-        x = int(res)
-        total += x
-        if i == 0: item = "tilde"
-        elif i == 1: item = "pound"
-        elif i == 2: item = "spiral"
-        elif i == 3: item = "amper"
-        elif i == 4: item = "splat"
-        elif i == 5: item = "lbrack"
-        elif i == 6: item = "rbrack"
-        elif i == 7: item = "carat"
-
-        if x > 0:
-          output.append(p.no(item, x))
-
-        i += 1
-
-    if total > 0:
-      output.append("for a total of "+p.no("unit", total))
-    else:
-      output.append("nothing useful")
-
-    return ", ".join(output)
-    #return str(resources[0])+" tilde, "+str(resources[1])+" pound, "+str(resources[2])+" spiral, "+str(resources[3])+" amper, "+str(resources[4])+" splat, "+str(resources[5])+" lbrack, "+str(resources[6])+" rbrack, and "+str(resources[7])+" carat, for a total of "+str(total)+" units"
-
-def statsFormatted(channel, user):
-    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - min(9, players.getEndurance(user)))+" without experiencing fatigue.  "
-    plural = 's'
-    if players.getClearedCount(user) == 1: plural = ''
-    stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+".  "
-    stats += "You can make a golem with up to "+p.no("resource", int(3.5*players.getStrength(user)))+".  "
-    stats += "Please continue working hard for the empress!"
-
-    return stats
-
-def golemStats(channel, user, time):
-    status = golems.getShape(user)+" is hard at work!  "
-    status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user)) + ".  "
-    status += "It's been going for "+util.pretty_time(golems.getLife(user, time))+"."
-
-    return status
-
-def resourcesFormatted(channel, user):
-    return "You're holding the following resources: "+itemizeRes(players.getHeld(user))
-
-def mineListFormatted(msg, channel, user):
-    plural = ''
-    if len(players.getMines(user)) > 0:
-        plural = 's'
-
-    prejoin = []
-
-    mineList = players.getMines(user)
-    rawlist = []
-    for x in mineList:
-        depletion = int(100*float(mines.getTotal(x))/float(mines.getStarting(x)))
-        prefix = ''
-
-        if mineList.index(x) == 0: # currently targetted
-            prefix= '>'
-
-        rawlist.append([prefix+x.capitalize(), depletion])
-
-    rawlist.sort(key=lambda entry:int(entry[1]))
-
-    for x in rawlist:
-        depletion = x[1]
-
-        color = ''
-        if depletion > 98:
-            color += "\x0311"
-        elif depletion > 90:
-            color += "\x0309"
-        elif depletion > 49:
-            color += "\x0308"
-        elif depletion > 24:
-            color += "\x0307"
-        elif depletion > 9:
-            color += "\x0304"
-        else:
-            color += "\x0305"
-
-        prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
-
-    return "You're working on the following mine"+plural+": "+j.join(prejoin)

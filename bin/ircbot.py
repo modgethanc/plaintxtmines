@@ -24,10 +24,9 @@ SERVER = config[0]
 CHAN = config[1]
 BOTNAME = config[2]
 ADMIN = config[3]
-TEST = "testicles"
+COMMANDS = []
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-txtminebot.init()
 
 def send(msg):
     ircsock.send(msg.encode())
@@ -182,15 +181,42 @@ def receive(msg):
         code = adminPanel(channel, user, time, message)
 
     if command == "PRIVMSG":
-        response = txtminebot.handle(user, time, message)
+        response = handle(user, time, message)
 
         if response:
             multisay(channel, response, user)
 
     sys.stdout.flush()
 
+def handle(user, time, message):
+    # main command processing
+
+    response = []
+    print("handling: "+message)
+    if re.match('^:!', message):
+        inputs = message.split(" ")
+        command = inputs[0].split("!")[1]
+
+        if command in COMMANDS:
+            print("found command "+ command)
+            handler = getattr(txtminebot, command)
+            playerID = txtminebot.playerID(user)
+
+            if COMMANDS[command].get("player only"):
+                if playerID:
+                    response.extend(handler(playerID, user, time, inputs))
+                else:
+                    response.append(txtminebot.STRANGER)
+            else:
+                response.extend(handler(playerID, user, time, inputs))
+
+    return response
 #########################
 def start():
+    global COMMANDS
+
+    txtminebot.init()
+    COMMANDS = txtminebot.COMMANDS
     connect(SERVER, CHAN, BOTNAME)
 
 def reload():
