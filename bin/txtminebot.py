@@ -18,13 +18,14 @@ LANG = {}
 STRANGER = ""
 UNIMP = "I'm sorry, friend, but this function is currently disabled.  I expect it to return with an improved ability to support your mining ventures."
 
+IRC = False
 p.defnoun("mine", "mines")
 
 ## file i/o
 
 def init():
     # calls all the loading methods
-    
+
     global STRANGER
 
     imp.reload(game)
@@ -53,17 +54,10 @@ def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
     COMMANDS = json.load(infile)
     infile.close()
 
-def list():
-    # returns a list of all loaded commands
-
-    return [command for command in iter(COMMANDS)]
-
 def save():
     # calls game save
 
     game.save()
-
-##
 
 def playerID(name):
     # returns playerID of name, or none
@@ -77,8 +71,11 @@ def commands(playerID, user, now, inputs):
 
     msg = ""
 
-    for cmd in list():
-        msg += "!"+cmd+" "
+    for cmd in COMMANDS:
+        if IRC:
+            msg += util.irc_rainbow("!"+cmd+" ")
+        else:
+            msg += "!"+cmd+" "
 
     return [msg]
 
@@ -93,12 +90,11 @@ def join(playerID, user, now, inputs):
         if len(inputs) < 2:
             response.append("You must declare a province to which you call home, stranger.  "+provinces())
         else:
-            #zoneID = game.is_zone(inputs[1])
             zoneID = game.match_province(inputs[1])
             newID, hasSpace, zoneExists = game.new_player(make_player(user, now, zoneID))
             if newID:
                 print("new player: "+newID)
-                response.append("Your citizenship of the province of "+game.name_zone(zoneID)+" is now acknowledged.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with \"!new\".")
+                response.append("Your citizenship of the province of "+game.get_data("world", zoneID, "name")+" is now acknowledged.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with \"!new\".")
             else:
                 response.append(failed_join(hasSpace, zoneExists))
 
@@ -106,14 +102,13 @@ def join(playerID, user, now, inputs):
 
 def new(playerID, user, time, inputs):
     # new mine creation
-    print("creating new mine for "+user)
 
     response = []
 
     mineID, hasSpace, mayCreate = game.new_mine(playerID)
 
     if mineID:
-        minename = game.name_mine(mineID)
+        minename = game.get_data("mine", mineID, "name")
         response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+minename+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic \'!strike\".")
     else:
         response.append(failed_new(hasSpace, mayCreate))
@@ -129,6 +124,7 @@ def grovel(playerID, user, time, inputs):
     return response
 
 def mines(playerID, user, time, inputs):
+    # returns formatted list of mines for playerID
 
     response = []
 
@@ -145,6 +141,7 @@ def info(playerID, user, time, inputs):
     return response
 
 def stats(playerID, user, now, inputs):
+    # calls stat formatter and returns it
 
     response = []
 
@@ -153,6 +150,7 @@ def stats(playerID, user, now, inputs):
     return response
 
 def fatigue(playerID, user, now, inputs):
+    # calls fatigue formatter and returns it
 
     response = []
 
@@ -161,6 +159,7 @@ def fatigue(playerID, user, now, inputs):
     return response
 
 def report(playerID, user, now, inputs):
+    # calls each formatter for full player details
 
     response = []
 
@@ -181,21 +180,26 @@ def strike(playerID, user, now, inputs):
         return response
 
     if len(inputs) < 2:
-        targetted = game.player_get(playerID, "targetted")
+        targetID = game.get_data("players", playerID, "targetted")
     else:
-        targetted = game.is_mine(inputs[1])
-        if not targetted:
-            targetted = game.player_get(playerID, "targetted")
+        targetID = game.is_mine(inputs[1])
+        if not targetID:
+            targetID = game.get_data("players", playerID, "targetted")
 
-    fatigue, permitted, depleted, reslist, lvlUp = game.strike(playerID, targetted, now)
+    fatigue, permitted, depleted, reslist, lvlUp = game.strike(playerID, targetID, now)
 
-    mineName = game.name_mine(targetted)
+    mineName = game.get_data("mines", targetID, "name")
 
     if reslist:
         lvlMsg = ""
         if lvlUp:
             lvlMsg = "You're feeling strong!  "
-        response.append(random.choice(LANG.get("wham")) + lvlMsg + "  You struck at "+ mineName + " and mined the following: "+ game.print_reslist(reslist))
+        if IRC:
+            wham = util.irc_rainbow(random.choice(LANG.get("wham")))
+        else:
+            wham = random.choice(LANG.get("wham"))
+
+        response.append(wham + lvlMsg + "  You struck at "+ mineName + " and mined the following: "+ game.print_reslist(reslist))
         if depleted:
             response.append("As you clear the last of the rubble from "+mineName+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
             response.append(mineName+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
@@ -331,7 +335,7 @@ def pretty_res(reslist):
 def player_res(playerID):
     # given playerID, generated held res list
 
-    res = pretty_res(game.player_get(playerID, "held res"))
+    res = pretty_res(game.get_data("players", playerID, "held res"))
 
     if res:
         return "You're holding the following resources: "+res
@@ -348,7 +352,7 @@ def player_stats(playerID, now):
     fatigue = game.player_fatiguerate(playerID)
 
     response.append("You can mine up to "+p.no("unit", depth)+" from "+p.no("vein", width)+" every strike, and strike every "+p.no("second", fatigue)+" without experiencing fatigue.")
-    response.append("You've cleared "+p.no("mine", len(game.player_get(playerID, "mines completed"))) +".")
+    response.append("You've cleared "+p.no("mine", len(game.get_data("players", playerID, "mines completed"))) +".")
     # "You can make a golem with up to "+p.no("resource", int(3.5*players.getStrength(user)))+".  "
 
 
@@ -357,7 +361,7 @@ def player_stats(playerID, now):
 def player_favors(playerID):
     # format player favor list
 
-    favors = game.player_get(playerID, "favors")
+    favors = game.get_data("players", playerID, "favors")
 
     if favors:
         return "The empress has granted you the following "+p.no("favor", len(favors))+": "+", ".join(favors)
@@ -377,14 +381,47 @@ def player_fatigue(playerID, now):
 def player_mines(playerID):
     # given playerID, return mine sentence
 
-    minelist = game.list_mines(playerID)
+    minelist = pretty_minelist(game.list_mines(playerID))
     if minelist:
         msg = "You own the following "+p.plural("mines", len(minelist))+": "
         msg += ", ".join(minelist)
     else:
         msg = "You don't own any mines friend.  The empress expects all citizens to work productively; please consider making progress on your mining ventures."
-    
+
     return msg
+
+def pretty_minelist(rawlist):
+    # takes a list of ["mine name", depletion] and formats for output
+
+    minelist = []
+
+    for mine in rawlist:
+        postfix = ""
+        depletion = mine[1]
+
+        if depletion is not None:   # True if depletion has been set
+            color = ""
+            uncolor = ""
+            if IRC:
+                uncolor = "\x03"
+                if depletion > 98:
+                    color = "\x0311"
+                elif depletion > 90:
+                    color = "\x0309"
+                elif depletion > 49:
+                    color = "\x0308"
+                elif depletion > 24:
+                    color = "\x0307"
+                elif depletion > 9:
+                    color = "\x0304"
+                else:
+                    color = "\x0305"
+
+            postfix = " ("+color+str(depletion)+"%"+uncolor+")"
+
+        minelist.append(mine[0]+postfix)
+
+    return minelist
 
 def golem_stats(playerID):
     # copied over from old version

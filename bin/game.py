@@ -13,14 +13,13 @@ import inflect
 
 from datetime import datetime
 import json
+import sys
 import os
 import random
 import time as systime
 import imp
 
 p = inflect.engine()
-j = ", "
-baseFatigue = 10
 
 RESOURCES = {}
 CONFIG = os.path.join("config")
@@ -144,15 +143,14 @@ def has_space(zoneID, target):
 
     return world.has_space(zoneID, target)
 
-def name_mine(mineID):
-    # returns name of mine
+def get_data(datatype, dataID, field):
+    # calls specific get function for named data time
+    # returns value of field
+    # valid datatypes: players, world, mines
 
-    return mines.get(mineID, "name")
+    dataget = getattr(getattr(sys.modules[__name__], datatype), "get")
 
-def name_zone(zoneID):
-    # returns name of zoneID
-
-    return world.get(zoneID, "name")
+    return dataget(dataID, field)
 
 def list_zones():
     # returns sorted list of zone names
@@ -183,35 +181,7 @@ def list_mines(playerID):
     if showPercent:
         rawlist.sort(key = lambda mine:mine[1])
 
-    minelist = []
-
-    for mine in rawlist:
-        postfix = ""
-        depletion = mine[1]
-
-        if depletion is not None:   # True if depletion has been set
-            color = ""
-            uncolor = ""
-            if IRC_COLORS:
-                uncolor = "\x03"
-                if depletion > 98:
-                    color = "\x0311"
-                elif depletion > 90:
-                    color = "\x0309"
-                elif depletion > 49:
-                    color = "\x0308"
-                elif depletion > 24:
-                    color = "\x0307"
-                elif depletion > 9:
-                    color = "\x0304"
-                else:
-                    color = "\x0305"
-
-            postfix = " ("+color+str(depletion)+"%"+uncolor+")"
-
-        minelist.append(mine[0]+postfix)
-
-    return minelist
+    return rawlist
 
 def fatigue_left(playerID, now):
     # returns fatigue left for playerID from passed in no
@@ -226,11 +196,6 @@ def may_strike(playerID, mineID):
     permitted.extend(players.get(playerID, "mines assigned"))
 
     return mineID in permitted
-
-def player_get(playerID, field):
-    # retrieves field of playerID from playerdata
-
-    return players.get(playerID, field)
 
 def player_fatiguerate(playerID):
     # return fatigue seconds
@@ -278,6 +243,7 @@ def strike(playerID, mineID, now):
     depleted = False
     reslist = None
     fatigue = 1
+    lvlUp = False
 
     if may_strike(playerID, mineID):
         permitted = True

@@ -29,6 +29,11 @@ def sum_res(res):
 
     return total
 
+def irc_rainbow(target):
+    # sets a random irc color for target and returns it
+
+    return "\x03"+random.choice(['4', '8', '9', '11', '12', '13'])+target+"\x03"
+
 def pretty_dict(indict):
     print(json.dumps(indict, sort_keys=True, indent=2, separators=(",", ":")))
 

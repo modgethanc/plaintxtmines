@@ -1,10 +1,7 @@
 #!/usr/bin/python
 
 import socket
-import os
 import sys
-import fileinput
-import random
 import re
 import time as systime
 import imp
@@ -14,6 +11,7 @@ import txtminebot
 
 config = []
 channels = []
+COMMANDS = []
 
 configfile = open("ircconfig", "r")
 for x in configfile:
@@ -24,7 +22,6 @@ SERVER = config[0]
 CHAN = config[1]
 BOTNAME = config[2]
 ADMIN = config[3]
-COMMANDS = []
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -57,13 +54,11 @@ def disconnect():
   ircsock.close()
 
 def say(channel, msg, nick=""):
-  if nick == channel: #don't repeat nick if in PM
+  if nick == channel:  # don't repeat nick if in PM
     nick = ""
   elif nick:
     nick += ": "
 
-  #print "trying to say: " + channel + ":>" + nick+msg
-  #print ":::PRIVMSG "+channel+" :"+nick+msg+":::"
   send("PRIVMSG "+channel+" :"+nick+msg+"\n")
 
 def multisay(channel, msglist, nick=""):
@@ -71,12 +66,10 @@ def multisay(channel, msglist, nick=""):
    say(channel, x, nick)
 
 def wall(msg):
-  global channels
   for x in channels:
     say(x, msg)
 
 def multiwall(msglist):
-  global channels
   for x in msglist:
     wall(x)
 
@@ -128,8 +121,6 @@ def listen():
       receive(msg)
 
 def receive(msg):
-      #print msg
-
     if msg.find("PING :") != -1:
         return ping()
 
@@ -161,7 +152,6 @@ def receive(msg):
         else:
             message = " ".join(process[3:])
 
-    #print("command: "+command)
     formatted = util.format_message(msg)
 
     if formatted != "":
@@ -193,6 +183,7 @@ def handle(user, time, message):
 
     response = []
     print("handling: "+message)
+
     if re.match('^:!', message):
         inputs = message.split(" ")
         command = inputs[0].split("!")[1]
@@ -211,12 +202,17 @@ def handle(user, time, message):
                 response.extend(handler(playerID, user, time, inputs))
 
     return response
+
+
 #########################
+
 def start():
     global COMMANDS
 
     txtminebot.init()
+    txtminebot.IRC = True
     COMMANDS = txtminebot.COMMANDS
+
     connect(SERVER, CHAN, BOTNAME)
 
 def reload():
@@ -224,3 +220,4 @@ def reload():
     imp.reload(txtminebot)
     imp.reload(util)
     txtminebot.init()
+    txtminebot.IRC = True
