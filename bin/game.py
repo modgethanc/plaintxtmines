@@ -136,7 +136,7 @@ def is_mine(minename):
     # checks for named mine in mine data
     # returrns mineID if listed
 
-    return mine.exists(minename)
+    return mines.exists(minename)
 
 def has_space(zoneID, target):
     # checks if zoneID has space
