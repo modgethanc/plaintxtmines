@@ -19,14 +19,14 @@ DEFAULTS = {
     "max residents": 10,
     "rates": {
       "size":100,
-      "tilde":40,
-      "pound":20,
-      "spiral":15,
+      "tilde":10,
+      "pound":10,
+      "spiral":10,
       "amper":10,
-      "splat":6,
-      "lbrack":4,
-      "rbrack":4,
-      "carat":1 },
+      "splat":10,
+      "lbrack":10,
+      "rbrack":10,
+      "carat":10 },
     "level":0
 }
 

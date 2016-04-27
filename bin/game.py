@@ -8,7 +8,7 @@ import empress
 import gibber
 import util
 
-from fuzzywuzzy import process
+#from fuzzywuzzy import process
 import inflect
 
 from datetime import datetime
@@ -136,7 +136,7 @@ def is_mine(minename):
     # checks for named mine in mine data
     # returrns mineID if listed
 
-    return mine.exists(minename)
+    return mines.exists(minename)
 
 def has_space(zoneID, target):
     # checks if zoneID has space
@@ -229,9 +229,10 @@ def match_province(target):
     # returns zoneID
 
     zones = world.list_names()
-    match = process.extractOne(target, zones)[0]
+    #match = process.extractOne(target, zones)[0]
 
-    return world.exists(match)
+    #return world.exists(match)
+    return world.exists(target)
 
 ## player actions
 

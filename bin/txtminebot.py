@@ -108,7 +108,7 @@ def new(playerID, user, time, inputs):
     mineID, hasSpace, mayCreate = game.new_mine(playerID)
 
     if mineID:
-        minename = game.get_data("mine", mineID, "name")
+        minename = game.get_data("mines", mineID, "name")
         response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+minename+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic \'!strike\".")
     else:
         response.append(failed_new(hasSpace, mayCreate))
@@ -193,7 +193,7 @@ def strike(playerID, user, now, inputs):
     if reslist:
         lvlMsg = ""
         if lvlUp:
-            lvlMsg = "You're feeling strong!  "
+            lvlMsg = "  You're feeling strong!"
         if IRC:
             wham = util.irc_rainbow(random.choice(LANG.get("wham")))
         else:

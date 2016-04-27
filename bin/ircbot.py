@@ -115,7 +115,10 @@ def adminPanel(channel, user, time, msg):
 
 def listen():
   while 1:
-    msg = ircsock.recv(2048).decode()
+    try:
+        msg = ircsock.recv(2048).decode()
+    except UnicodeDecodeError:
+        continue
     print(msg)
     if msg:
       receive(msg)
