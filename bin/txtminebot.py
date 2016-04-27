@@ -325,20 +325,26 @@ def failed_new(hasSpace, mayCreate):
 def strike_failure(fatigue, permitted):
     # generates strike failure message
 
-    msg = ""
+    #msg = ""
 
-    if fatigue:
-        msg += "You're still tired from your last attempt.  You'll be ready again in "+util.pretty_time(fatigue)+".  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
+    #if fatigue:
+        #msg += "You're still tired from your last attempt.  You'll be ready again in "+util.pretty_time(fatigue)+".  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
 
     if not permitted:
-        if fatigue:
-            msg += "  Additionally, y"
-        else:
-            msg += "Y"
+        #if fatigue:
+        #    msg += "  Additionally, y"
+        #else:
+        #    msg += "Y"
 
-        msg += "ou do not have permission to work on that mine, friend."
+        #msg += "ou do not have permission to work on that mine, friend."
+        return "You do not have permission to work on that mine, friend."
 
-    return msg
+    if fatigue:
+        return "You're still tired from your last attempt.  You'll be ready again in "+util.pretty_time(fatigue)+".  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
+
+    return ""
+
+    #return msg
 
 def pretty_res(reslist):
     # return a string of human-readable reslist

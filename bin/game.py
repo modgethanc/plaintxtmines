@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import golems
 import players
 import mines
@@ -7,6 +6,7 @@ import world
 import empress
 import gibber
 import util
+import out
 
 #from fuzzywuzzy import process
 import inflect
@@ -253,9 +253,11 @@ def strike(playerID, mineID, now):
     fatigue = 1
     lvlUp = False
 
+    fatigue = players.fatigue_left(playerID, now)
+
     if may_strike(playerID, mineID):
         permitted = True
-        fatigue = players.fatigue_left(playerID, now)
+        #fatigue = players.fatigue_left(playerID, now)
         if fatigue > 0:
             fatigue = players.double_fatigue(playerID, now)
 
