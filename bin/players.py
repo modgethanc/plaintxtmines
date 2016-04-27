@@ -227,11 +227,13 @@ def add_res(playerID, reslist):
         if current:
             current += reslist.get(res)
         else:
-            held.update({res:reslist.get(res)})
+            current = reslist.get(res)
         if historic:
             historic += reslist.get(res)
+            history.update({res:historic})
         else:
             history.update({res:reslist.get(res)})
+        held.update({res:current})
 
     update(playerID, {"held total":util.sum_res(held)})
     update(playerID, {"historic total":util.sum_res(history)})
