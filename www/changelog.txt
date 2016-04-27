@@ -1,5 +1,12 @@
 ------- currently alphatesting in ##txtmines-test ------------------------------
 
+------- features pushed on 2016-04-27 ------------------------------------------
+
+MASSIVE BACKEND OVERHAUL
+1. html output
+2. multiple provinces
+3. nick aliasing
+
 ------- features pushed on 2015-03-29 ------------------------------------------
 
 GOLEMNERF
