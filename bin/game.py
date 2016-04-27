@@ -6,7 +6,7 @@ import world
 import empress
 import gibber
 import util
-import out
+import htmlout
 
 #from fuzzywuzzy import process
 import inflect
@@ -67,6 +67,8 @@ def save():
     mines.save()
     players.save()
     world.save()
+
+    htmlout.write("world.html")
 
 ## object creation
 

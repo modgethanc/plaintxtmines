@@ -122,6 +122,7 @@ def listen():
     print(msg)
     if msg:
       receive(msg)
+      txtminebot.save()
 
 def receive(msg):
     if msg.find("PING :") != -1:
