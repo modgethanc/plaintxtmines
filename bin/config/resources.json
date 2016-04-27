@@ -1,0 +1,34 @@
+{
+  "tilde":{
+    "glyph":"~",
+    "value":0
+  },
+  "pound":{
+    "glyph":"#",
+    "value":0
+  },
+  "spiral":{
+    "glyph":"@",
+    "value":0
+  },
+  "amper":{
+    "glyph":"&",
+    "value":0
+  },
+  "splat":{
+    "glyph":"*",
+    "value":0
+  },
+  "lbrack":{
+    "glyph":"[",
+    "value":0
+  },
+  "rbrack":{
+    "glyph":"]",
+    "value":0
+  },
+  "carat":{
+    "glyph":"^",
+    "value":0
+  }
+}

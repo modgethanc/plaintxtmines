@@ -1,184 +1,203 @@
 #!/usr/bin/python
 
-import socket
-import os
-import os.path
-import sys
-import time as systime
-from optparse import OptionParser
-import random
 import inflect
-from datetime import datetime
-
+import os
+import json
+import random
+import util
 import game
-import formatter
-import mines
-import players
-import gibber
-import empress
-import golems
+import imp
 
-### CONFIG
 p = inflect.engine()
-j = ", "
+CONFIG = os.path.join("config")
+DATA = os.path.join("..", "data")
+CMD_DEF = "commands.json"
+LANG_DEF = "lang.json"
+COMMANDS = {}
+LANG = {}
+STRANGER = ""
+UNIMP = "I'm sorry, friend, but this function is currently disabled.  I expect it to return with an improved ability to support your mining ventures."
 
-configfile = open("ircconfig", 'r')
-config = []
+IRC = False
+p.defnoun("mine", "mines")
 
-for x in configfile:
-    config.append(x.rstrip())
+## file i/o
 
-configfile.close()
+def init():
+    # calls all the loading methods
 
-botName = config[2]
-admin   = config[3]
+    global STRANGER
 
-parser = OptionParser()
+    imp.reload(game)
+    game.init()
 
-parser.add_option("-s", "--server", dest="server", default=config[0], help="the server to connect to", metavar="SERVER")
-parser.add_option("-c", "--channel", dest="channel", default=config[1], help="the channel to join", metavar="CHANNEL")
-parser.add_option("-n", "--nick", dest="nick", default=botName, help="the nick to use", metavar="NICK")
+    load_lang()
+    load_cmd()
 
-(options, args) = parser.parse_args()
+    STRANGER = "I don't know who you are, stranger.  If you'd like to enlist your talents in the name of the empress, you may do so with \"!join PROVINCE\".  "+provinces()
 
-dossierList = game.listDossiers()
-## gameplay config defaults
+def load_lang(langfile=os.path.join(CONFIG, LANG_DEF)):
+    # takes a langfile and loads into memory
 
-baseFatigue     = 10
+    global LANG
 
-file_commands   = "lang/commands.txt"
-file_interp_pos = "lang/interp-pos.txt"
-file_interp_neu = "lang/interp-neu.txt"
-file_interp_neg = "lang/interp-neg.txt"
-file_wham = "lang/wham.txt"
+    infile = open(langfile, "r")
+    LANG = json.load(infile)
+    infile.close()
 
-if config[4]:
-    baseFatigue = int(config[4])
-if config[5]:
-    file_commands = config[5]
-if config[6]:
-    file_interp_pos = config[6]
-if config[7]:
-    file_interp_neu = config[7]
-if config[8]:
-    file_interp_neg = config[8]
-if config[9]:
-    file_wham = config[9]
+def load_cmd(commandfile=os.path.join(CONFIG, CMD_DEF)):
+    # takes a commandfile and loads into memory
 
-## lang import
+    global COMMANDS
 
-COMMANDS = []
-for x in open(file_commands):
-    COMMANDS.append(x.rstrip())
+    infile = open(commandfile, "r")
+    COMMANDS = json.load(infile)
+    infile.close()
 
-INTERP_POS = []
-for x in open(file_interp_pos):
-    INTERP_POS.append(x.rstrip())
+def save():
+    # calls game save
 
-INTERP_NEU = []
-for x in open(file_interp_neu):
-    INTERP_NEU.append(x.rstrip())
+    game.save()
 
-INTERP_NEG = []
-for x in open(file_interp_neg):
-    INTERP_NEG.append(x.rstrip())
+def playerID(name):
+    # returns playerID of name, or none
 
-WHAM = []
-for x in open(file_wham):
-    WHAM.append(x.rstrip())
+    return game.is_playing(name)
 
-### irc functions
+## base handler functions
 
-def ping():
-  ircsock.send("PONG :pingis\n")
+def commands(playerID, user, now, inputs):
+    # returns a list of currently valid commands
 
-def joinchan(chan):
-  ircsock.send("JOIN "+ chan +"\n")
+    msg = ""
 
-def connect(server, channel, botnick):
-  ircsock.connect((server, 6667))
-  ircsock.send("USER "+botnick+" "+botnick+" "+botnick+" :"+admin+"\n")
-  ircsock.send("NICK "+botnick+"\n")
-
-  joinchan(channel)
-
-def say(channel, msg, nick=""):
-  if channel == nick or nick == "":
-    nick = ""
-  else:
-    nick += ": "
-
-  print "trying to say: " + channel + ":>" + msg
-  ircsock.send("PRIVMSG "+channel+" :"+nick+msg+"\n")
-
-def multisay(channel, msglist, nick=""):
- for x in msglist:
-   say(channel, x, nick)
-
-### meta functions
-
-def isPlaying(user):
-    return os.path.isfile('../data/'+user+'.dossier')
-
-def isMine(mine):
-    return os.path.isfile('../data/'+mine+'.mine')
-
-def hasGolem(user):
-    return os.path.isfile('../data/'+user+'.golem')
-
-### gameplay functions
-
-def newPlayer(user):
-    if os.path.isfile('../data/'+user+'.stats'):
-        players.newDossier(user)
-    else:
-        players.newPlayer(user)
-
-    #playerlist = open("../data/players.txt", 'a')
-    #playerlist.write(user+"\n")
-    #playerlist.close()
-    global dossierList
-    dossierList.append(user)
-
-    #ircsock.send("PRIVMSG "+channel+" :"+ user + ": New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.\n")
-
-    #return user
-
-    return "New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'."
-
-def newMine(channel, user, rates="standardrates"):
-    mine = players.newMine(user, "standardrates").capitalize()
-    players.decAvailableMines(user)
-    say(channel, "Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.", user)
-
-    return mine
-
-def golemHandler(channel, user, time, golemstring):
-    if hasGolem(user):
-        if golemstring == "destroy":
-            golemDestroy(channel, user, time)
+    for cmd in COMMANDS:
+        if IRC:
+            msg += util.irc_rainbow("!"+cmd+" ")
         else:
-            say(channel, "You can't make a new golem until your old golem finishes working!", user)
-    else:
-        if golems.calcStrength(golems.parse(golemstring)) > 0:
-            if players.canAfford(user, golems.parse(golemstring)):
-                golemfilter = list(golemstring)
-                maxgolem = int((players.getStrength(user)*3.5))
-                if len(golemfilter) > maxgolem:
-                  say(channel, "You're not strong enough to construct a golem that big, friend.  The most you can use is "+p.no("resource", maxgolem)+".", user)
-                else:
-                  golemshape = []
-                  for x in golemfilter:
-                      if x in ['~', '@', '#', '^', '&', '*', '[', ']']:
-                          golemshape.append(x)
+            msg += "!"+cmd+" "
 
-                  golem = golems.newGolem(user, ''.join(golemshape), time)
-                  players.removeRes(user, golems.getStats(user))
-                  say(channel, players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user)) + ".  It will decay as it works; once it crumbles entirely, you can gather all the resources it harvested for you.", user)
-                  game.logGolem(user)
+    return [msg]
+
+def join(playerID, user, now, inputs):
+    # creates a new player
+
+    response = []
+
+    if playerID:
+        response.append("You are already registered, my friend.")
+    else:
+        if len(inputs) < 2:
+            response.append("You must declare a province to which you call home, stranger.  "+provinces())
+        else:
+            zoneID = game.match_province(inputs[1])
+            newID, hasSpace, zoneExists = game.new_player(make_player(user, now, zoneID))
+            if newID:
+                print("new player: "+newID)
+                response.append("Your citizenship of the province of "+game.get_data("world", zoneID, "name")+" is now acknowledged.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with \"!new\".")
             else:
-                say(channel, "You don't have the resources to make that golem, friend.", user)
+                response.append(failed_join(hasSpace, zoneExists))
+
+    return response
+
+def new(playerID, user, time, inputs):
+    # new mine creation
+
+    response = []
+
+    mineID, hasSpace, mayCreate = game.new_mine(playerID)
+
+    if mineID:
+        minename = game.get_data("mines", mineID, "name")
+        response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+minename+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic \'!strike\".")
+    else:
+        response.append(failed_new(hasSpace, mayCreate))
+
+    return response
+
+def grovel(playerID, user, time, inputs):
+
+    response = []
+
+    response.append(UNIMP)
+
+    return response
+
+def mines(playerID, user, time, inputs):
+    # returns formatted list of mines for playerID
+
+    response = []
+
+    response.append(player_mines(playerID))
+
+    return response
+
+def info(playerID, user, time, inputs):
+
+    response = []
+
+    response.append(UNIMP)
+
+    return response
+
+def stats(playerID, user, now, inputs):
+    # calls stat formatter and returns it
+
+    response = []
+
+    response.extend(player_stats(playerID, now))
+
+    return response
+
+def fatigue(playerID, user, now, inputs):
+    # calls fatigue formatter and returns it
+
+    response = []
+
+    response.append(player_fatigue(playerID, now))
+
+    return response
+
+def report(playerID, user, now, inputs):
+    # calls each formatter for full player details
+
+    response = []
+
+    response.append(player_mines(playerID))
+    response.append(player_res(playerID))
+    response.extend(player_stats(playerID, now))
+    response.append(player_favors(playerID))
+    response.append("Please continue working hard for the empress!")
+
+    return response
+
+def strike(playerID, user, now, inputs):
+
+    response = []
+
+    if len(game.list_mines(playerID)) < 1:
+        response.append("I'm sorry, friend, but you have no mines at which to strike.  Open a new mine with \"!new\",")
+        return response
+
+    if len(inputs) < 2:
+        targetID = game.get_data("players", playerID, "targetted")
+    else:
+        targetID = game.is_mine(inputs[1])
+        if not targetID:
+            targetID = game.get_data("players", playerID, "targetted")
+
+    fatigue, permitted, depleted, reslist, lvlUp = game.strike(playerID, targetID, now)
+
+    mineName = game.get_data("mines", targetID, "name")
+
+    if reslist:
+        lvlMsg = ""
+        if lvlUp:
+            lvlMsg = "  You're feeling strong!"
+        if IRC:
+            wham = util.irc_rainbow(random.choice(LANG.get("wham")))
         else:
+<<<<<<< HEAD
             say(channel, "That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired.", user)
 
 def updateGolems(time):
@@ -302,228 +321,274 @@ def fatigue(msg, channel, user, time): #~krowbar memorial feature
     if fatigue > 0:
 
         say(channel, "You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body.", user)
+=======
+            wham = random.choice(LANG.get("wham"))
+
+        response.append(wham + lvlMsg + "  You struck at "+ mineName + " and mined the following: "+ game.print_reslist(reslist))
+        if depleted:
+            response.append("As you clear the last of the rubble from "+mineName+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
+            response.append(mineName+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
+
+>>>>>>> gamerefactor
     else:
-        say(channel, "You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.", user)
+        response.append(strike_failure(fatigue, permitted))
 
-def rankings(msg, channel, user):
-    dossiers = dossierList
-    #playerlist = open("../data/players.txt", 'r')
-    #for x in playerlist:
-    #   dossiers.append(x.rstrip())
-    #playerlist.close()
+    return response
 
-    records = []
-    for x in dossiers:
-        records.append([x, str(players.getHeldTotal(x))])
+def rankings(playeID, user, time, inputs):
 
-    records.sort(key=lambda entry:int(entry[1]), reverse=True)
-    say(channel, "The wealthiest citizens are:")
-    rankings = []
-    for x in range (0, min(5, len(records))):
-        entry = records[x]
-        rankings.append(entry[0] + " with " + entry[1] + " units")
+    response = []
 
-    multisay(channel, rankings)
-    #for x in range (0, min(5, len(records))):
-    #    entry = records[x]
-    #    ircsock.send("PRIVMSG " + channel + " :" + entry[0] + " with " + entry[1] + " units\n")
+    response.append(UNIMP)
 
-###########################
+    return response
 
-def listen():
-  lastcheck = int(systime.time())
-  while 1:
-    #####
-    now = int(systime.time())
-    #if now - lastcheck > 0: #updates
-    #    print "tick: " + str(now - lastcheck)
-    #    lastcheck = now
-    #    updateGolems(now)
-    #####
-    #print "waiting " + str(now)
-    msg = ircsock.recv(2048)
-    print msg
+def golem(playerID, user, time, inputs):
 
-    if msg == "":
-        continue
+    response = []
 
-    ## every tick
-    if now - lastcheck > 0:
-        print "tick: " + str(now - lastcheck)
-        lastcheck = now
-        updateGolems(now)
-    ##
+    response.append(UNIMP)
 
-    if msg.find("PING") != -1: 
-        ping()
+    return response
 
-    msg = msg.strip('\n\r').lower() #case insensitive
-    formatted = formatter.format_message(msg)
+def res(playerID, user, time, inputs):
 
-    if "" == formatted:
-          continue
+    response = []
 
-    #if msg.find("PING :") != -1: ping()
+    response.append(player_res(playerID))
 
-    #else:
-        #if msg.find("PING :") != -1: ping()
-    if 1:
+    return response
 
-        nick = msg.split("!")[0].split(":")[1]
+def alias(playerID, user, time, inputs):
 
-        split       = formatted.split("\t")
-        time        = split[0]
-        user        = split[1]
-        command     = split[2]
-        channel     = split[3] #if you include the :: we can do slicker PM
-        messageText = split[4]
+    response = []
 
-        #print channel
-        #print msg
-        #print formatted
-
-        if nick != user: #check for weird identity stuff
-            user = nick
-
-        if channel == botName:  #check for PM
-            channel = user
-
-        #if channel == botName or msg.find(":!") != -1: #only log PM and commands
-        #    logfile = open("irclog", 'a')
-        #    logfile.write(msg+"\n")
-        #    logfile.close()
-
-        ###### admin commands
-        if msg.find(":!join") != -1 and user == admin:
-            split = msg.split(" ");
-            for x in split:
-                if x.find("#") != -1:
-                    joinchan(x)
-
-        elif msg.find(":!allplayers") != -1 and user == admin:
-            say(channel, j.join(game.listPlayers()), user)
-
-        elif msg.find(":!alldossiers") != -1 and user == admin:
-            say(channel, j.join(game.listDossiers()), user)
-
-        elif msg.find(":!allgolems") != -1 and user == admin:
-            say(channel, j.join(game.listGolems()), user)
-
-        elif msg.find(":!allmines") != -1 and user == admin:
-            say(channel, j.join(game.listMines()), user)
-
-        elif msg.find(":!forcenew") != -1:
-            if user == admin:
-                split = msg.split(" ");
-                rates = ''
-                for x in split:
-                    if os.path.isfile(x):
-                        rates = x
-                for x in split:
-                    if isPlaying(x):
-                        if rates is not '':
-                            newMine(msg, x, x, rates)
-                        else:
-                            newMine(msg, x, x)
+    if len(inputs) < 2:
+        response.append("You need to specify at least one alias to add to your dossier, friend.")
+    else:
+        inputs.pop(0)
+        added = []
+        unadded = []
+        print(inputs)
+        for alias in inputs:
+            if game.alias(playerID, alias):
+                added.append(alias)
             else:
-                say(channel, "Sorry, friend, but only "+admin+" can request new mines on behalf of others.", user)
-        elif msg.find(":!brb") != -1:
-          ircsock.send("QUIT\n")
-          print "manual shutdown"
-          break
+                unadded.append(alias)
+        if added:
+            response.append("I've added "+",".join(added)+" to your alias list.")
+        if unadded:
+            response.append(", ".join(added)+" could not be added due to conflicting records.")
 
-        ###### gameplay commands
-        elif msg.find(":!rollcall") != -1: # tildetown specific
-            say(channel, "I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.", user)
+    return response
 
-        elif msg.find(":!"+COMMANDS[7]) != -1: # !info
-            say(channel, "I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.", user)
+def world(playerID, user, time, inputs):
 
-        elif msg.find(":!"+COMMANDS[0]) != -1: # !init
-            if isPlaying(user):
-                say(channel, "You already have a dossier in my records, friend.", user)
-            else:
-                say(channel, newPlayer(user), user)
+    response = []
 
-        elif msg.find(":!"+COMMANDS[1]) != -1: # !open
-            if isPlaying(user):
-                if players.getAvailableMines(user) > 0:
-                     newMine(channel, user)
+    response.append(provinces())
+    response.append(players())
+
+    return response
+
+## helper functions
+
+def make_player(user, now, zoneID):
+    # creates new inits for a player
+
+    playerdata = {}
+    playerdata.update({"nick":user})
+    playerdata.update({"home":zoneID})
+    playerdata.update({"joined":now})
+
+    return playerdata
+
+def failed_join(hasSpace, zoneExists):
+    # processes join failure
+
+    if not zoneExists:
+        return "I've never heard of that province, stranger.  "+provinces()
+
+    if not hasSpace:
+        return "I'm sorry, friend, but that province cannot support any additional residents.  Please choose a different one in order to prevent overcrowding."
+
+def players():
+    # returns list of players
+
+    players = game.list_players()
+
+    msg = "The following "+p.plural("worker", len(players))+" "+p.plural("is", len(players))+" registered as "+p.plural("citizen", len(players))+" of the empress's land: "
+    msg += ", ".join(players)
+
+    return msg
+
+def provinces():
+    # returns list of provinces
+
+    zones = game.list_zones()
+
+    msg = "The following "+p.plural("province", len(zones))+" "+p.plural("falls", len(zones))+" under the empress's rule: "
+    msg += ", ".join(zones)
+
+    return msg
+
+def failed_new(hasSpace, mayCreate):
+    # generates mine failure message
+
+    msg = "I could not open a new mine on your behalf because"
+
+    if not hasSpace:
+        msg += " your current locale cannot support an additional mining venture"
+
+    if not mayCreate:
+        if not hasSpace:
+            msg += " and"
+
+        msg += " you do not have permission to open any more mines"
+
+    return msg + "."
+
+def strike_failure(fatigue, permitted):
+    # generates strike failure message
+
+    #msg = ""
+
+    #if fatigue:
+        #msg += "You're still tired from your last attempt.  You'll be ready again in "+util.pretty_time(fatigue)+".  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
+
+    if not permitted:
+        #if fatigue:
+        #    msg += "  Additionally, y"
+        #else:
+        #    msg += "Y"
+
+        #msg += "ou do not have permission to work on that mine, friend."
+        return "You do not have permission to work on that mine, friend."
+
+    if fatigue:
+        return "You're still tired from your last attempt.  You'll be ready again in "+util.pretty_time(fatigue)+".  Please take breaks to prevent fatigue; rushing will only lengthen your recovery."
+
+    return ""
+
+    #return msg
+
+def pretty_res(reslist):
+    # return a string of human-readable reslist
+
+    readable = []
+
+    for res in reslist:
+        readable.append(p.no(res, reslist.get(res)))
+
+    return ", ".join(readable)
+
+def player_res(playerID):
+    # given playerID, generated held res list
+
+    res = pretty_res(game.get_data("players", playerID, "held res"))
+
+    if res:
+        return "You're holding the following resources: "+res
+    else:
+        return "You don't have any resources in your possession.  On behalf of the empresss, I encoruage you to work on your mining endeavors."
+
+
+def player_stats(playerID, now):
+    # given playerID, return formatted stats
+
+    response = []
+
+    depth, width = game.player_strikerate(playerID)
+    fatigue = game.player_fatiguerate(playerID)
+
+    response.append("You can mine up to "+p.no("unit", depth)+" from "+p.no("vein", width)+" every strike, and strike every "+p.no("second", fatigue)+" without experiencing fatigue.")
+    response.append("You've cleared "+p.no("mine", len(game.get_data("players", playerID, "mines completed"))) +".")
+    # "You can make a golem with up to "+p.no("resource", int(3.5*players.getStrength(user)))+".  "
+
+
+    return response
+
+def player_favors(playerID):
+    # format player favor list
+
+    favors = game.get_data("players", playerID, "favors")
+
+    if favors:
+        return "The empress has granted you the following "+p.no("favor", len(favors))+": "+", ".join(favors)
+    else:
+        return "You do not have any earned favors from the empress.  She will reward your dilligence and loyalty."
+
+def player_fatigue(playerID, now):
+    # given playerID, return formatted fatigue message
+
+    fatigue = game.fatigue_left(playerID, now)
+
+    if fatigue:
+        return "You'll be ready to strike again in "+util.pretty_time(fatigue)+".  Please rest patiently so you do not stress your body."
+    else:
+        return "You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress."
+
+def player_mines(playerID):
+    # given playerID, return mine sentence
+
+    minelist = pretty_minelist(game.list_mines(playerID))
+    if minelist:
+        msg = "You own the following "+p.plural("mines", len(minelist))+": "
+        msg += ", ".join(minelist)
+    else:
+        msg = "You don't own any mines friend.  The empress expects all citizens to work productively; please consider making progress on your mining ventures."
+
+    return msg
+
+def pretty_minelist(rawlist):
+    # takes a list of ["mine name", depletion] and formats for output
+
+    minelist = []
+
+    for mine in rawlist:
+        postfix = ""
+        depletion = mine[1]
+
+        if depletion is not None:   # True if depletion has been set
+            color = ""
+            uncolor = ""
+            if IRC:
+                uncolor = "\x03"
+                if depletion > 98:
+                    color = "\x0311"
+                elif depletion > 90:
+                    color = "\x0309"
+                elif depletion > 49:
+                    color = "\x0308"
+                elif depletion > 24:
+                    color = "\x0307"
+                elif depletion > 9:
+                    color = "\x0304"
                 else:
-                    say(channel, "You do not have permission to open a new nmine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.", user)
-            else:
-                say(channel, "I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.", user)
+                    color = "\x0305"
 
-        elif msg.find(":!"+COMMANDS[2]) != -1: # !mines
-            if isPlaying(user):
-                if len(players.getMines(user)) == 0:
-                    say(channel, "You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.", user)
-                else:
-                    say(channel, game.mineListFormatted(msg, channel, user), user)
-            else:
-                say(channel, "I don't have anything on file for you, friend.  Request a new dossier with '!init'.", user)
+            postfix = " ("+color+str(depletion)+"%"+uncolor+")"
 
-        elif msg.find(":!"+COMMANDS[9]) != -1: # !stats
-            if isPlaying(user):
-                say(channel, game.statsFormatted(channel, user), user)
-            else:
-                say(channel, "I don't know anything about you, friend.  Request a new dossier with '!init'.", user)
-
-        elif msg.find(":!"+COMMANDS[11]) != -1: # !res
-            if isPlaying(user):
-                say(channel, game.resourcesFormatted(channel, user), user)
-            else:
-                say(channel, "I don't know anything about you, friend.  Request a new dossier with '!init'.", user)
-
-        elif msg.find(":!"+COMMANDS[3]) != -1: # !strike
-            if isPlaying(user):
-                if len(players.getMines(user)) == 0:
-                    say(channel, "You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.",user)
-                else:
-                    strike(msg, channel, user, time)
-            else:
-                say(channel, "I don't have anything on file for you, friend.  Request a new dossier with '!init'.", user)
-
-        elif msg.find(":!"+COMMANDS[5]) != -1: # !fatigue
-            if isPlaying(user):
-                fatigue(msg, channel, user, time)
-            else:
-                say(channel, "I don't know anything about you, friend.  Request a new dossier with '!init'.", user)
-
+<<<<<<< HEAD
         elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
             if isPlaying(user):
                 grovel(msg, channel, user, time)
                 #say(channel, "The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.", user)
             else:
                 say(channel, "I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.", user)
+=======
+        minelist.append(mine[0]+postfix)
+>>>>>>> gamerefactor
 
-        elif msg.find(":!"+COMMANDS[4]) != -1: # !report
-            if isPlaying(user):
-                report(msg, channel, user, time)
-            else:
-                say(channel, "I don't have anything on file for you, friend.  Request a new dossier with '!init'.", user)
+    return minelist
 
-        elif msg.find(":!"+COMMANDS[10]) != -1: # !golem
-            if isPlaying(user):
-                parse = msg.split("!"+COMMANDS[10])
-                if parse[1] == '': #no arguments
-                    if hasGolem(user):
-                        say(channel, game.golemStats(channel, user, time), user)
-                        #say(channel, "It's holding the following resources: "+golems.heldFormatted(user)+".", user)
-                        say(channel, "It's holding the following resources: "+game.itemizeRes(golems.getHeld(user))+".", user)
-                    else:
-                        say(channel, "You don't have a golem working for you, friend.  Create one with '!golem {resources}'.", user)
-                else: # check for mines??
-                    golemHandler(channel, user, time, parse[1].lstrip())
-            else:
-                say(channel, "I don't know anything about you, friend.  Request a new dossier with '!init'.", user)
+def golem_stats(playerID):
+    # copied over from old version
 
-        elif msg.find(":!"+COMMANDS[8]) != -1: # !rankings
-            rankings(msg, channel, user)
+    #status = golems.getShape(user)+" is hard at work!  "
+    #status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user)) + ".  "
+    #status += "It's been going for "+util.pretty_time(golems.getLife(user, time))+"."
 
+    #return status
 
-#########################
-ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connect(options.server, options.channel, options.nick)
-listen()
-ircsock.close()
+    return

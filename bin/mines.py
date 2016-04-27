@@ -1,174 +1,254 @@
 #!/usr/bin/python
 
-import random
 import gibber
+import util
+import inflect
+
+import json
+import random
 import os
 
-def newMine(owner, minerate="standardrates"):
-    minename = gibber.medium()
-    while os.path.isfile('../data/'+minename+'.mine'): # check for mine colision
+DATA = os.path.join("..", "data")
+ATS = "mineautosave.json"
+CONFIG = os.path.join("config")
+MINES = {}
+STATUS = ["new", "active", "depleted"]
+
+p = inflect.engine()
+
+## file i/o
+
+def load(minefile=os.path.join(DATA,ATS)):
+    # takes a json from minefile and loads it into memory
+    # returns number of mines loaded
+
+    global MINES
+
+    infile = open(minefile, "r")
+    MINES = json.load(infile)
+    infile.close()
+
+    return len(MINES)
+
+def save(savefile=os.path.join(DATA,ATS)):
+    # save current MINES to savefile, returns save location
+
+    outfile = open(savefile, "w")
+    outfile.write(json.dumps(MINES, sort_keys=True, indent=2, separators=(',', ':')))
+    outfile.close()
+
+    return savefile
+
+def new(ownerID, zoneID, minerate):
+    # generates a new mine entry from givens, adds to memory, returns new mineID
+
+    minedata = {}
+
+    mineID = util.genID(10)
+    while mineID in MINES:
+        mineID = util.genID(10)
+
+    minename = gibber.medium().capitalize()
+    while exists(minename):
         minename = gibber.medium()
 
-    res = generateRes(minerate)
-    total = sumRes(res)
+    starting_res = generate_res(minerate)
+    starting_total = util.sum_res(starting_res)
 
-    j = ','
-    minefile = open('../data/'+minename+'.mine', 'w+')
-    minefile.write(j.join(res)+'\n') # 0 res counts
-    minefile.write(str(total)+'\n') # 1 original total
-    minefile.write(owner+'\n') # 2 owner
-    minefile.write('\n') # 3 workers
+    minedata.update({"name":minename})
+    minedata.update({"owner":ownerID})
+    minedata.update({"location":zoneID})
+    minedata.update({"status":STATUS[0]})
+    minedata.update({"starting resources":starting_res})
+    minedata.update({"starting total":starting_total})
+    minedata.update({"current resources":starting_res.copy()})
+    minedata.update({"current total":starting_total})
+    minedata.update({"workers":[ownerID]})
 
-    minefile.close()
+    MINES.update({mineID:minedata})
 
-    return minename # for mine name confirmation
-
-def generateRes(minerate): #takes a minerate file; returns a list of resource amounts for a generated mine
-    ratefile = open(minerate,'r')
-    rates = []
-    for x in ratefile:
-        rates.append(int(x.rstrip()))
-    ratefile.close()
-
-    bound = rates[8]
-    seed = random.randrange(1,bound)
-    resources = [0,0,0,0,0,0,0,0]
-    i = 0
-
-    for x in resources:
-        resources[i] = str(seed * rates[i] + random.randrange(1,bound))
-        i += 1
-
-    return resources
+    return mineID
 
 ## mine output
 
-def openMine(mine): # returns str list of entire mine file
-    minefile = open('../data/'+mine+'.mine', 'r')
+def data(mineID):
+    # takes str mineID and returns mine data, or none
 
-    minedata = []
-    for x in minefile:
-        minedata.append(x.rstrip())
+    if mineID in MINES:
+        return {mineID:MINES[mineID]}
+    else:
+        return None
 
-    minefile.close()
-    return minedata
+def get(mineID, field):
+    # takes str mineID and field and returns whatever it is
+    # returns None if mine or field doesn't exist
 
-def getRes(mine): # return list of res
-    minedata = openMine(mine)
+    if mineID in MINES:
+        return MINES[mineID].get(field)
+    else:
+        return None
 
-    return minedata[0].rstrip().split(',')
+def find(searchdict):
+    # returns a list of str IDs that match search dict
 
-def getStarting(mine): # return original starting res
-    minedata = openMine(mine)
+    matches = []
 
-    return minedata[1]
+    for x in MINES:
+        found = True
+        mine = MINES[x]
 
-def getTotal(mine): # return int of res total
-    return sumRes(getRes(mine))
+        for y in searchdict:
+            if mine.get(y) == searchdict.get(y):
+                found = True
+            else:
+                found = False
+                break
 
-def getOwner(mine): # return str of owner
-    minedata = openMine(mine)
+        if found:
+            matches.append(x)
 
-    return minedata[2]
+    return matches
 
-def getWorkers(mine): # return str list of contracted workers
-    minedata = openMine(mine)
+def exists(minename):
+    # check to see if minename exists
 
-    workerlist = minedata[2].rstrip().split[',']
+    for mineID in MINES:
+        if MINES[mineID].get("name") == minename:
+            return mineID
 
-    while workerlist.count('') > 0:
-        workerlist.remove('') #dirty hack
+    return False
 
-    return workerList
+## meta helpers
 
-def sumRes(res): # returns total for a list of res
-    total = 0
-    for x in res:
-        total += int(x)
-    return total
+def generate_res(resrate): # takes a resrate dict; returns a dict of resource amounts for a generated mine
 
-## mine input
+    bound = resrate.get("size")
+    seed = random.randrange(1,bound)
 
-def writeMine(mine, minedata):
-    minefile = open('../data/'+mine+'.mine', 'w')
-    for x in minedata:
-        minefile.write(str(x) + "\n")
-    minefile.close()
+    resources = {}
+
+    for x in resrate:
+        if x != "size":
+            spawn = seed * resrate[x] + random.randrange(1,bound)
+            resources.update({x: spawn})
+
+    return resources
+
+#def sum_res(res):
+#    # takes a dict of str res and int quantities, returns int sum
+#
+#    total = 0
+#    for x in res:
+#        total += res.get(x)
+#
+#    return total
+
+def percentage_left(mineID):
+    # returns an integer of remaining res percentage
+
+    return int(100*float(get(mineID, "current total"))/float(get(mineID, "starting total")))
+
 
 ## mine actions
 
-def excavate(mine, rate=10, width=3):
-    excavated = [0,0,0,0,0,0,0,0]
-    res = getRes(mine)
+def close(mineID):
+    # clear out all res and mark mine as dead
 
-    mineData = openMine(mine)
+    mine = data(mineID)
+    mine[mineID].update({"current resources":{}})
+    mine[mineID].update({"current total":0})
+    mine[mineID].update({"status":STATUS[2]})
+
+    return mineID
+
+def excavate(mineID, depth=10, width=3):
+    # strikes rate times from width different veins
+    # returns a dict of mined resources
+    # closes mine if it's empty
+    # won't target empty veins
+
+    excavated = {}
+    mine = data(mineID)
+    res = get(mineID, "current resources")
     veins = []
 
-    if getTotal(mine) <= rate: # clear the mine
+    if get(mineID, "current total") <= depth: # clear the mine
+        excavated = res.copy()
+        close(mineID)
+        return res # but we need a way to know if this is going to happen???
 
-        excavated = getRes(mine)
-        mineData[0] = "0,0,0,0,0,0,0,0"
-        writeMine(mine, mineData)
-        return excavated
-
+    ## pick veins to target
     i = width
-    mineChoices = [0,1,2,3,4,5,6,7]
-    while i > 0: # pick veins
-        vein = random.choice(mineChoices)
+    while i > 0:
+        vein = random.choice(list(res.keys()))
         veins.append(vein)
-        mineChoices.remove(vein)
         i -= 1
 
-    i = rate
+    #print("targets: "+str(veins))
+
+    ## strike!
+    i = depth
     veinsLeft = width
-    while i > 0: # strike!
+
+    while i > 0:
         if veinsLeft > 0:
-            strike = random.choice(veins)
+            target = random.choice(veins)
         else:
             break
 
-        if int(res[strike]) > excavated[strike]: # check for remaining res
-            excavated[strike] += 1
-            i -= 1
-        else: # stop striking empy vein
-            veins.remove(strike)
+        #print("target: "+ target)
+        remaining = res.get(target)
+        #print("remaining: "+str(remaining))
+
+        if target in excavated:
+            held = excavated[target] + 1
+        else:
+            held = 1
+
+        excavated.update({target:held})
+        i -= 1
+
+        # cleaning up vein
+        if remaining > 1:
+            res[target] -= 1
+            #remaining -= 1
+        else: # taking last res from vein
+            #print("taking last from "+target)
+            del res[target]
+            veins.remove(target)
             veinsLeft -= 1
 
-    i = 0
-    while i < 8: # clear out res
-       vein = int(res[i])
-       vein -= excavated[i]
-       res[i] = str(vein)
-       i += 1
-
-    j = ','
-    mineData[0] = j.join(res)
-    writeMine(mine, mineData)
+    mine[mineID].update({"current total":util.sum_res(res)})
 
     return excavated
 
 ######## LINE OF DEATH
 
-def remaining(record): # REDUNDANT
-    return getTotal(record.split('/')[-1].split('.')[0])
-
-def starting(record): # REDUNDANT
-    return getStarting(record.split('/')[-1].split('.')[0])
-
 def printMine(mine):
-    print mine[-1]
+    print(mine[-1])
     remaining = mine[-2].split(',')[0]
     if int(remaining) == 0:
-        print "mine depleted"
+        print("mine depleted")
     else:
-        print "~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(remaining))
-        print "# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(remaining))
-        print "@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(remaining))
-        print "& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(remaining))
-        print "* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(remaining))
-        print "[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(remaining))
-        print "] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(remaining))
-        print "^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(remaining))
-        print "\ntotal: %s" % (remaining)
+        print("~ %d (%d%%)" % (int(mine[0]), 100*float(mine[0])/float(remaining)))
+        print("# %d (%d%%)" % (int(mine[1]), 100*float(mine[1])/float(remaining)))
+        print("@ %d (%d%%)" % (int(mine[2]), 100*float(mine[2])/float(remaining)))
+        print("& %d (%d%%)" % (int(mine[3]), 100*float(mine[3])/float(remaining)))
+        print("* %d (%d%%)" % (int(mine[4]), 100*float(mine[4])/float(remaining)))
+        print("[ %d (%d%%)" % (int(mine[5]), 100*float(mine[5])/float(remaining)))
+        print("] %d (%d%%)" % (int(mine[6]), 100*float(mine[6])/float(remaining)))
+        print("^ %d (%d%%)" % (int(mine[7]), 100*float(mine[7])/float(remaining)))
+        print("\ntotal: %s" % (remaining))
 
     return mine
+
+def test():
+    global MINES
+
+    load()
+    load_res()
+
+    #MINES.update(new_mine("001", "003", load_rate("config/tinyrates.json")))
+    print(json.dumps(MINES, sort_keys=True, indent=2, separators=(",",":")))
+
+    return

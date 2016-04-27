@@ -2,7 +2,7 @@
 
 import random
 
-syllablefile = open("syllables.txt", 'r')
+syllablefile = open("config/syllables.txt", 'r')
 syllables = []
 for x in syllablefile:
     syllables.append(x.rstrip())

@@ -1,0 +1,29 @@
+{
+  "03488":{
+    "name":"Ipakyno",
+    "owner":"playerID",
+    "location":"zoneID",
+    "status":"",
+    "starting resources":{"tilde":0,
+                 "spiral":0,
+                 "pound":0,
+                 "amper":0,
+                 "splat":0,
+                 "lbrack":0,
+                 "rbrack":0,
+                 "carat":0
+                },
+    "starting total":0,
+    "current resources":{"tilde":0,
+                 "spiral":0,
+                 "pound":0,
+                 "amper":0,
+                 "splat":0,
+                 "lbrack":0,
+                 "rbrack":0,
+                 "carat":0
+                },
+    "current total":0,
+    "workers":["playerID","playerID"]
+  }
+}
