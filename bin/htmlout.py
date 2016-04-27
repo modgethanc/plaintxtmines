@@ -31,7 +31,7 @@ def write(outurl):
     outfile.write("<h3>Provinces recognized by the empress</h3>")
     outfile.write("<ul>")
     for zone in game.list_zones():
-      outfile.write("<li>"+zone+"</li>")
+      outfile.write("<li>"+zone+" ("+str(game.zone_pop(game.is_zone(zone)))+"% populated)</li>")
     outfile.write("</ul>")
 
     outfile.write("<h3>Workers registered as citizens</h3>")

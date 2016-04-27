@@ -141,7 +141,6 @@ def list_names():
     for playerID in PLAYERS:
         playerlist.append(get(playerID, "nick"))
   
-    print(playerlist)
     return playerlist
 
 ## meta helpers

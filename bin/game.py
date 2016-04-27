@@ -194,7 +194,7 @@ def list_mines(playerID):
     return rawlist
 
 def fatigue_left(playerID, now):
-    # returns fatigue left for playerID from passed in no
+    # returns fatigue left for playerID, counting from passed in now
 
     return players.fatigue_left(playerID, now)
 
@@ -220,9 +220,7 @@ def player_strikerate(playerID):
 def player_home(playerID):
     # return name of player's home province
 
-    zoneID = players.get(playerID, "home")
-
-    return world.get(zoneID, "name")
+    return world.get(players.get(playerID, "home"), "name")
 
 ###
 
@@ -250,6 +248,14 @@ def match_province(target):
 
     #return world.exists(match)
     return world.exists(target)
+
+def zone_pop(zoneID):
+    # for a given zoneID, calculate population percentage and return it as an int
+
+    cap = world.get(zoneID, "max residents")
+    pop = len(world.get(zoneID, "residents"))
+
+    return int(100*float(pop)/float(cap))
 
 ## player actions
 
