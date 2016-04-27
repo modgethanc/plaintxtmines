@@ -133,6 +133,17 @@ def registered(playername):
 
     return False
 
+def list_names():
+    # returns a list of zone names
+
+    playerlist = []
+
+    for playerID in PLAYERS:
+        playerlist.append(get(playerID, "nick"))
+  
+    print(playerlist)
+    return playerlist
+
 ## meta helpers
 
 def fatigue_left(playerID, now):

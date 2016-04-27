@@ -159,6 +159,13 @@ def list_zones():
 
     return zonelist
 
+def list_players():
+    # returns sorted list of zone names
+
+    playerlist = players.list_names()
+
+    return playerlist 
+
 def list_mines(playerID):
     # returns list of mine names
 

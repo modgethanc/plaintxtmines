@@ -256,6 +256,14 @@ def alias(playerID, user, time, inputs):
 
     return response
 
+def world(playerID, user, time, inputs):
+
+    response = []
+
+    response.append(provinces())
+    response.append(players())
+
+    return response
 
 ## helper functions
 
@@ -277,6 +285,16 @@ def failed_join(hasSpace, zoneExists):
 
     if not hasSpace:
         return "I'm sorry, friend, but that province cannot support any additional residents.  Please choose a different one in order to prevent overcrowding."
+
+def players():
+    # returns list of players
+
+    players = game.list_players()
+
+    msg = "The following "+p.plural("worker", len(players))+" "+p.plural("is", len(players))+" registered as "+p.plural("citizen", len(players))+" of the empress's land: "
+    msg += ", ".join(players)
+
+    return msg
 
 def provinces():
     # returns list of provinces

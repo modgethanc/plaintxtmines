@@ -52,6 +52,10 @@
     "help":"",
     "player only":true
   },
+  "world":{
+    "help":"",
+    "player only":false
+  },
   "commands":{
     "player only": false
   }

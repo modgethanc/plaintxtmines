@@ -224,3 +224,4 @@ def reload():
     imp.reload(util)
     txtminebot.init()
     txtminebot.IRC = True
+    COMMANDS = txtminebot.COMMANDS
