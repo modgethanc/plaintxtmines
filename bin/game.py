@@ -34,6 +34,7 @@ def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.
     imp.reload(players)
     imp.reload(world)
     imp.reload(mines)
+    imp.reload(htmlout)
     load_res()
 
     print("players: "+str(players.load(playerfile)))
@@ -162,14 +163,14 @@ def list_zones():
     return zonelist
 
 def list_players():
-    # returns sorted list of zone names
+    # returns list of player names
 
     playerlist = players.list_names()
 
-    return playerlist 
+    return playerlist
 
 def list_mines(playerID):
-    # returns list of mine names
+    # returns list of mine names assigned to given playerID
 
     rawlist = []
 
@@ -215,6 +216,13 @@ def player_strikerate(playerID):
     # return player strikerate
 
     return players.strikerate(playerID)
+
+def player_home(playerID):
+    # return name of player's home province
+
+    zoneID = players.get(playerID, "home")
+
+    return world.get(zoneID, "name")
 
 ###
 
