@@ -197,131 +197,6 @@ def strike(playerID, user, now, inputs):
         if IRC:
             wham = util.irc_rainbow(random.choice(LANG.get("wham")))
         else:
-<<<<<<< HEAD
-            say(channel, "That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired.", user)
-
-def updateGolems(time):
-    for x in game.listGolems():
-        #if int(time) > golems.getDeath(x): # golem death
-        if golems.getSize(x) == 0: # golem death
-            golemDie(x, time)
-            continue
-
-        strikeDiff = int(time) - golems.getLastStrike(x)
-        interval = golems.getInterval(x)
-
-        if strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
-            target = players.getMines(x)[0]
-            strikeCount = strikeDiff/interval
-            i = 0
-            elapsed = golems.getLastStrike(x)
-            dead = False
-            while i < strikeCount:
-                if dead:
-                    break
-                if mines.getTotal(target) > 0:
-                    if golems.getSize(x) > 0:
-                        #print "golemstrike"+ str(golems.strike(x, target))
-                        golems.strike(x, target)
-                    else:
-                        dead = golemDie(x, time)
-                    elapsed += interval
-                    i += 1
-            if not dead:
-                golems.updateLastStrike(x, elapsed)
-
-def golemDie(user, time):
-    life = formatter.prettyTime(golems.getLife(user, time))
-    mined = game.itemizeRes(golems.expire(user))
-
-    golemgrave = "in front of you"
-    if len(players.getMines(user)) > 0:
-        golemgrave = "inside of "+players.getMines(user)[0].capitalize()
-
-    say(user, "After working for "+life+", your golem crumbles to dust "+golemgrave+" and leaves a wake of its mined resources: "+mined)
-
-    return True
-
-def golemDestroy(channel, user, time):
-    life = formatter.prettyTime(golems.getLife(user, time))
-    mined = game.itemizeRes(golems.destroy(user))
-
-    say(channel, "Your golem collapsed on the spot!  Through the rubble, you manage to recover the following resources: "+mined, user)
-
-    return True
-
-def strike(msg, channel, user, time):
-    mineList = players.getMines(user)
-    target = mineList[0] #autotarget first mine
-
-    selected = msg.split(COMMANDS[3])[-1].split(" ")[-1] #check for targetted mine
-    if selected != "":
-        if mineList.count(selected) == 0:
-            say(user, "That's not a mine you're working on, friend.")
-            return
-
-        if target != selected:
-            target = selected
-            mineList.remove(target)    #bump this to the top of the minelist
-            mineList.insert(0, target)
-
-    #diff = int(time)-int(players.getLastStrike(user))
-    #if diff < baseFatigue: # fatigue check
-    #    left =  baseFatigue - diff
-    #    fatigue = left * 2
-    #    time = int(time) + fatigue - baseFatigue
-
-    fatigue = players.fatigueCheck(user, time)
-    if fatigue > 0:
-        fatigue = fatigue * 2
-        time = int(time) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
-        say(user, "You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.")
-
-    else: # actual mining actions
-        emptyMines = []
-        status = players.incStrikes(user)
-        excavation = players.strike(user, target)
-        mined = players.printExcavation(players.acquireRes(user, excavation))
-        say(user, "\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined)
-
-        if mines.getTotal(target) == 0:
-            emptyMines.append(target)
-            players.incCleared(user)
-            players.incEndurance(user)
-            players.incAvailableMines(user)
-            say(user, "As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
-            say(user, target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
-            say(config[1], "There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".")
-
-        for x in emptyMines:
-            mineList.remove(x)
-
-    players.updateOwned(user, mineList)
-    players.updateLastStrike(user, time)
-
-def report(msg, channel, user, time):
-    if len(players.getMines(user)) > 0:
-        say(user, game.mineListFormatted(msg, channel, user))
-    say(user, game.resourcesFormatted(channel, user))
-    if hasGolem(user):
-        say(user, game.golemStats(channel, user, time))
-    say(user, game.statsFormatted(channel, user))
-
-def grovel(msg, channel, user, time):
-    players.incGrovel(user)
-    statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
-
-    say(channel, "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP_NEU), user)
-
-def stirke(msg, channel, user, time): #hazelnut memorial disfeature
-    a = 0
-
-def fatigue(msg, channel, user, time): #~krowbar memorial feature
-    fatigue = players.fatigueCheck(user, time)
-    if fatigue > 0:
-
-        say(channel, "You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body.", user)
-=======
             wham = random.choice(LANG.get("wham"))
 
         response.append(wham + lvlMsg + "  You struck at "+ mineName + " and mined the following: "+ game.print_reslist(reslist))
@@ -329,7 +204,6 @@ def fatigue(msg, channel, user, time): #~krowbar memorial feature
             response.append("As you clear the last of the rubble from "+mineName+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
             response.append(mineName+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
 
->>>>>>> gamerefactor
     else:
         response.append(strike_failure(fatigue, permitted))
 
@@ -569,16 +443,7 @@ def pretty_minelist(rawlist):
 
             postfix = " ("+color+str(depletion)+"%"+uncolor+")"
 
-<<<<<<< HEAD
-        elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
-            if isPlaying(user):
-                grovel(msg, channel, user, time)
-                #say(channel, "The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.", user)
-            else:
-                say(channel, "I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.", user)
-=======
         minelist.append(mine[0]+postfix)
->>>>>>> gamerefactor
 
     return minelist
 
