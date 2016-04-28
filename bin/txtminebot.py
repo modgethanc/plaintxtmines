@@ -184,7 +184,9 @@ def strike(playerID, user, now, inputs):
     else:
         targetID = game.is_mine(inputs[1])
         if not targetID:
-            targetID = game.get_data("players", playerID, "targetted")
+            response.append("I'm not sure what you'd like to strike, friend.  Please specify a mine on which you have permission to work.  ")
+            return response
+            #targetID = game.get_data("players", playerID, "targetted")
 
     fatigue, permitted, depleted, reslist, lvlUp = game.strike(playerID, targetID, now)
 
