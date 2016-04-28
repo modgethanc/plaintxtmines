@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-import mines
-import gibber
 import util
 
 import inflect
@@ -94,7 +92,7 @@ def data(playerID):
         return None
 
 def get(playerID, field):
-    # takes str mineID and field and returns whatever it is
+    # takes str playerID and field and returns whatever it is
     # returns None if player or field doesn't exist
 
     if playerID in PLAYERS:
@@ -134,7 +132,7 @@ def registered(playername):
     return False
 
 def list_names():
-    # returns a list of zone names
+    # returns a list of player names
 
     playerlist = []
 

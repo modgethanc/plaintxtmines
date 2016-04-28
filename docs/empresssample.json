@@ -1,0 +1,9 @@
+{
+  "favorite":"playerID",
+  "grovel reset":0,
+  "favor granted":false,
+  "grovel count":{
+    "playerID_1":0,
+    "playerID_2":2
+  }
+}

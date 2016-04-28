@@ -1,32 +1,38 @@
 #!/usr/bin/python
 
+import gibber
+import util
+
+import inflect
+import json
 import os
 import random
-import gibber
+import time
 
-def newEmpress():
-    empressfile = open('../data/empress.txt', 'w+')
+DATA = os.path.join("..", "data")
+ATS = "empressautosave.json"
+CONFIG = os.path.join("config")
+EMPRESS = {}
 
-    empressfile.write('0\n') # 0 next grovel window
-    empressfile.write("0,0,0,0,0,0,0,0\n") # 1 tithed total
-    empressfile.write('\n') # 2 favorite
+## file i/o
 
-### output
+def load(empressfile=os.path.join(DATA, ATS)):
+    # takes a json from empressfile and loads to memory
+    # returns empressfile location
 
-def openEmpress():
-    return
+    global EMPRESS
 
-def getGrovel():
-    return
+    infile = open(playerfile, "r")
+    EMPRESS = json.load(infile)
+    infile.close()
 
-def getTithed():
-    return
+    return empressfile
 
-def getFavorite():
-    return
+def save(savefile=os.path.join(DATA, ATS)):
+    # save current EMPRESS to savefile, returns save location
 
-def speak():
-    return gibber.sentence()
+    outfile = open(savefile, "w")
+    outfile.write(json.dumps(EMPRESS, sort_keys=True, indent=2, separators=(',', ':')))
+    outfile.close()
 
-if not os.path.isfile("../data/empress.txt"):
-    newEmpress()
+    return savefile

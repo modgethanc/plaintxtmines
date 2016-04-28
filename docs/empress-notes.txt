@@ -1,0 +1,9 @@
+grovel mechanic:
+during open grovel window, the first player to grovel gets favored
+while favored, player has a 10% chance of earning a Favor
+player may only earn one Favor per window
+
+grovel responses:
+  -not favored: neg
+  -receiving favor: neu
+  -while favored: pos
