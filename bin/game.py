@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 import golems
 import players
 import mines
@@ -35,11 +36,13 @@ def init(playerfile=os.path.join(DATA,"playersautosave.json"), minefile=os.path.
     imp.reload(world)
     imp.reload(mines)
     imp.reload(htmlout)
+    imp.reload(empress)
     load_res()
 
     print("players: "+str(players.load(playerfile)))
     print("mines: "+str(mines.load(minefile)))
     print("zones: " +str(world.load(worldfile)))
+    print("empress: " +empress.load())
 
 def load_res(resfile=os.path.join(CONFIG, "resources.json")):
     # takes a json from resfile and loads into memory
@@ -68,6 +71,7 @@ def save():
     mines.save()
     players.save()
     world.save()
+    empress.save()
 
     htmlout.write("world.html")
 
@@ -317,6 +321,19 @@ def alias(playerID, newAlias):
         aliases = players.get(playerID, "aliases")
 
     return aliases
+
+## empress actions
+
+def grant_favor(playerID):
+    # grants player the next favor
+
+    level = get_data("players", playerID, "favor level")
+    favor = empress.get("favors")[level]
+
+    get_data("players", playerID, "favors").append(favor) 
+    players.inc(playerID, "favor level")
+
+    return favor
 
 ## meta helpers
 

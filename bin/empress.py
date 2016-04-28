@@ -22,7 +22,7 @@ def load(empressfile=os.path.join(DATA, ATS)):
 
     global EMPRESS
 
-    infile = open(playerfile, "r")
+    infile = open(empressfile, "r")
     EMPRESS = json.load(infile)
     infile.close()
 
@@ -36,3 +36,12 @@ def save(savefile=os.path.join(DATA, ATS)):
     outfile.close()
 
     return savefile
+
+def get(field):
+    # calls dictionary get function
+
+    return EMPRESS.get(field)
+
+## grovel mechanic
+
+##
