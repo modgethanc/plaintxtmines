@@ -539,8 +539,10 @@ def listen():
 
         elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
             if isPlaying(user):
-                #grovel(msg, channel, user, time)
-                ircsock.send("PRIVMSG "+ channel + " :" + user + ": The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.\n")
+                if random.randrange(1,100) < 30:
+                    ircsock.send("PRIVMSG "+ channel + " :" + user + ": The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.\n")
+                else:
+                    grovel(msg, channel, user, time)
             else:
                 ircsock.send("PRIVMSG "+ channel + " :" + user + ": I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.\n")
 
