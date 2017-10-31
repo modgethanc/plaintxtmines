@@ -165,8 +165,8 @@ def strike(player, target): # performs mining action
 
     writeGolem(player, golemdata)
 
-    if random.randrange(1,100) < 15:
-        print decay(player, 1)
+    #if random.randrange(1,100) < 15:
+    #    print decay(player, 1)
 
     return excavation
 
