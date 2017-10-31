@@ -72,7 +72,7 @@ def calcDeath(golem, time): # calcuate expiration time
     death = int(time)
     #life = random.randrange(1, max(2,calcStrength(golem) * calcWidth(golem))) * random.randrange(1,max(calcStrength(golem), 50))
     tail = int(golem[0]) * random.randrange(1,10)
-    life = 100 * random.randrange(1, calcStrength(golem)) + tail
+    life = 100 * random.randrange(1, max(calcStrength(golem), 2)) + tail
     death = int(time) + life
 
     return death
@@ -165,8 +165,13 @@ def strike(player, target): # performs mining action
 
     writeGolem(player, golemdata)
 
+<<<<<<< HEAD
     if random.randrange(1,100) < 15:
         print decay(player, 1)
+=======
+    #if random.randrange(1,100) < 15:
+    #    print decay(player, 1)
+>>>>>>> 2b9e27804326cac006d5294b999727d07aca99b1
 
     return excavation
 
