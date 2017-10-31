@@ -1,0 +1,12 @@
+init
+open
+mines
+strike
+report
+fatigue
+grovel
+info
+rankings
+stats
+golem
+res
