@@ -52,6 +52,7 @@ class IRC():
         self.SERVER = ""
         self.DEFAULTCHANS = []
         self.CHANNELS = []
+        self.LASTCHECK = 0
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #imp.reload(txtminebot)
@@ -292,12 +293,28 @@ class IRC():
             self.say(parse[0], " ".join(parse[1:]))
             return "say"
 
+    def tick(self, now):
+        '''Gets called every time one second elapses, to handle all the
+        time-based actions.'''
+
+        txtminebot.tick(now)
+
+        return
+
     def listen(self):
         '''
         A loop for listening for messages.
         '''
 
+        self.LASTCHECK = int(time.time())
+
         while 1:
+            now = int(time.time())
+
+            if now - self.LASTCHECK > 0:
+                self.LASTCHECK = now
+                self.tick(now)
+
             msg = self.sock.recv(2048)
             if msg:
                 if re.match("^PING", msg):
@@ -364,11 +381,12 @@ class IRC():
 
             if parsed.get("message").find(self.BOTNAME+": ") != -1 or self.is_pm(parsed):
                 # responses when directly addressed
-                self.multisay(parsed.get("channel"), txtminebot.addressed(parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
+                self.multisay(parsed.get("channel"),
+                        txtminebot.addressed(self, parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
             else:
                 # general responses
 
-                self.multisay(parsed.get("channel"), txtminebot.said(parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
+                self.multisay(parsed.get("channel"), txtminebot.said(self, parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
 
         sys.stdout.flush()
 
@@ -412,7 +430,7 @@ def irc_loop(head):
             # juggle existing socket and channels
             s = head.sock
             chans = head.CHANNELS
-            imp.reload(heads)
+            #imp.reload(heads)
             head = IRC()
 
             head.sock = s
