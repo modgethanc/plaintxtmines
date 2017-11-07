@@ -42,15 +42,13 @@ def said(bot, channel, nick, time, msg, interface):
 
     response = []
 
-    if msg.find("!info") == 0: # !info
+    if msg.find("!info") == 0:
         response.append("I am the mining assistant, here to facilitate your ventures by order of the empress.  My lieutenant is "+bot.ADMIN+", who can handle inquiries beyond my availability.")
         response.append("Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.")
-        #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": I am the mining assistant, here to facilitate your ventures by order of the empress.  Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.\n")
 
-    elif msg.find(":!"+COMMANDS[0]) != -1: # !init
+    elif msg.find("!init") != 0:
         if isPlaying(user):
             response.append("You already have a dossier in my records, friend.")
-            #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You already have a dossier in my records, friend.\n")
         else:
             response.append(newPlayer(channel, user))
 
@@ -60,97 +58,76 @@ def said(bot, channel, nick, time, msg, interface):
                  response.append(newMine(channel, user))
             else:
                 response.append("You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.")
-                #ircsock.send("PRIVMSG "+ channel + " :" + user + ": You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.\n")
         else:
             response.append("I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[2]) != -1: # !mines
         if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
-                #ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else:
                 response.append(mineListFormatted(msg, channel, user))
-                #ircsock.send("PRIVMSG "+channel+" :" + user + ": "+mineListFormatted(msg, channel, user)+"\n")
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[9]) != -1: # !stats
         if isPlaying(user):
             response.append(statsFormatted(channel, user))
-            #ircsock.send("PRIVMSG "+channel+" :" + user + ": "+statsFormatted(channel, user)+"\n")
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[11]) != -1: # !res
         if isPlaying(user):
             response.append(resourcesFormatted(channel, user))
-            #ircsock.send("PRIVMSG "+channel+" :" + user + ": "+resourcesFormatted(channel, user)+"\n")
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[3]) != -1: # !strike
         if isPlaying(user):
             if len(players.getMines(user)) == 0:
                 response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
-                #ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.\n")
             else:
-                strike(msg, channel, user, time)
+                response.extend(strike(msg, channel, user, time))
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[5]) != -1: # !fatigue
         if isPlaying(user):
-            fatigue(msg, channel, user, time)
+            response.append(fatigue(msg, channel, user, time))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
         if isPlaying(user):
             if random.randrange(1,100) < 30:
                 response.append("The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.")
-                #ircsock.send("PRIVMSG "+ channel + " :" + user + ": The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.\n")
             else:
-                grovel(msg, channel, user, time)
+                response.append(grovel(msg, channel, user, time))
         else:
             response.append("I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[4]) != -1: # !report
         if isPlaying(user):
-            report(msg, channel, user, time)
+            response.extend(report(msg, channel, user, time))
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't have anything on file for you, friend.  Request a new dossier with '!init'.\n")
 
-    elif msg.find(":!"+COMMANDS[10]) != -1: # !golem
+    elif msg.find(":!golem") != -1:
         if isPlaying(user):
             parse = msg.split("!"+COMMANDS[10])
             if parse[1] == '': #no arguments
                 if hasGolem(user):
                     response.append(golemStats(channel, user, time))
                     response.append("It's holding the following resources: "+golems.heldFormatted(user))
-                    #ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golemStats(channel, user, time)+".\n")
-                    #ircsock.send("PRIVMSG "+ channel + " :" + user + ": It's holding the following resources: "+golems.heldFormatted(user)+".\n")
-
-                    #ircsock.send("PRIVMSG "+ channel + " :" + user + ": "+golems.getShape(user)+" is hard at work!  It'll last for another "+p.no("second", golems.getLifeRemaining(user, time))+".\n")
                 else:
                     response.append("You don't have a golem working for you, friend.  Create one with '!golem {resources}'.")
-                    #ircsock.send("PRIVMSG "+ channel + " :" + user + ": You don't have a golem working for you, friend.  Create one with '!golem {resources}'.\n")
             else: # check for mines??
                 response.append(newGolem(channel, user, time, parse[1].lstrip()))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
-            #ircsock.send("PRIVMSG "+ channel + " :" + user + ": I don't know anything about you, friend.  Request a new dossier with '!init'.\n")
 
     elif msg.find(":!"+COMMANDS[8]) != -1: # !rankings
-        rankings(msg, channel, user)
+        response.extend(rankings(msg, channel, user))
 
     return response
 
@@ -240,50 +217,52 @@ def updateGolems(time):
             ircsock.send("PRIVMSG "+ x +" :"+golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined+"\n")
             """
 
-""" LINE OF DEATH """
-
 def strike(msg, channel, user, time):
+
+    response = []
+
     mineList = players.getMines(user)
     target = mineList[0] #autotarget first mine
 
     selected = msg.split(COMMANDS[3])[-1].split(" ")[-1] #check for targetted mine
     if selected != "":
         if mineList.count(selected) == 0:
-            ircsock.send("PRIVMSG "+ user +" : That's not a mine you're working on, friend.\n")
-            return
+            return "That's not a mine you're working on, friend."
 
         if target != selected:
             target = selected
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
 
-    #diff = int(time)-int(players.getLastStrike(user))
-    #if diff < baseFatigue: # fatigue check
-    #    left =  baseFatigue - diff
-    #    fatigue = left * 2
-    #    time = int(time) + fatigue - baseFatigue
-
     fatigue = players.fatigueCheck(user, time)
     if fatigue > 0:
         fatigue = fatigue * 2
         time = int(time) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
-        ircsock.send("PRIVMSG "+ user +" :You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.\n")
+        response.append("You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.")
+
+        return response
 
     else: # actual mining actions
         emptyMines = []
         status = players.incStrikes(user)
         excavation = players.strike(user, target)
         mined = players.printExcavation(players.acquireRes(user, excavation))
-        ircsock.send("PRIVMSG "+ user +" :\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined+"\n")
+        response.append("\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined)
 
         if mines.getTotal(target) == 0:
             emptyMines.append(target)
             players.incCleared(user)
             players.incEndurance(user)
             players.incAvailableMines(user)
-            ircsock.send("PRIVMSG "+ user +" :As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.\n")
-            ircsock.send("PRIVMSG "+ user +" :"+target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.\n")
+
+            response.append("As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in."
+            response.append(target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
+
+            """ TODO: figure out how to announce mine clearing in main. legacy
+            code below:
+
             ircsock.send("PRIVMSG "+config[1]+" :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".\n")
+            """
 
         for x in emptyMines:
             mineList.remove(x)
@@ -291,19 +270,28 @@ def strike(msg, channel, user, time):
     players.updateOwned(user, mineList)
     players.updateLastStrike(user, time)
 
+    return response
+
 def report(msg, channel, user, time):
+    response = []
+
     if len(players.getMines(user)) > 0:
-        ircsock.send("PRIVMSG "+ user +" :"+mineListFormatted(msg, channel, user)+"\n")
-    ircsock.send("PRIVMSG "+ user +" :"+resourcesFormatted(channel, user)+"\n")
+        response.append(mineListFormatted(msg, channel, user))
+
+    response.append(resourcesFormatted(channel, user))
+
     if hasGolem(user):
-        ircsock.send("PRIVMSG "+ user +" :"+golemStats(channel, user, time)+".\n")
-    ircsock.send("PRIVMSG "+ user +" :"+statsFormatted(channel, user)+"\n")
+        response.append(golemStats(channel, user, time))
+
+    response.append(statsFormatted(channel, user))
+
+    return response
 
 def grovel(msg, channel, user, time):
     players.incGrovel(user)
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
 
-    ircsock.send("PRIVMSG "+ channel + " :" + user +": The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP_NEU)+"\n")
+    return "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP_NEU)
 
 def stirke(msg, channel, user, time): #hazelnut memorial disfeature
     a = 0
@@ -311,10 +299,9 @@ def stirke(msg, channel, user, time): #hazelnut memorial disfeature
 def fatigue(msg, channel, user, time): #~krowbar memorial feature
     fatigue = players.fatigueCheck(user, time)
     if fatigue > 0:
-
-        ircsock.send("PRIVMSG "+ channel + " :" + user +": You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body.\n")
+        return "You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body."
     else:
-        ircsock.send("PRIVMSG "+ channel + " :" + user +": You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress.\n")
+        return "You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress."
 
 def mineListFormatted(msg, channel, user):
     plural = ''
@@ -376,23 +363,25 @@ def golemStats(channel, user, time):
 
     return status
 
+""" LINE OF DEATH """
+
 def rankings(msg, channel, user):
+
+    response = []
     dossiers = dossierList
-    #playerlist = open("../data/players.txt", 'r')
-    #for x in playerlist:
-    #   dossiers.append(x.rstrip())
-    #playerlist.close()
 
     records = []
     for x in dossiers:
         records.append([x, str(players.getHeldTotal(x))])
 
     records.sort(key=lambda entry:int(entry[1]), reverse=True)
-    ircsock.send("PRIVMSG " + channel + " :The wealthiest citizens are:\n")
+    response.append("The wealthiest citizens are:")
 
     for x in range (0, min(5, len(records))):
         entry = records[x]
-        ircsock.send("PRIVMSG " + channel + " :" + entry[0] + " with " + entry[1] + " units\n")
+        response.append(entry[0] + " with " + entry[1] + " units")
+
+    return response
 
 ## helper functions
 
