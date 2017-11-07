@@ -165,6 +165,7 @@ def strike(player, target): # performs mining action
 
     writeGolem(player, golemdata)
 
+    ## 10/31/17 disabling decay because it's hanging
     #if random.randrange(1,100) < 15:
     #    print decay(player, 1)
 
