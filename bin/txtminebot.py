@@ -191,7 +191,12 @@ def newGolem(channel, user, time, golemstring):
 
                   golem = golems.newGolem(user, ''.join(golemshape), time)
                   players.removeRes(user, golems.getStats(user))
-                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
+
+                  golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you."
+                  golemstats += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))
+
+                  ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+golemstats+"\n")
+                  #ircsock.send("PRIVMSG "+ channel +" :"+ user + ": "+players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.\n")
                   logGolem(user)
             else:
                 ircsock.send("PRIVMSG "+ channel +" :"+ user + ": You don't have the resources to make that golem, friend.\n")
