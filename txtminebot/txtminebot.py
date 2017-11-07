@@ -18,7 +18,36 @@ https://github.com/modgethanc/plaintxtmines
 
 __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 
+import os
+import random
+import inflect
+
+import formatter
+import players
+import golems
+import mines
+import gibber
+import empress
+
+
 ## globals
+
+
+## legacy globals
+
+baseFatigue     = 10
+p = inflect.engine()
+
+def listDossiers():
+    gamedata = os.listdir('../data/')
+    playerlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "dossier":
+            playerlist.append(entry[0])
+    return playerlist
+
+dossierList = listDossiers()
 
 ## speaking functions
 
@@ -46,94 +75,130 @@ def said(bot, channel, nick, time, msg, interface):
         response.append("I am the mining assistant, here to facilitate your ventures by order of the empress.  My lieutenant is "+bot.ADMIN+", who can handle inquiries beyond my availability.")
         response.append("Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.")
 
-    elif msg.find("!init") != 0:
-        if isPlaying(user):
+    elif msg.find("!init") == 0:
+        if isPlaying(nick):
             response.append("You already have a dossier in my records, friend.")
         else:
-            response.append(newPlayer(channel, user))
+            response.append(newPlayer(channel, nick))
 
-    elif msg.find(":!"+COMMANDS[1]) != -1: # !open
-        if isPlaying(user):
-            if players.getAvailableMines(user) > 0:
-                 response.append(newMine(channel, user))
+    elif msg.find("!open") == 0: # !open
+        if isPlaying(nick):
+            if players.getAvailableMines(nick) > 0:
+                 response.append(newMine(channel, nick))
             else:
                 response.append("You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.")
         else:
             response.append("I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
 
-    elif msg.find(":!"+COMMANDS[2]) != -1: # !mines
-        if isPlaying(user):
-            if len(players.getMines(user)) == 0:
+    elif msg.find("!mines") == 0: # !mines
+        if isPlaying(nick):
+            if len(players.getMines(nick)) == 0:
                 response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
             else:
-                response.append(mineListFormatted(msg, channel, user))
+                response.append(mineListFormatted(msg, channel, nick))
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!"+COMMANDS[9]) != -1: # !stats
-        if isPlaying(user):
-            response.append(statsFormatted(channel, user))
+    elif msg.find("!stats") == 0: # !stats
+        if isPlaying(nick):
+            response.append(statsFormatted(channel, nick))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!"+COMMANDS[11]) != -1: # !res
-        if isPlaying(user):
-            response.append(resourcesFormatted(channel, user))
+    elif msg.find("!res") == 0: # !res
+        if isPlaying(nick):
+            response.append(resourcesFormatted(channel, nick))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!"+COMMANDS[3]) != -1: # !strike
-        if isPlaying(user):
-            if len(players.getMines(user)) == 0:
+    elif msg.find("!strike") == 0: # !strike
+        if isPlaying(nick):
+            if len(players.getMines(nick)) == 0:
                 response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
             else:
-                response.extend(strike(msg, channel, user, time))
+                response.extend(strike(msg, channel, nick, time))
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!"+COMMANDS[5]) != -1: # !fatigue
-        if isPlaying(user):
-            response.append(fatigue(msg, channel, user, time))
+    elif msg.find("!fatigue") == 0: # !fatigue
+        if isPlaying(nick):
+            response.append(fatigue(msg, channel, nick, time))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!"+COMMANDS[6]) != -1: # !grovel
-        if isPlaying(user):
+    elif msg.find("!grovel") == 0: # !grovel
+        if isPlaying(nick):
             if random.randrange(1,100) < 30:
                 response.append("The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.")
             else:
-                response.append(grovel(msg, channel, user, time))
+                response.append(grovel(msg, channel, nick, time))
         else:
             response.append("I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!"+COMMANDS[4]) != -1: # !report
-        if isPlaying(user):
-            response.extend(report(msg, channel, user, time))
+    elif msg.find("!report") == 0: # !report
+        if isPlaying(nick):
+            response.extend(report(msg, channel, nick, time))
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!golem") != -1:
-        if isPlaying(user):
-            parse = msg.split("!"+COMMANDS[10])
+    elif msg.find("!golem") == 0:
+        if isPlaying(nick):
+            parse = msg.split("!golem")
             if parse[1] == '': #no arguments
-                if hasGolem(user):
-                    response.append(golemStats(channel, user, time))
-                    response.append("It's holding the following resources: "+golems.heldFormatted(user))
+                if hasGolem(nick):
+                    response.append(golemStats(channel, nick, time))
+                    response.append("It's holding the following resources: "+golems.heldFormatted(nick))
                 else:
                     response.append("You don't have a golem working for you, friend.  Create one with '!golem {resources}'.")
             else: # check for mines??
-                response.append(newGolem(channel, user, time, parse[1].lstrip()))
+                response.append(newGolem(channel, nick, time, parse[1].lstrip()))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
-    elif msg.find(":!"+COMMANDS[8]) != -1: # !rankings
-        response.extend(rankings(msg, channel, user))
+    elif msg.find("!rankings") == 0: # !rankings
+        response.extend(rankings(msg, channel, nick))
 
     return response
 
 ## command handlers
 
 ## legacy gameplay functions
+
+def isPlaying(user):
+    return os.path.isfile('../data/'+user+'.dossier')
+
+def isMine(mine):
+    return os.path.isfile('../data/'+mine+'.mine')
+
+def hasGolem(user):
+    return os.path.isfile('../data/'+user+'.golem')
+
+def listPlayers():
+    gamedata = os.listdir('../data/')
+    playerlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "stats":
+            playerlist.append(entry[0])
+    return playerlist
+
+def listGolems():
+    gamedata = os.listdir('../data/')
+    golemlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "golem":
+            golemlist.append(entry[0])
+    return golemlist
+
+def listMines():
+    gamedata = os.listdir('../data/')
+    minelist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "mine":
+            minelist.append(entry[0])
+    return minelist
 
 def newPlayer(channel, user):
     if os.path.isfile('../data/'+user+'.stats'):
@@ -224,7 +289,7 @@ def strike(msg, channel, user, time):
     mineList = players.getMines(user)
     target = mineList[0] #autotarget first mine
 
-    selected = msg.split(COMMANDS[3])[-1].split(" ")[-1] #check for targetted mine
+    selected = msg.split("strike")[-1].split(" ")[-1] #check for targetted mine
     if selected != "":
         if mineList.count(selected) == 0:
             return "That's not a mine you're working on, friend."
