@@ -255,7 +255,7 @@ def strike(msg, channel, user, time):
             players.incEndurance(user)
             players.incAvailableMines(user)
 
-            response.append("As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in."
+            response.append("As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
             response.append(target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
 
             """ TODO: figure out how to announce mine clearing in main. legacy
@@ -342,7 +342,7 @@ def mineListFormatted(msg, channel, user):
 
         prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
 
-    return "You're working on the following mine"+plural+": "+j.join(prejoin)
+    return "You're working on the following mine"+plural+": "+", ".join(prejoin)
 
 def resourcesFormatted(channel, user):
     return "You're holding the following resources: "+players.heldFormatted(user)
