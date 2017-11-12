@@ -32,6 +32,9 @@ import empress
 
 ## globals
 
+INTERP = []
+for x in open("lang/interp.txt"):
+    INTERP.append(x.rstrip())
 
 ## legacy globals
 
@@ -59,7 +62,7 @@ def addressed(bot, channel, nick, time, msg, interface):
 
     response = []
 
-    response.append("hi")
+    response.extend(said(bot, channel, nick, time, msg, interface))
 
     return response
 
@@ -356,7 +359,7 @@ def grovel(msg, channel, user, time):
     players.incGrovel(user)
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
 
-    return "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP_NEU)
+    return "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP)
 
 def stirke(msg, channel, user, time): #hazelnut memorial disfeature
     a = 0
