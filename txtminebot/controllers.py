@@ -58,7 +58,7 @@ class IRC():
         #imp.reload(txtminebot)
 
         if self.load(configfile):
-            print "Successfully loaded configuration file! Hi, "+self.ADMIN+", I'm "+self.BOTNAME+"! I'm ready to connect to "+str(self.DEFAULTCHANS)+"@"+self.SERVER +" whenever you're ready!"
+            print "Successfully loaded configuration file! Hi, "+self.ADMIN+", I'm "+self.BOTNAME+"! I'm about to connect to "+str(self.DEFAULTCHANS)+"@"+self.SERVER +"!"
         else:
             print "There was a problem with the config file, ["+configfile+"]. Either it doesn't exist, or the format was not as expected. See documentation for details."
 
@@ -158,36 +158,33 @@ class IRC():
         '''
 
         self.sock.connect((server, 6667))
-        self.send("NICK "+botnick+"\n")
-        time.sleep(1)
         #self.send("USER ~"+botnick+" 0 * :"+self.ADMIN+"'s bot\n")
         self.send("USER "+botnick+" "+botnick+" "+botnick+" :"+self.ADMIN+"'s bot\n")
+        self.send("NICK "+botnick+"\n")
 
-        time.sleep(5)
+        #time.sleep(5)
 
-        for chan in self.DEFAULTCHANS:
-            self.joinchan(chan)
-
-        """ THIS ISN'T WORKING FOR SOME REASON??
         while 1:
             # wait for mode set before joining channels
-            msg = self.sock.recv(2048).decode('ascii')
+            msg = self.sock.recv(2048)
 
             if msg:
                 print(msg)
 
-                if re.match("PING", msg):
-                    print "[pinged]"
+                if msg.find("PING :") == 0:
                     pingcode = msg.split(":")[1]
+                    print "[pinged] with "+pingcode
                     self.ping(pingcode)
-                    continue
 
-                if re.match("MODE", msg):
+                elif msg.find("MODE") != -1:
 
                     for chan in self.DEFAULTCHANS:
                         self.joinchan(chan)
-                    break
-        """
+                    return
+
+                elif msg.find("ERROR") == 0:
+                    print "connection error :("
+                    return
 
     def disconnect(self, quitmsg=""):
         '''
