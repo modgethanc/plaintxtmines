@@ -212,25 +212,37 @@ class IRC():
 
     def multisay(self, channel, msglist, nick=""):
         '''
-        Takes a list of messages to send to a single channel and says them, with
-        optional nick addressing.
+        Takes a list of messages to send to a single channel processes them,
+        calling self.say() on each one.
 
         Also provides the option of processing a dict from an individual
         message, extracting "msg" and "channel" appropriately.
         '''
 
-        for msg in msglist:
-            target = ""
+        for line in msglist:
+            msg = ""
+            chan_target = ""
+            nick_target = ""
 
-            if isinstance(msg, dict):
-                target = msg.get("channel")
-                msg = msg.get("msg")
+            if isinstance(line, dict):
+                # message metadata handling
 
-            if target:
-                if target == "MAIN":
-                    channel = self.MAINCHAN
+                msg = line.get("msg")
+                chan_target = line.get("channel")
+                nick_target = line.get("nick")
+
+                if chan_target:
+                    if chan_target == "MAIN":
+                        channel = self.MAINCHAN
+                    else:
+                        channel = chan_target
+
+                if not nick_target:
+                    nick = ""
                 else:
-                    channel = target
+                    nick = nick_target
+            else:
+                msg = line
 
             self.say(channel, msg, nick)
 

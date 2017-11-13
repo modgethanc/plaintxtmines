@@ -329,7 +329,7 @@ def strike(msg, channel, user, time):
 
             response.append({"msg":"As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.", "channel":user})
             response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":user})
-            response.append({"msg":"There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN"})
+            response.append({"msg":"There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN", "nick":False})
 
             """ TODO: figure out how to announce mine clearing in main. legacy
             code below:
