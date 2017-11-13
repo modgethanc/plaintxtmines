@@ -51,6 +51,7 @@ class IRC():
         self.ADMIN = ""
         self.SERVER = ""
         self.DEFAULTCHANS = []
+        self.MAINCHAN = ""
         self.CHANNELS = []
         self.LASTCHECK = 0
 
@@ -91,6 +92,8 @@ class IRC():
         self.ADMIN  = config[3]
         self.SERVER = config[0]
         self.DEFAULTCHANS = config[1].split(',')
+        # assumes first channel listed is main game channel
+        self.MAINCHAN = self.DEFAULTCHANS[0]
 
         return configfile
 
@@ -211,10 +214,25 @@ class IRC():
         '''
         Takes a list of messages to send to a single channel and says them, with
         optional nick addressing.
+
+        Also provides the option of processing a dict from an individual
+        message, extracting "msg" and "channel" appropriately.
         '''
 
-        for x in msglist:
-            self.say(channel, x, nick)
+        for msg in msglist:
+            target = ""
+
+            if isinstance(msg, dict):
+                target = msg.get("channel")
+                msg = msg.get("msg")
+
+            if target:
+                if target == "MAIN":
+                    channel = self.MAINCHAN
+                else:
+                    channel = target
+
+            self.say(channel, msg, nick)
 
     def wall(self, msg, nick=""):
         '''

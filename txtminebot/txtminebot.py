@@ -286,6 +286,10 @@ def updateGolems(time):
             """
 
 def strike(msg, channel, user, time):
+    '''
+    Process all strike actions, returning username as channel so these responses
+    always go to PM.
+    '''
 
     response = []
 
@@ -295,7 +299,7 @@ def strike(msg, channel, user, time):
     selected = msg.split("strike")[-1].split(" ")[-1] #check for targetted mine
     if selected != "":
         if mineList.count(selected) == 0:
-            return "That's not a mine you're working on, friend."
+            response.append({"msg":"That's not a mine you're working on, friend.", "channel":user})
 
         if target != selected:
             target = selected
@@ -306,7 +310,7 @@ def strike(msg, channel, user, time):
     if fatigue > 0:
         fatigue = fatigue * 2
         time = int(time) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
-        response.append("You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.")
+        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":user})
 
         return response
 
@@ -315,7 +319,7 @@ def strike(msg, channel, user, time):
         status = players.incStrikes(user)
         excavation = players.strike(user, target)
         mined = players.printExcavation(players.acquireRes(user, excavation))
-        response.append("\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined)
+        response.append({"msg":"\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined, "channel":user})
 
         if mines.getTotal(target) == 0:
             emptyMines.append(target)
@@ -323,8 +327,9 @@ def strike(msg, channel, user, time):
             players.incEndurance(user)
             players.incAvailableMines(user)
 
-            response.append("As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.")
-            response.append(target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.")
+            response.append({"msg":"As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.", "channel":user})
+            response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":user})
+            response.append({"msg":"There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN"})
 
             """ TODO: figure out how to announce mine clearing in main. legacy
             code below:
