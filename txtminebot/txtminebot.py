@@ -465,6 +465,11 @@ def tick(now):
     TODO: Put golem updating here!
     '''
 
+    response = []
+
     updateGolems(now)
 
-    return
+    # debugging ticks below:
+    response.append({"msg":"tick "+str(now), "channel":"hvincent"})
+
+    return response

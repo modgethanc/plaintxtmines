@@ -321,10 +321,12 @@ class IRC():
             return "say"
 
     def tick(self, now):
-        '''Gets called every time one second elapses, to handle all the
-        time-based actions.'''
+        '''
+        Gets called every time one second elapses, to handle all the time-based
+        actions.
+        '''
 
-        txtminebot.tick(now)
+        self.multisay("",txtminebot.tick(now))
 
         return
 
