@@ -59,19 +59,25 @@ dossierList = listDossiers()
 def addressed(bot, channel, nick, time, msg, interface):
     '''
     Returns responses to something said in a channel when directly addressed.
+    If the thing said in a channel is a command, defer to the command
+    processing in said(); otherwise, return a fallthrough filler statement.
+
     Every time this bot is addressed, this should be called.
     '''
 
     response = []
 
-    #response.extend(said(bot, channel, nick, time, msg, interface))
     randoms = ["Sorry, friend, I'm not sure how to help you here.", "Check with my lieutenant, "+bot.ADMIN+", if you need an urgent response.", "Perhaps you should just focus on your mining duties."]
 
-    response.append(random.choice(randoms))
+    saids = said(bot, channel, nick, time, msg, interface)
 
-    systime.sleep(1)
+    if not saids:
+        systime.sleep(1)
+        response.append(random.choice(randoms))
+        return response
+    else:
+        return saids
 
-    return response
 
 def said(bot, channel, nick, time, msg, interface):
     '''
