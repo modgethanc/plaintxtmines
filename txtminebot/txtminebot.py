@@ -21,7 +21,7 @@ __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 import os
 import random
 import inflect
-import time
+import time as systime
 from datetime import datetime
 
 import formatter
@@ -69,7 +69,7 @@ def addressed(bot, channel, nick, time, msg, interface):
 
     response.append(random.choice(randoms))
 
-    time.sleep(1)
+    systime.sleep(1)
 
     return response
 
