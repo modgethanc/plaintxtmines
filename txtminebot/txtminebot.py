@@ -64,7 +64,8 @@ def addressed(bot, channel, nick, time, msg, interface):
 
     response = []
 
-    response.extend(said(bot, channel, nick, time, msg, interface))
+    #response.extend(said(bot, channel, nick, time, msg, interface))
+    response.append("Sorry, friend, I'm not sure how to help you here.")
 
     return response
 
