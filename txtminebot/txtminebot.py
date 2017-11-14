@@ -21,6 +21,7 @@ __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 import os
 import random
 import inflect
+import time
 
 import formatter
 import players
@@ -250,40 +251,45 @@ def logGolem(user):
   golemarchive = open("../data/golems.txt", 'a')
   golemtext = golems.getShape(user) + "\t"
   golemtext += str(golems.getStrength(user)) + "/" + str(golems.getInterval(user)) + "\t"
-  golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
+  golemtext += " ("+user+" on "+time.now().date().__str__()+")"
   golemarchive.write(golemtext+"\n")
   golemarchive.close()
 
 def updateGolems(time):
-    for x in listGolems():
-        strikeDiff = int(time) - golems.getLastStrike(x)
-        interval = golems.getInterval(x)
+    response = []
 
-        if strikeDiff >= interval and len(players.getMines(x)) > 0: # golem strike
-            target = players.getMines(x)[0]
+    for user in listGolems():
+        strikeDiff = int(time) - golems.getLastStrike(user)
+        interval = golems.getInterval(user)
+
+        if strikeDiff >= interval and len(players.getMines(user)) > 0: # golem strike
+            target = players.getMines(user)[0]
             strikeCount = strikeDiff/interval
             i = 0
-            elapsed = golems.getLastStrike(x)
+            elapsed = golems.getLastStrike(user)
             while i < strikeCount:
                 if mines.getTotal(target) > 0:
-                    print "golemstrike"+ str(golems.strike(x, target))
+                    print "golemstrike"+ str(golems.strike(user, target))
                 elapsed += interval
                 i += 1
 
-            golems.updateLastStrike(x, elapsed)
+            golems.updateLastStrike(user, elapsed)
 
-        if int(time) > golems.getDeath(x): # golem death
-            golem = golems.getShape(x)
-            mined = players.printExcavation(golems.expire(x))
+        if int(time) > golems.getDeath(user): # golem death
+            golem = golems.getShape(user)
+            mined = players.printExcavation(golems.expire(user))
             golemgrave = "in front of you"
-            if len(players.getMines(x)) > 0:
-                golemgrave = "inside of "+players.getMines(x)[0].capitalize()
+            if len(players.getMines(user)) > 0:
+                golemgrave = "inside of "+players.getMines(user)[0].capitalize()
 
             """TODO: figure out how to make tick speak appropriately! old
             response below:
 
             ircsock.send("PRIVMSG "+ x +" :"+golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined+"\n")
             """
+            response.append({"msg":golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined, "channel":user})
+
+    return response
 
 def strike(msg, channel, user, time):
     '''
@@ -467,9 +473,9 @@ def tick(now):
 
     response = []
 
-    updateGolems(now)
+    response.extend(updateGolems(now))
 
     # debugging ticks below:
-    response.append({"msg":"tick "+str(now), "channel":"hvincent"})
+    #response.append({"msg":"tick "+str(now), "channel":"hvincent"})
 
     return response
