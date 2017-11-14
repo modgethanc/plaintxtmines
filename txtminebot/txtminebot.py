@@ -253,7 +253,11 @@ def newGolem(channel, user, time, golemstring):
                   players.removeRes(user, golems.getStats(user))
                   logGolem(user)
 
-                  return players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you."
+                  golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.  "
+                  golemstats += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+"."
+
+                  return golemstats
+
             else:
                 return "You don't have the resources to make that golem, friend."
         else:
