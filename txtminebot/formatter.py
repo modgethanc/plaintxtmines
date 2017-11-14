@@ -20,6 +20,11 @@ def format_message(message):
 	return "%s\t%s\t%s\t%s\t%s" % (now, nick, command, channel, message)
 
 def prettyTime(time):
+    '''
+    Takes an input as a number of seconds and returns a more human-readable
+    phrase.
+    '''
+
     m, s = divmod(time, 60)
     if m > 0:
         h, m = divmod(m, 60)

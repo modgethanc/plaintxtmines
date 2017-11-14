@@ -18,8 +18,8 @@ def newGolem(player, golemstring, time):
     golemfile.write(str(calcStrength(golem))+"\n") # 4 strength
     golemfile.write(str(calcInterval(golem))+"\n") # 5 interval
     golemfile.write(str(calcDeath(golem, time))+"\n") # 6 death time
-    golemfile.write(time+"\n") # 7 birth time
-    golemfile.write(time+"\n") # 8 last strike
+    golemfile.write(str(time)+"\n") # 7 birth time
+    golemfile.write(str(time)+"\n") # 8 last strike
     golemfile.write("0,0,0,0,0,0,0,0\n") # 9 held res
 
     golemfile.close()
@@ -68,7 +68,12 @@ def calcWidth(golem): # number of different res
 
     return width
 
-def calcDeath(golem, time): # calcuate expiration time
+def calcDeath(golem, time):
+    '''
+    Takes a golem array and a time and performs a diceroll to determine its
+    lifespan, and returns a timestamp for when it will die.
+    '''
+
     death = int(time)
     #life = random.randrange(1, max(2,calcStrength(golem) * calcWidth(golem))) * random.randrange(1,max(calcStrength(golem), 50))
     tail = int(golem[0]) * random.randrange(1,10)

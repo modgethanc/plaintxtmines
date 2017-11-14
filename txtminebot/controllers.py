@@ -51,13 +51,15 @@ class IRC():
         self.ADMIN = ""
         self.SERVER = ""
         self.DEFAULTCHANS = []
+        self.MAINCHAN = ""
         self.CHANNELS = []
+        self.LASTCHECK = 0
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #imp.reload(txtminebot)
 
         if self.load(configfile):
-            print "Successfully loaded configuration file! Hi, "+self.ADMIN+", I'm "+self.BOTNAME+"! I'm ready to connect to "+str(self.DEFAULTCHANS)+"@"+self.SERVER +" whenever you're ready!"
+            print "Successfully loaded configuration file! Hi, "+self.ADMIN+", I'm "+self.BOTNAME+"!"
+           
         else:
             print "There was a problem with the config file, ["+configfile+"]. Either it doesn't exist, or the format was not as expected. See documentation for details."
 
@@ -90,6 +92,8 @@ class IRC():
         self.ADMIN  = config[3]
         self.SERVER = config[0]
         self.DEFAULTCHANS = config[1].split(',')
+        # assumes first channel listed is main game channel
+        self.MAINCHAN = self.DEFAULTCHANS[0]
 
         return configfile
 
@@ -108,7 +112,7 @@ class IRC():
         Calls reload on txtminebot module.
         '''
 
-        importlib.reload(self.txtminebot)
+        reload(txtminebot)
 
     ### irc functions
 
@@ -156,37 +160,35 @@ class IRC():
         of channels.
         '''
 
+        print "I'm about to connect to "+str(self.DEFAULTCHANS)+"@"+self.SERVER +"!"
         self.sock.connect((server, 6667))
-        self.send("NICK "+botnick+"\n")
-        time.sleep(1)
         #self.send("USER ~"+botnick+" 0 * :"+self.ADMIN+"'s bot\n")
         self.send("USER "+botnick+" "+botnick+" "+botnick+" :"+self.ADMIN+"'s bot\n")
+        self.send("NICK "+botnick+"\n")
 
-        time.sleep(5)
+        #time.sleep(5)
 
-        for chan in self.DEFAULTCHANS:
-            self.joinchan(chan)
-
-        """ THIS ISN'T WORKING FOR SOME REASON??
         while 1:
             # wait for mode set before joining channels
-            msg = self.sock.recv(2048).decode('ascii')
+            msg = self.sock.recv(2048)
 
             if msg:
                 print(msg)
 
-                if re.match("PING", msg):
-                    print "[pinged]"
+                if msg.find("PING :") == 0:
                     pingcode = msg.split(":")[1]
+                    print "[pinged] with "+pingcode
                     self.ping(pingcode)
-                    continue
 
-                if re.match("MODE", msg):
+                elif msg.find("MODE") != -1:
 
                     for chan in self.DEFAULTCHANS:
                         self.joinchan(chan)
-                    break
-        """
+                    return
+
+                elif msg.find("ERROR") == 0:
+                    print "connection error :("
+                    return
 
     def disconnect(self, quitmsg=""):
         '''
@@ -211,12 +213,39 @@ class IRC():
 
     def multisay(self, channel, msglist, nick=""):
         '''
-        Takes a list of messages to send to a single channel and says them, with
-        optional nick addressing.
+        Takes a list of messages to send to a single channel processes them,
+        calling self.say() on each one.
+
+        Also provides the option of processing a dict from an individual
+        message, extracting "msg" and "channel" appropriately.
         '''
 
-        for x in msglist:
-            self.say(channel, x, nick)
+        for line in msglist:
+            msg = ""
+            chan_target = ""
+            nick_target = ""
+
+            if isinstance(line, dict):
+                # message metadata handling
+
+                msg = line.get("msg")
+                chan_target = line.get("channel")
+                nick_target = line.get("nick")
+
+                if chan_target:
+                    if chan_target == "MAIN":
+                        channel = self.MAINCHAN
+                    else:
+                        channel = chan_target
+
+                if not nick_target:
+                    nick = ""
+                else:
+                    nick = nick_target
+            else:
+                msg = line
+
+            self.say(channel, msg, nick)
 
     def wall(self, msg, nick=""):
         '''
@@ -292,12 +321,30 @@ class IRC():
             self.say(parse[0], " ".join(parse[1:]))
             return "say"
 
+    def tick(self, now):
+        '''
+        Gets called every time one second elapses, to handle all the time-based
+        actions.
+        '''
+
+        self.multisay("",txtminebot.tick(now))
+
+        return
+
     def listen(self):
         '''
         A loop for listening for messages.
         '''
 
+        self.LASTCHECK = int(time.time())
+
         while 1:
+            now = int(time.time())
+
+            if now - self.LASTCHECK > 0:
+                self.LASTCHECK = now
+                self.tick(now)
+
             msg = self.sock.recv(2048)
             if msg:
                 if re.match("^PING", msg):
@@ -364,11 +411,12 @@ class IRC():
 
             if parsed.get("message").find(self.BOTNAME+": ") != -1 or self.is_pm(parsed):
                 # responses when directly addressed
-                self.multisay(parsed.get("channel"), txtminebot.addressed(parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
+                self.multisay(parsed.get("channel"),
+                        txtminebot.addressed(self, parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
             else:
                 # general responses
 
-                self.multisay(parsed.get("channel"), txtminebot.said(parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
+                self.multisay(parsed.get("channel"), txtminebot.said(self, parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
 
         sys.stdout.flush()
 
@@ -410,16 +458,18 @@ def irc_loop(head):
 
         if proceed:
             # juggle existing socket and channels
-            s = head.sock
+            sock = head.sock
             chans = head.CHANNELS
-            imp.reload(heads)
-            head = IRC()
+            head.reload()
 
-            head.sock = s
+            head = IRC()
+            head.sock = sock
             head.CHANNELS = chans
             irc_loop(head)
         else:
             # TODO: fire clean bot shutdown
+
+            head.disconnect("Rest for now, until I return, citizens.")
 
             print "bot going down!"
 
