@@ -69,6 +69,8 @@ def addressed(bot, channel, nick, time, msg, interface):
 
     response.append(random.choice(randoms))
 
+    time.sleep(1)
+
     return response
 
 def said(bot, channel, nick, time, msg, interface):
