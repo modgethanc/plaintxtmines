@@ -409,14 +409,24 @@ class IRC():
                 if code:
                    return
 
-            if parsed.get("message").find(self.BOTNAME+": ") != -1 or self.is_pm(parsed):
-                # responses when directly addressed
-                self.multisay(parsed.get("channel"),
-                        txtminebot.addressed(self, parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
-            else:
-                # general responses
+            # create a player_input
 
-                self.multisay(parsed.get("channel"), txtminebot.said(self, parsed.get("channel"), parsed.get("nick"), parsed.get("time"), parsed.get("message"), "irc"), parsed.get("nick"))
+            player_input = PlayerInput()
+            player_input.manual_set(
+                    self, parsed.get("channel"), parsed.get("nick"), 
+                    parsed.get("time"), parsed.get("message"), "irc")
+
+            if (parsed.get("message").find(self.BOTNAME+": ") != -1 or
+                self.is_pm(parsed)):
+                # responses when directly addressed
+
+                self.multisay(parsed.get("channel"),
+                        txtminebot.addressed(player_input), parsed.get("nick"))
+            else:
+                # responses when not addressed
+
+                self.multisay(parsed.get("channel"), 
+                        txtminebot.said(player_input), parsed.get("nick"))
 
         sys.stdout.flush()
 
@@ -436,6 +446,35 @@ class IRC():
         if re.match("\+o "+self.BOTNAME, parsed.get("message")):
             self.say(parsed.get("channel"), "")
 
+
+class PlayerInput():
+    '''
+    To make some user handling more expedient.
+    '''
+
+    def __init__(self):
+        '''
+        Initial placeholder values.
+        '''
+
+        self.bot = None
+        self.channel = ""
+        self.nick = ""
+        self.timestamp = 0
+        self.msg = ""
+        self.interface = ""
+
+    def manual_set(self, bot, channel, nick, timestamp, msg, interface):
+        '''
+        To directly pass in all attributes.
+        '''
+
+        self.bot = bot
+        self.channel = channel
+        self.nick = nick
+        self.timestamp = timestamp
+        self.msg = msg
+        self.interface = interface
 
 ### MAIN IRC BOT CONTROL
 

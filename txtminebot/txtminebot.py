@@ -56,7 +56,7 @@ dossierList = listDossiers()
 
 ## speaking functions
 
-def addressed(bot, channel, nick, timestamp, msg, interface):
+def addressed(player_input):
     '''
     Returns responses to something said in a channel when directly addressed.
     If the thing said in a channel is a command, defer to the command
@@ -67,9 +67,9 @@ def addressed(bot, channel, nick, timestamp, msg, interface):
 
     response = []
 
-    randoms = ["Sorry, friend, I'm not sure how to help you here.", "Check with my lieutenant, "+bot.ADMIN+", if you need an urgent response.", "Perhaps you should just focus on your mining duties."]
+    randoms = ["Sorry, friend, I'm not sure how to help you here.", "Check with my lieutenant, "+player_input.bot.ADMIN+", if you need an urgent response.", "Perhaps you should just focus on your mining duties."]
 
-    saids = said(bot, channel, nick, timestamp, msg, interface)
+    saids = said(player_input)
 
     if not saids:
         time.sleep(1)
@@ -79,11 +79,18 @@ def addressed(bot, channel, nick, timestamp, msg, interface):
         return saids
 
 
-def said(bot, channel, nick, timestamp, msg, interface):
+def said(player_input):
     '''
     Returns responses to something said in a channel, when not directly
     addressed. This should catch everything that addressed() misses.
     '''
+
+    bot = player_input.bot
+    channel = player_input.channel
+    nick = player_input.nick
+    timestamp = player_input.timestamp
+    msg = player_input.msg
+    interface = player_input.interface
 
     response = []
 
