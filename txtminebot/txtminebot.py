@@ -64,12 +64,14 @@ def addressed(bot, channel, nick, time, msg, interface):
 
     response = []
 
-    #response.extend(said(bot, channel, nick, time, msg, interface))
     randoms = ["Sorry, friend, I'm not sure how to help you here.", "Check with my lieutenant, "+bot.ADMIN+", if you need an urgent response.", "Perhaps you should just focus on your mining duties."]
 
-    response.append(random.choice(randoms))
+    saids = said(bot, channel, nick, time, msg, interface)
 
-    systime.sleep(1)
+    if not saids:
+        systime.sleep(1)
+        response.append(random.choice(randoms))
+        #response.extend(said(bot, channel, nick, time, msg, interface))
 
     return response
 
