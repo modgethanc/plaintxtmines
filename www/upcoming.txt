@@ -1,0 +1,34 @@
+some general to-do/future planning.:
+
+SKILLS
+-survey: discover makeup of your mine
+-theft: steal resources from others
+-tools: upgrade for depth/width/multi
+
+GOLEMS
+-decay
+-don't spend life when working on an empty mine
+  -auto-target non-empty mine
+-golem termination
+  -bones
+-show current res in report [rbenua]
+-less shitty res printing
+
+EMPRESS
+-tithing
+-favors
+  -additional mine permission
+
+MARKET
+-trade resources to others
+-sell resources for cash
+-buy stuff
+  -messenger service
+  -reminder service [hazel]
+
+MISC
+-burn: destroy your dossier (soft reset)
+-abandon mines
+-strike yourself if you typo !strike [hazel]
+-contract other people to work in your mines
+-partial mine name matching [~asa]

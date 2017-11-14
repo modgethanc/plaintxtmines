@@ -1,0 +1,31 @@
+------- features pushed on 2015-03-11 ------------------------------------------
+
+1. mine list sorted by completion
+2. number of mined resources per strike based on strength calculation
+  2a. formula is 3*str
+3. strength gain semi-randomly while !striking
+  3a. this gets harder the more str you have
+4. !stats outputs some stats
+  4a. it's included in !report
+5. !open new mines now depends on whether or not you have empress permission
+  5a. granted 1 on !init
+  5b. granted +1 for each mine cleared
+6. GOLEMS!!!!!!!!!!
+  6a. !golem {res} to make a golem
+	6b. golem lifetime is semirandomly calculated based on what res you give it
+	6c. golem mats get deducted from your holdings
+	6d. when the golem dies, everything it collected during its life is
+	tranferred to you
+	6e. golem default mines out of whatever mine you have targeted
+	6f. you can only have one golem at a time
+	6g. (FIXED) KNOWN BUG: you can put non-resource characters into your golem (i am too
+	lazy to filter this shit out right now
+7. you now gain ENDURANCE from finishing a mine
+
+------- currently alphatesting in ##txtmines-test ------------------------------
+
+1. golem size is now capped to player's strength
+	1a. formula: rounded 3.5*str
+2. golems do not strike on empty mines
+3. golems decay when striking
+4. golems are archived
