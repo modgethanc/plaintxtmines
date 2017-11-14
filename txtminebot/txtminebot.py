@@ -21,7 +21,7 @@ __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 import os
 import random
 import inflect
-import time as systime
+import time as time
 from datetime import datetime
 
 import formatter
@@ -56,7 +56,7 @@ dossierList = listDossiers()
 
 ## speaking functions
 
-def addressed(bot, channel, nick, time, msg, interface):
+def addressed(bot, channel, nick, timestamp, msg, interface):
     '''
     Returns responses to something said in a channel when directly addressed.
     If the thing said in a channel is a command, defer to the command
@@ -69,17 +69,17 @@ def addressed(bot, channel, nick, time, msg, interface):
 
     randoms = ["Sorry, friend, I'm not sure how to help you here.", "Check with my lieutenant, "+bot.ADMIN+", if you need an urgent response.", "Perhaps you should just focus on your mining duties."]
 
-    saids = said(bot, channel, nick, time, msg, interface)
+    saids = said(bot, channel, nick, timestamp, msg, interface)
 
     if not saids:
-        systime.sleep(1)
+        time.sleep(1)
         response.append(random.choice(randoms))
         return response
     else:
         return saids
 
 
-def said(bot, channel, nick, time, msg, interface):
+def said(bot, channel, nick, timestamp, msg, interface):
     '''
     Returns responses to something said in a channel, when not directly
     addressed. This should catch everything that addressed() misses.
@@ -132,13 +132,13 @@ def said(bot, channel, nick, time, msg, interface):
             if len(players.getMines(nick)) == 0:
                 response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
             else:
-                response.extend(strike(msg, channel, nick, time))
+                response.extend(strike(msg, channel, nick, timestamp))
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
     elif msg.find("!fatigue") == 0: # !fatigue
         if isPlaying(nick):
-            response.append(fatigue(msg, channel, nick, time))
+            response.append(fatigue(msg, channel, nick, timestamp))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
@@ -147,13 +147,13 @@ def said(bot, channel, nick, time, msg, interface):
             if random.randrange(1,100) < 30:
                 response.append("The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.")
             else:
-                response.append(grovel(msg, channel, nick, time))
+                response.append(grovel(msg, channel, nick, timestamp))
         else:
             response.append("I advise against groveling unless you're in my records, friend.  Request a new dossier with '!init'.")
 
     elif msg.find("!report") == 0: # !report
         if isPlaying(nick):
-            response.extend(report(msg, channel, nick, time))
+            response.extend(report(msg, channel, nick, timestamp))
         else:
             response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
@@ -162,12 +162,12 @@ def said(bot, channel, nick, time, msg, interface):
             parse = msg.split("!golem")
             if parse[1] == '': #no arguments
                 if hasGolem(nick):
-                    response.append(golemStats(channel, nick, time))
+                    response.append(golemStats(channel, nick, timestamp))
                     response.append("It's holding the following resources: "+golems.heldFormatted(nick))
                 else:
                     response.append("You don't have a golem working for you, friend.  Create one with '!golem {resources}'.")
             else: # check for mines??
-                response.append(newGolem(channel, nick, time, parse[1].lstrip()))
+                response.append(newGolem(channel, nick, timestamp, parse[1].lstrip()))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
@@ -233,9 +233,9 @@ def newMine(channel, user, rates="standardrates"):
 
     return "Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'."
 
-def newGolem(channel, user, time, golemstring):
+def newGolem(channel, user, timestamp, golemstring):
     if hasGolem(user):
-        return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, time))
+        return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
@@ -249,11 +249,11 @@ def newGolem(channel, user, time, golemstring):
                       if x in ['~', '@', '#', '^', '&', '*', '[', ']']:
                           golemshape.append(x)
 
-                  golem = golems.newGolem(user, ''.join(golemshape), time)
+                  golem = golems.newGolem(user, ''.join(golemshape), timestamp)
                   players.removeRes(user, golems.getStats(user))
                   logGolem(user)
 
-                  golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, time))+".  Once it expires, you can gather all the resources it harvested for you.  "
+                  golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
                   golemstats += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+"."
 
                   return golemstats
@@ -271,11 +271,11 @@ def logGolem(user):
   golemarchive.write(golemtext+"\n")
   golemarchive.close()
 
-def updateGolems(time):
+def updateGolems(timestamp):
     response = []
 
     for user in listGolems():
-        strikeDiff = int(time) - golems.getLastStrike(user)
+        strikeDiff = int(timestamp) - golems.getLastStrike(user)
         interval = golems.getInterval(user)
 
         if strikeDiff >= interval and len(players.getMines(user)) > 0: # golem strike
@@ -291,7 +291,7 @@ def updateGolems(time):
 
             golems.updateLastStrike(user, elapsed)
 
-        if int(time) > golems.getDeath(user): # golem death
+        if int(timestamp) > golems.getDeath(user): # golem death
             golem = golems.getShape(user)
             mined = players.printExcavation(golems.expire(user))
             golemgrave = "in front of you"
@@ -307,7 +307,7 @@ def updateGolems(time):
 
     return response
 
-def strike(msg, channel, user, time):
+def strike(msg, channel, user, timestamp):
     '''
     Process all strike actions, returning username as channel so these responses
     always go to PM.
@@ -328,10 +328,10 @@ def strike(msg, channel, user, time):
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
 
-    fatigue = players.fatigueCheck(user, time)
+    fatigue = players.fatigueCheck(user, timestamp)
     if fatigue > 0:
         fatigue = fatigue * 2
-        time = int(time) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
+        timestamp = int(timestamp) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
         response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":user})
 
         return response
@@ -363,11 +363,11 @@ def strike(msg, channel, user, time):
             mineList.remove(x)
 
     players.updateOwned(user, mineList)
-    players.updateLastStrike(user, time)
+    players.updateLastStrike(user, timestamp)
 
     return response
 
-def report(msg, channel, user, time):
+def report(msg, channel, user, timestamp):
     response = []
 
     if len(players.getMines(user)) > 0:
@@ -376,23 +376,23 @@ def report(msg, channel, user, time):
     response.append(resourcesFormatted(channel, user))
 
     if hasGolem(user):
-        response.append(golemStats(channel, user, time))
+        response.append(golemStats(channel, user, timestamp))
 
     response.append(statsFormatted(channel, user))
 
     return response
 
-def grovel(msg, channel, user, time):
+def grovel(msg, channel, user, timestamp):
     players.incGrovel(user)
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
 
     return "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP)
 
-def stirke(msg, channel, user, time): #hazelnut memorial disfeature
+def stirke(msg, channel, user, timestamp): #hazelnut memorial disfeature
     a = 0
 
-def fatigue(msg, channel, user, time): #~krowbar memorial feature
-    fatigue = players.fatigueCheck(user, time)
+def fatigue(msg, channel, user, timestamp): #~krowbar memorial feature
+    fatigue = players.fatigueCheck(user, timestamp)
     if fatigue > 0:
         return "You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body."
     else:
@@ -452,9 +452,9 @@ def statsFormatted(channel, user):
 
     return stats
 
-def golemStats(channel, user, time):
+def golemStats(channel, user, timestamp):
     status = golems.getShape(user)+" is hard at work!  "
-    status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(user, time))
+    status += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))
 
     return status
 
