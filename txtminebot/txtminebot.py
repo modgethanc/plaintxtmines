@@ -65,7 +65,9 @@ def addressed(bot, channel, nick, time, msg, interface):
     response = []
 
     #response.extend(said(bot, channel, nick, time, msg, interface))
-    response.append("Sorry, friend, I'm not sure how to help you here.")
+    randoms = ["Sorry, friend, I'm not sure how to help you here.", "Check with my lieutenant, "+bot.ADMIN+", if you need an urgent response.", "Perhaps you should just focus on your mining duties."]
+
+    response.append(random.choice(randoms))
 
     return response
 
