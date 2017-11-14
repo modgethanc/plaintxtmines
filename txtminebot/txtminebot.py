@@ -88,14 +88,12 @@ def said(bot, channel, nick, timestamp, msg, interface):
     response = []
 
     if msg.find("!info") == 0:
-        response.append("I am the mining assistant, here to facilitate your ventures by order of the empress.  My lieutenant is "+bot.ADMIN+", who may be able to handle inquiries beyond my availability.")
-        response.append("Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.")
+        response.extend(
+                info_handler(bot, channel, nick, timestamp, msg, interface))
 
     elif msg.find("!init") == 0:
-        if isPlaying(nick):
-            response.append("You already have a dossier in my records, friend.")
-        else:
-            response.append(newPlayer(channel, nick))
+        response.extend(
+                init_handler(bot, channel, nick, timestamp, msg, interface))
 
     elif msg.find("!open") == 0: # !open
         if isPlaying(nick):
@@ -177,6 +175,71 @@ def said(bot, channel, nick, timestamp, msg, interface):
     return response
 
 ## command handlers
+
+def info_handler(bot, channel, nick, timestamp, msg, interface):
+    '''
+    Handles responses to !info command.
+    '''
+
+    response = []
+
+    response.append("I am the mining assistant, here to facilitate your ventures by order of the empress.  My lieutenant is "+bot.ADMIN+", who may be able to handle inquiries beyond my availability.")
+    response.append("Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.")
+
+    return response
+
+def init_handler(bot, channel, nick, timestamp, msg, interface):
+    '''
+    Handles responses to !init command.
+    '''
+
+    response = []
+
+    if isPlaying(nick):
+        response.append("You already have a dossier in my records, friend.")
+    else:
+        response.append(newPlayer(channel, nick))
+
+    return response
+
+def mines_handler(bot, channel, nick, timestamp, msg, interface):
+    '''
+    Handles responses to !mines command.
+    '''
+
+    response = []
+
+    return response
+
+class CommandHandler():
+    '''
+    Just dumping this structure here so I don't lose it; stubs to make more
+    graceful command handling.
+    '''
+
+    def __init__(self):
+        self.COMMANDS = []
+
+    def catch_command(self, bot, channel, nick, timestamp, msg, interface):
+        '''
+        Command-catching wrapper.
+        '''
+
+        response = []
+
+        response.extend(self.handle(
+            self, bot, channel, nick, timestamp, msg, interface))
+
+        return response
+
+    def handle(self, bot, channel, nick, timestamp, msg, interface):
+        '''
+        Override this.
+        '''
+
+        return
+
+
 
 ## legacy gameplay functions
 
