@@ -56,10 +56,10 @@ class IRC():
         self.LASTCHECK = 0
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #imp.reload(txtminebot)
 
         if self.load(configfile):
-            print "Successfully loaded configuration file! Hi, "+self.ADMIN+", I'm "+self.BOTNAME+"! I'm about to connect to "+str(self.DEFAULTCHANS)+"@"+self.SERVER +"!"
+            print "Successfully loaded configuration file! Hi, "+self.ADMIN+", I'm "+self.BOTNAME+"!"
+           
         else:
             print "There was a problem with the config file, ["+configfile+"]. Either it doesn't exist, or the format was not as expected. See documentation for details."
 
@@ -112,7 +112,7 @@ class IRC():
         Calls reload on txtminebot module.
         '''
 
-        importlib.reload(self.txtminebot)
+        reload(txtminebot)
 
     ### irc functions
 
@@ -160,6 +160,7 @@ class IRC():
         of channels.
         '''
 
+        print "I'm about to connect to "+str(self.DEFAULTCHANS)+"@"+self.SERVER +"!"
         self.sock.connect((server, 6667))
         #self.send("USER ~"+botnick+" 0 * :"+self.ADMIN+"'s bot\n")
         self.send("USER "+botnick+" "+botnick+" "+botnick+" :"+self.ADMIN+"'s bot\n")
@@ -457,16 +458,18 @@ def irc_loop(head):
 
         if proceed:
             # juggle existing socket and channels
-            s = head.sock
+            sock = head.sock
             chans = head.CHANNELS
-            #imp.reload(heads)
-            head = IRC()
+            head.reload()
 
-            head.sock = s
+            head = IRC()
+            head.sock = sock
             head.CHANNELS = chans
             irc_loop(head)
         else:
             # TODO: fire clean bot shutdown
+
+            head.disconnect("Rest for now, until I return, citizens.")
 
             print "bot going down!"
 
