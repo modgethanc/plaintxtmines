@@ -22,6 +22,7 @@ import os
 import random
 import inflect
 import time
+from datetime import datetime
 
 import formatter
 import players
@@ -251,7 +252,7 @@ def logGolem(user):
   golemarchive = open("../data/golems.txt", 'a')
   golemtext = golems.getShape(user) + "\t"
   golemtext += str(golems.getStrength(user)) + "/" + str(golems.getInterval(user)) + "\t"
-  golemtext += " ("+user+" on "+time.now().date().__str__()+")"
+  golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
   golemarchive.write(golemtext+"\n")
   golemarchive.close()
 
