@@ -100,35 +100,17 @@ def said(player_input):
         response.extend(ch_init(player_input.nick))
     elif msg.find("!open") == 0:
         response.extend(ch_open(player_input.nick))
-    elif msg.find("!mines") == 0: # !mines
-        if isPlaying(nick):
-            if len(players.getMines(nick)) == 0:
-                response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
-            else:
-                response.append(mineListFormatted(msg, channel, nick))
-        else:
-            response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
-
-    elif msg.find("!stats") == 0: # !stats
-        if isPlaying(nick):
-            response.append(statsFormatted(channel, nick))
-        else:
-            response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
-
+    elif msg.find("!mines") == 0:
+        response.extend(ch_mines(player_input.nick))
+    elif msg.find("!stats") == 0:
+        response.extend(ch_stats(player_input.nick))
+    elif msg.find("!strike") == 0:
+        response.extend(ch_strike(player_input))
     elif msg.find("!res") == 0: # !res
         if isPlaying(nick):
-            response.append(resourcesFormatted(channel, nick))
+            response.append(resourcesFormatted(nick))
         else:
             response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
-
-    elif msg.find("!strike") == 0: # !strike
-        if isPlaying(nick):
-            if len(players.getMines(nick)) == 0:
-                response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
-            else:
-                response.extend(strike(msg, channel, nick, timestamp))
-        else:
-            response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
     elif msg.find("!fatigue") == 0: # !fatigue
         if isPlaying(nick):
@@ -215,12 +197,51 @@ def ch_open(nick):
 
     return response
 
-def mines_handler(bot, channel, nick, timestamp, msg, interface):
+def ch_mines(nick):
     '''
     Handles responses to !mines command.
     '''
 
     response = []
+
+    if isPlaying(nick):
+        if len(players.getMines(nick)) == 0:
+            response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
+        else:
+            response.append(mineListFormatted(nick))
+    else:
+        response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
+
+    return response
+
+def ch_stats(nick):
+    '''
+    Handles response to !stats command.
+    '''
+
+    response = []
+
+    if isPlaying(nick):
+        response.append(statsFormatted(nick))
+    else:
+        response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
+
+    return response
+
+def ch_strike(player_input):
+    '''
+    Handles response to !strike command.
+    '''
+
+    response = []
+
+    if isPlaying(player_input.nick):
+        if len(players.getMines(player_input.nick)) == 0:
+            response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
+        else:
+            response.extend(strike(player_input))
+    else:
+        response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
     return response
 
@@ -383,7 +404,7 @@ def updateGolems(timestamp):
 
     return response
 
-def strike(msg, channel, user, timestamp):
+def strike(player_input):
     '''
     Process all strike actions, returning username as channel so these responses
     always go to PM.
@@ -391,43 +412,43 @@ def strike(msg, channel, user, timestamp):
 
     response = []
 
-    mineList = players.getMines(user)
+    mineList = players.getMines(player_input.nick)
     target = mineList[0] #autotarget first mine
 
-    selected = msg.split("strike")[-1].split(" ")[-1] #check for targetted mine
+    selected = player_input.msg.split("strike")[-1].split(" ")[-1] #check for targetted mine
     if selected != "":
         if mineList.count(selected) == 0:
-            response.append({"msg":"That's not a mine you're working on, friend.", "channel":user})
+            response.append({"msg":"That's not a mine you're working on, friend.", "channel":player_input.nick})
 
         if target != selected:
             target = selected
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
 
-    fatigue = players.fatigueCheck(user, timestamp)
+    fatigue = players.fatigueCheck(player_input.nick, player_input.timestamp)
     if fatigue > 0:
         fatigue = fatigue * 2
-        timestamp = int(timestamp) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
-        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":user})
+        timestamp = int(player_input.timestamp) + fatigue - (baseFatigue - players.getEndurance(player_input.nick))# still hardcoded bs
+        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":player_input.nick})
 
         return response
 
     else: # actual mining actions
         emptyMines = []
-        status = players.incStrikes(user)
-        excavation = players.strike(user, target)
-        mined = players.printExcavation(players.acquireRes(user, excavation))
-        response.append({"msg":"\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined, "channel":user})
+        status = players.incStrikes(player_input.nick)
+        excavation = players.strike(player_input.nick, target)
+        mined = players.printExcavation(players.acquireRes(player_input.nick, excavation))
+        response.append({"msg":"\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined, "channel":player_input.nick})
 
         if mines.getTotal(target) == 0:
             emptyMines.append(target)
-            players.incCleared(user)
-            players.incEndurance(user)
-            players.incAvailableMines(user)
+            players.incCleared(player_input.nick)
+            players.incEndurance(player_input.nick)
+            players.incAvailableMines(player_input.nick)
 
-            response.append({"msg":"As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.", "channel":user})
-            response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":user})
-            response.append({"msg":"There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN", "nick":False})
+            response.append({"msg":"As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.", "channel":player_input.nick})
+            response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":player_input.nick})
+            response.append({"msg":"There's a distant rumbling as "+player_input.nick+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN", "nick":False})
 
             """ TODO: figure out how to announce mine clearing in main. legacy
             code below:
@@ -438,8 +459,8 @@ def strike(msg, channel, user, timestamp):
         for x in emptyMines:
             mineList.remove(x)
 
-    players.updateOwned(user, mineList)
-    players.updateLastStrike(user, timestamp)
+    players.updateOwned(player_input.nick, mineList)
+    players.updateLastStrike(player_input.nick, player_input.timestamp)
 
     return response
 
@@ -447,14 +468,14 @@ def report(msg, channel, user, timestamp):
     response = []
 
     if len(players.getMines(user)) > 0:
-        response.append(mineListFormatted(msg, channel, user))
+        response.append(mineListFormatted(user))
 
-    response.append(resourcesFormatted(channel, user))
+    response.append(resourcesFormatted(user))
 
     if hasGolem(user):
         response.append(golemStats(channel, user, timestamp))
 
-    response.append(statsFormatted(channel, user))
+    response.append(statsFormatted(user))
 
     return response
 
@@ -474,7 +495,12 @@ def fatigue(msg, channel, user, timestamp): #~krowbar memorial feature
     else:
         return "You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress."
 
-def mineListFormatted(msg, channel, user):
+def mineListFormatted(user):
+    '''
+    Returns a nicely formatted list of mines for IRC printing from the given
+    user's dossier.
+    '''
+
     plural = ''
     if len(players.getMines(user)) > 0:
         plural = 's'
@@ -515,10 +541,10 @@ def mineListFormatted(msg, channel, user):
 
     return "You're working on the following mine"+plural+": "+", ".join(prejoin)
 
-def resourcesFormatted(channel, user):
+def resourcesFormatted(user):
     return "You're holding the following resources: "+players.heldFormatted(user)
 
-def statsFormatted(channel, user):
+def statsFormatted(user):
     stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - players.getEndurance(user))+" without experiencing fatigue.  "
     plural = 's'
     if players.getClearedCount(user) == 1: plural = ''
