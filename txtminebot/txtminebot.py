@@ -95,11 +95,11 @@ def said(player_input):
     response = []
 
     if msg.find("!info") == 0 or msg.find("!help") == 0:
-        response.extend(info_handler(player_input.bot))
+        response.extend(ch_info(player_input.bot))
     elif msg.find("!init") == 0:
-        response.extend(init_handler(player_input.nick))
+        response.extend(ch_init(player_input.nick))
     elif msg.find("!open") == 0:
-        response.extend(open_handler(player_input.nick))
+        response.extend(ch_open(player_input.nick))
     elif msg.find("!mines") == 0: # !mines
         if isPlaying(nick):
             if len(players.getMines(nick)) == 0:
@@ -172,7 +172,7 @@ def said(player_input):
 
 ## command handlers
 
-def info_handler(bot):
+def ch_info(bot):
     '''
     Handles responses to !info command.
     '''
@@ -184,7 +184,7 @@ def info_handler(bot):
 
     return response
 
-def init_handler(nick):
+def ch_init(nick):
     '''
     Handles responses to !init command.
     '''
@@ -198,7 +198,7 @@ def init_handler(nick):
 
     return response
 
-def open_handler(nick):
+def ch_open(nick):
     '''
     Handlers response to !open command.
     '''
