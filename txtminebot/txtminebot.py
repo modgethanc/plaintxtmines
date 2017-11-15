@@ -94,7 +94,7 @@ def said(player_input):
 
     response = []
 
-    if msg.find("!info") == 0:
+    if msg.find("!info") == 0 or msg.find("!help") == 0:
         response.extend(
                 info_handler(bot, channel, nick, timestamp, msg, interface))
 
