@@ -95,22 +95,11 @@ def said(player_input):
     response = []
 
     if msg.find("!info") == 0 or msg.find("!help") == 0:
-        response.extend(
-                info_handler(bot, channel, nick, timestamp, msg, interface))
-
+        response.extend(info_handler(player_input.bot))
     elif msg.find("!init") == 0:
-        response.extend(
-                init_handler(bot, channel, nick, timestamp, msg, interface))
-
-    elif msg.find("!open") == 0: # !open
-        if isPlaying(nick):
-            if players.getAvailableMines(nick) > 0:
-                 response.append(newMine(channel, nick))
-            else:
-                response.append("You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.")
-        else:
-            response.append("I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.\n")
-
+        response.extend(init_handler(player_input.nick))
+    elif msg.find("!open") == 0:
+        response.extend(open_handler(player_input.nick))
     elif msg.find("!mines") == 0: # !mines
         if isPlaying(nick):
             if len(players.getMines(nick)) == 0:
@@ -183,7 +172,7 @@ def said(player_input):
 
 ## command handlers
 
-def info_handler(bot, channel, nick, timestamp, msg, interface):
+def info_handler(bot):
     '''
     Handles responses to !info command.
     '''
@@ -195,7 +184,7 @@ def info_handler(bot, channel, nick, timestamp, msg, interface):
 
     return response
 
-def init_handler(bot, channel, nick, timestamp, msg, interface):
+def init_handler(nick):
     '''
     Handles responses to !init command.
     '''
@@ -205,7 +194,24 @@ def init_handler(bot, channel, nick, timestamp, msg, interface):
     if isPlaying(nick):
         response.append("You already have a dossier in my records, friend.")
     else:
-        response.append(newPlayer(channel, nick))
+        response.append(newPlayer(nick))
+
+    return response
+
+def open_handler(nick):
+    '''
+    Handlers response to !open command.
+    '''
+
+    response = []
+
+    if isPlaying(nick):
+        if players.getAvailableMines(nick) > 0:
+             response.append(newMine(nick))
+        else:
+            response.append("You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.")
+    else:
+        response.append("I can't open a mine for you until you have a dossier in my records, friend.  Request a new dossier with '!init'.")
 
     return response
 
@@ -286,7 +292,7 @@ def listMines():
             minelist.append(entry[0])
     return minelist
 
-def newPlayer(channel, user):
+def newPlayer(user):
     if os.path.isfile('../data/'+user+'.stats'):
         players.newDossier(user)
     else:
@@ -297,7 +303,7 @@ def newPlayer(channel, user):
 
     return "New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'."
 
-def newMine(channel, user, rates="standardrates"):
+def newMine(user, rates="standardrates"):
     mine = players.newMine(user, "standardrates").capitalize()
     players.decAvailableMines(user)
 
