@@ -87,7 +87,7 @@ def said(bot, channel, nick, time, msg, interface):
 
     response = []
 
-    if msg.find("!info") == 0:
+    if msg.find("!info") == 0 or msg.find("!help") == 0:
         response.append("I am the mining assistant, here to facilitate your ventures by order of the empress.  My lieutenant is "+bot.ADMIN+", who may be able to handle inquiries beyond my availability.")
         response.append("Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.")
 
