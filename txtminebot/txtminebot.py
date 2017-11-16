@@ -328,8 +328,7 @@ def newGolem(user, timestamp, golemstring):
     '''
 
     if game.has_golem(user):
-        return "You can't make a new golem until your old golem finishes
-    working!  It'll be ready in "+formatter.prettyTime(game.golem_lifespan(user, timestamp))
+        return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(game.golem_lifespan(user, timestamp))
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
