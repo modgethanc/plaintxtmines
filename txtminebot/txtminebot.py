@@ -32,13 +32,13 @@ import golems
 import mines
 import empress
 
-def reload():
+def reset():
     '''
     Reload game dependencies.
     '''
 
     reload(game)
-    game.reload()
+    game.reset()
 
 ## globals
 
@@ -136,7 +136,7 @@ def ch_init(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         response.append("You already have a dossier in my records, friend.")
     else:
         game.create_dossier(player_input.nick)
@@ -152,7 +152,7 @@ def ch_open(player_input, rate = "standardrates"):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         if players.getAvailableMines(player_input.nick) > 0:
              newMine = game.open_mine(player_input.nick, rate)
              response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+newMine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.")
@@ -170,7 +170,7 @@ def ch_mines(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         if len(players.getMines(player_input.nick)) == 0:
             response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
         else:
@@ -187,7 +187,7 @@ def ch_stats(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         response.append(statsFormatted(player_input.nick))
     else:
         response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
@@ -201,7 +201,7 @@ def ch_strike(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         if len(players.getMines(player_input.nick)) == 0:
             response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
         else:
@@ -218,7 +218,7 @@ def ch_res(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         response.append(resourcesFormatted(player_input.nick))
     else:
         response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
@@ -232,7 +232,7 @@ def ch_fatigue(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         response.append(fatigue(player_input))
     else:
         response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
@@ -246,7 +246,7 @@ def ch_grovel(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         if random.randrange(1,100) < 30:
             response.append("The empress is indisposed at the moment.  Perhaps she will be open to receiving visitors in the future.  Until then, I'd encourage you to work hard and earn her pleasure.")
         else:
@@ -263,7 +263,7 @@ def ch_report(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         response.extend(report(player_input))
     else:
         response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
@@ -277,10 +277,10 @@ def ch_golem(player_input):
 
     response = []
 
-    if isPlaying(player_input.nick):
+    if game.is_playing(player_input.nick):
         parse = player_input.msg.split("!golem")
         if parse[1] == '': #no arguments
-            if hasGolem(player_input.nick):
+            if game.has_golem(player_input.nick):
                 response.append(golemStats(player_input))
                 response.append("It's holding the following resources: "+golems.heldFormatted(player_input.nick))
             else:
@@ -322,17 +322,7 @@ class CommandHandler():
         return
 
 
-
 ## legacy gameplay functions
-
-def isPlaying(user):
-    return os.path.isfile('../data/'+user+'.dossier')
-
-def isMine(mine):
-    return os.path.isfile('../data/'+mine+'.mine')
-
-def hasGolem(user):
-    return os.path.isfile('../data/'+user+'.golem')
 
 def listPlayers():
     gamedata = os.listdir('../data/')
@@ -369,7 +359,7 @@ def newGolem(user, timestamp, golemstring):
     Builds a new golem for the given user, with a given string.
     '''
 
-    if hasGolem(user):
+    if game.has_golem(user):
         return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
@@ -514,7 +504,7 @@ def report(player_input):
 
     response.append(resourcesFormatted(player_input.nick))
 
-    if hasGolem(player_input.nick):
+    if game.has_golem(player_input.nick):
         response.append(golemStats(player_input))
 
     response.append(statsFormatted(player_input.nick))

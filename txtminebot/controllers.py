@@ -113,7 +113,7 @@ class IRC():
         '''
 
         reload(txtminebot)
-        txtminebot.reload()
+        txtminebot.reset()
 
     ### irc functions
 

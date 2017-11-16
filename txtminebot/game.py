@@ -21,7 +21,7 @@ import mines
 import gibber
 import empress
 
-def reload():
+def reset():
     '''
     Reload game dependencies.
     '''
@@ -36,9 +36,29 @@ def reload():
 
 GAMEDIR = os.path.join("..", "data")
 
-##
+## game inquiries
 
-##
+def is_playing(user):
+    '''
+    Returns whether or not the named user has a dossier on file.
+    '''
+
+    return os.path.isfile('../data/'+user+'.dossier')
+
+def is_mine(mine):
+    '''
+    Returns whether or not the named mine exists.
+    '''
+    return os.path.isfile('../data/'+mine+'.mine')
+
+def has_golem(user):
+    '''
+    Returns whether or not the named player has a golem.
+    '''
+    return os.path.isfile('../data/'+user+'.golem')
+
+
+## game actions
 
 def listDossiers():
     '''
