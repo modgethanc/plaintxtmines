@@ -42,14 +42,10 @@ def reset():
 
 ## globals
 
+p = inflect.engine()
 INTERP = []
 for x in open("lang/interp.txt"):
     INTERP.append(x.rstrip())
-
-## legacy globals
-
-baseFatigue     = 10
-p = inflect.engine()
 
 ## speaking functions
 
@@ -324,34 +320,6 @@ class CommandHandler():
 
 ## legacy gameplay functions
 
-def listPlayers():
-    gamedata = os.listdir('../data/')
-    playerlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "stats":
-            playerlist.append(entry[0])
-    return playerlist
-
-def listGolems():
-    gamedata = os.listdir('../data/')
-    golemlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "golem":
-            golemlist.append(entry[0])
-    return golemlist
-
-def listMines():
-    gamedata = os.listdir('../data/')
-    minelist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "mine":
-            minelist.append(entry[0])
-    return minelist
-
-
 def newGolem(user, timestamp, golemstring):
     '''
     Runs checks for building a golem.
@@ -360,7 +328,8 @@ def newGolem(user, timestamp, golemstring):
     '''
 
     if game.has_golem(user):
-        return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))
+        return "You can't make a new golem until your old golem finishes
+    working!  It'll be ready in "+formatter.prettyTime(game.golem_lifespan(user, timestamp))
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
@@ -389,17 +358,17 @@ def newGolem(user, timestamp, golemstring):
             return "That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired."
 
 def logGolem(user): 
-  golemarchive = open("../data/golems.txt", 'a')
-  golemtext = golems.getShape(user) + "\t"
-  golemtext += str(golems.getStrength(user)) + "/" + str(golems.getInterval(user)) + "\t"
-  golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
-  golemarchive.write(golemtext+"\n")
-  golemarchive.close()
+      golemarchive = open("../data/golems.txt", 'a')
+      golemtext = golems.getShape(user) + "\t"
+      golemtext += str(golems.getStrength(user)) + "/" + str(golems.getInterval(user)) + "\t"
+      golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
+      golemarchive.write(golemtext+"\n")
+      golemarchive.close()
 
 def updateGolems(timestamp):
     response = []
 
-    for user in listGolems():
+    for user in game.listGolems():
         strikeDiff = int(timestamp) - golems.getLastStrike(user)
         interval = golems.getInterval(user)
 
@@ -456,7 +425,7 @@ def strike(player_input):
     fatigue = players.fatigueCheck(player_input.nick, player_input.timestamp)
     if fatigue > 0:
         fatigue = fatigue * 2
-        timestamp = int(player_input.timestamp) + fatigue - (baseFatigue - players.getEndurance(player_input.nick))# still hardcoded bs
+        timestamp = int(player_input.timestamp) + fatigue - (game.BASE_FATIGUE - players.getEndurance(player_input.nick))# still hardcoded bs
         response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":player_input.nick})
 
         return response
@@ -478,14 +447,8 @@ def strike(player_input):
             response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":player_input.nick})
             response.append({"msg":"There's a distant rumbling as "+player_input.nick+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN", "nick":False})
 
-            """ TODO: figure out how to announce mine clearing in main. legacy
-            code below:
-
-            ircsock.send("PRIVMSG "+config[1]+" :There's a distant rumbling as "+user+" clears the last few resources from "+target.capitalize()+".\n")
-            """
-
-        for x in emptyMines:
-            mineList.remove(x)
+        for deadMine in emptyMines:
+            mineList.remove(deadMine)
 
     players.updateOwned(player_input.nick, mineList)
     players.updateLastStrike(player_input.nick, player_input.timestamp)
@@ -587,7 +550,7 @@ def resourcesFormatted(user):
     return "You're holding the following resources: "+players.heldFormatted(user)
 
 def statsFormatted(user):
-    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - players.getEndurance(user))+" without experiencing fatigue.  "
+    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", game.BASE_FATIGUE - players.getEndurance(user))+" without experiencing fatigue.  "
     plural = 's'
     if players.getClearedCount(user) == 1: plural = ''
     stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+".  "
@@ -606,8 +569,6 @@ def golemStats(player_input):
             golems.getStrength(player_input.nick))+" per strike, and strikes every "+p.no("second", golems.getInterval(player_input.nick))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(player_input.nick, player_input.timestamp))
 
     return status
-
-""" LINE OF DEATH """
 
 def rankings():
     '''

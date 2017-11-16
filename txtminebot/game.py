@@ -35,6 +35,7 @@ def reset():
 ## globals
 
 GAMEDIR = os.path.join("..", "data")
+BASE_FATIGUE = 10
 
 ## game inquiries
 
@@ -43,22 +44,58 @@ def is_playing(user):
     Returns whether or not the named user has a dossier on file.
     '''
 
-    return os.path.isfile('../data/'+user+'.dossier')
+    return os.path.isfile(os.path.join(GAMEDIR,user+'.dossier'))
 
 def is_mine(mine):
     '''
     Returns whether or not the named mine exists.
     '''
-    return os.path.isfile('../data/'+mine+'.mine')
+    return os.path.isfile(os.path.join(GAMEDIR,mine+'.mine'))
 
 def has_golem(user):
     '''
     Returns whether or not the named player has a golem.
     '''
-    return os.path.isfile('../data/'+user+'.golem')
+    return os.path.isfile(os.path.join(GAMEDIR,user+'.golem'))
 
+def listPlayers():
+    '''
+    TODO: deprecate this with better game data handline
+    '''
 
-## game actions
+    gamedata = os.listdir(GAMEDIR)
+    playerlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "stats":
+            playerlist.append(entry[0])
+    return playerlist
+
+def listGolems():
+    '''
+    TODO: deprecate this with better game data handline
+    '''
+
+    gamedata = os.listdir(GAMEDIR)
+    golemlist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "golem":
+            golemlist.append(entry[0])
+    return golemlist
+
+def listMines():
+    '''
+    TODO: deprecate this with better game data handline
+    '''
+
+    gamedata = os.listdir(GAMEDIR)
+    minelist = []
+    for x in gamedata:
+        entry = os.path.basename(x).split('.')
+        if entry[-1] == "mine":
+            minelist.append(entry[0])
+    return minelist
 
 def listDossiers():
     '''
@@ -75,6 +112,15 @@ def listDossiers():
             playerlist.append(entry[0])
 
     return playerlist
+
+def golem_lifespan(player, timestamp):
+    '''
+    Returns the number of seconds left in that player's golem's life.
+    '''
+
+    return golems.getLifeRemaining(player, timestamp)
+
+## game actions
 
 def create_dossier(user):
     '''
