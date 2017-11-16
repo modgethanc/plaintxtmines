@@ -21,14 +21,15 @@ __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 import os
 import random
 import inflect
-import time as time
+import time 
 from datetime import datetime
 
 import formatter
+import game
+
 import players
 import golems
 import mines
-import gibber
 import empress
 
 
@@ -42,17 +43,6 @@ for x in open("lang/interp.txt"):
 
 baseFatigue     = 10
 p = inflect.engine()
-
-def listDossiers():
-    gamedata = os.listdir('../data/')
-    playerlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "dossier":
-            playerlist.append(entry[0])
-    return playerlist
-
-dossierList = listDossiers()
 
 ## speaking functions
 
@@ -142,7 +132,9 @@ def ch_init(player_input):
     if isPlaying(player_input.nick):
         response.append("You already have a dossier in my records, friend.")
     else:
-        response.append(newPlayer(player_input.nick))
+        game.create_dossier(player_input.nick)
+
+        response.append("New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'.")
 
     return response
 
@@ -361,16 +353,6 @@ def listMines():
             minelist.append(entry[0])
     return minelist
 
-def newPlayer(user):
-    if os.path.isfile('../data/'+user+'.stats'):
-        players.newDossier(user)
-    else:
-        players.newPlayer(user)
-
-    global dossierList
-    dossierList.append(user)
-
-    return "New dossier created.  By order of the empress, each citizen is initially alotted one free mine.  Request your mine with '!open'."
 
 def newMine(user, rates="standardrates"):
     mine = players.newMine(user, "standardrates").capitalize()
@@ -641,7 +623,7 @@ def rankings():
     '''
 
     response = []
-    dossiers = dossierList
+    dossiers = game.listDossiers()
 
     records = []
     for x in dossiers:
