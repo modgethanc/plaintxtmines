@@ -21,6 +21,16 @@ import mines
 import gibber
 import empress
 
+def reload():
+    '''
+    Reload game dependencies.
+    '''
+
+    reload(players)
+    reload(golems)
+    reload(mines)
+    reload(gibber)
+    reload(empress)
 
 ## globals
 
@@ -56,6 +66,18 @@ def create_dossier(user):
         players.newDossier(user)
     else:
         players.newPlayer(user)
+
+def open_mine(user, rates="standardrates"):
+    '''
+    Opens a mine for the named user, given an optional mine rate file. Assumes
+    that player has the permission to open a new mine, and decreases their
+    current mine permission.
+    '''
+
+    mine = players.newMine(user, "standardrates").capitalize()
+    players.decAvailableMines(user)
+
+    return mine
 
 ## game setup
 

@@ -32,6 +32,13 @@ import golems
 import mines
 import empress
 
+def reload():
+    '''
+    Reload game dependencies.
+    '''
+
+    reload(game)
+    game.reload()
 
 ## globals
 
@@ -138,7 +145,7 @@ def ch_init(player_input):
 
     return response
 
-def ch_open(player_input):
+def ch_open(player_input, rate = "standardrates"):
     '''
     Handlers response to !open command.
     '''
@@ -147,7 +154,8 @@ def ch_open(player_input):
 
     if isPlaying(player_input.nick):
         if players.getAvailableMines(player_input.nick) > 0:
-             response.append(newMine(player_input.nick))
+             newMine = game.open_mine(player_input.nick, rate)
+             response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+newMine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.")
         else:
             response.append("You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.")
     else:
@@ -353,12 +361,6 @@ def listMines():
             minelist.append(entry[0])
     return minelist
 
-
-def newMine(user, rates="standardrates"):
-    mine = players.newMine(user, "standardrates").capitalize()
-    players.decAvailableMines(user)
-
-    return "Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+mine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'."
 
 def newGolem(user, timestamp, golemstring):
     '''
