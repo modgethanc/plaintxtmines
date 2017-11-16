@@ -542,7 +542,7 @@ def grovel(player_input):
     Handles groveling.
     '''
 
-    players.incGrovel(player_input.user)
+    players.incGrovel(player_input.nick)
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
 
     return "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP)
