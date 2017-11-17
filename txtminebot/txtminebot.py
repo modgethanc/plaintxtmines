@@ -338,9 +338,7 @@ def strike(msg, channel, user, time):
     if fatigue > 0:
         fatigue = min(fatigue * 2, 7200)
         time = int(time) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
-        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":user})
-
-        return response
+        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+formatter.prettyTime(fatigue)+".  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":user})
 
     else: # actual mining actions
         emptyMines = []
