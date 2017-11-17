@@ -336,7 +336,7 @@ def strike(msg, channel, user, time):
 
     fatigue = players.fatigueCheck(user, time)
     if fatigue > 0:
-        fatigue = fatigue * 2
+        fatigue = min(fatigue * 2, 7200)
         time = int(time) + fatigue - (baseFatigue - players.getEndurance(user))# still hardcoded bs
         response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":user})
 
