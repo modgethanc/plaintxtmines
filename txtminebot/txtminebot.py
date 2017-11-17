@@ -21,7 +21,7 @@ __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 import os
 import random
 import inflect
-import time 
+import time
 from datetime import datetime
 
 import formatter
@@ -356,7 +356,7 @@ def newGolem(user, timestamp, golemstring):
         else:
             return "That's not a valid golem, friend.  The golem has to be constructed from resources you've acquired."
 
-def logGolem(user): 
+def logGolem(user):
       golemarchive = open("../data/golems.txt", 'a')
       golemtext = golems.getShape(user) + "\t"
       golemtext += str(golems.getStrength(user)) + "/" + str(golems.getInterval(user)) + "\t"
@@ -614,4 +614,4 @@ def tick(now):
 
     return response
 
-print "TXTMINEBOT LOADED"
+print "arnold loaded."
