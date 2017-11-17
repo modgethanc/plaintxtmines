@@ -429,11 +429,9 @@ def strike(player_input):
 
     fatigue = players.fatigueCheck(player_input.nick, player_input.timestamp)
     if fatigue > 0:
-        fatigue = fatigue * 2
+        fatigue = min(fatigue * 2, 7200)
         timestamp = int(player_input.timestamp) + fatigue - (game.BASE_FATIGUE - players.getEndurance(player_input.nick))# still hardcoded bs
         response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":player_input.nick})
-
-        return response
 
     else: # actual mining actions
         emptyMines = []
@@ -555,7 +553,7 @@ def resourcesFormatted(user):
     return "You're holding the following resources: "+players.heldFormatted(user)
 
 def statsFormatted(user):
-    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", game.BASE_FATIGUE - players.getEndurance(user))+" without experiencing fatigue.  "
+    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", max(1, game.BASE_FATIGUE - players.getEndurance(user)))+" without experiencing fatigue.  "
     plural = 's'
     if players.getClearedCount(user) == 1: plural = ''
     stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+".  "
