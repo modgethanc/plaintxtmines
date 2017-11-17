@@ -447,7 +447,7 @@ def resourcesFormatted(channel, user):
     return "You're holding the following resources: "+players.heldFormatted(user)
 
 def statsFormatted(channel, user):
-    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", baseFatigue - players.getEndurance(user))+" without experiencing fatigue.  "
+    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", max(1,baseFatigue - players.getEndurance(user)))+" without experiencing fatigue.  "
     plural = 's'
     if players.getClearedCount(user) == 1: plural = ''
     stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+".  "
