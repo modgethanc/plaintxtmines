@@ -408,15 +408,21 @@ def strike(player_input):
 
     response = []
 
+    selected = ""
     mineList = players.getMines(player_input.nick)
     target = mineList[0] #autotarget first mine
 
-    selected = player_input.msg.split("strike")[-1].split(" ")[-1] #check for targetted mine
+    inputs = player_input.msg.split("!strike")
+    if len(inputs[-1].split(" ")) > 1:
+        selected = inputs[-1].split(" ")[+1].lower()
+
+    #check for targetted mine
     if selected != "":
         if mineList.count(selected) == 0:
-            response.append({"msg":"That's not a mine you're working on, friend.", "channel":player_input.nick})
+            response.append({"msg":"That's not a mine you're working on, friend.  Feel free to just '!strike' to work on the same mine you last targetted.", "channel":player_input.nick})
+            return response
 
-        if target != selected:
+        elif target != selected:
             target = selected
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
