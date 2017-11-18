@@ -26,6 +26,8 @@ __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 import os
 import random
 
+import vtils
+
 import players
 import mines
 
@@ -63,16 +65,39 @@ class Golem():
         self.res = "0,0,0,0,0,0,0,0"
 
 
-    def load(self, player_input):
+    def load(self, player):
         '''
-        Loads a golem from file.
+        Loads a golem from file for the named player, then returns that player's
+        name to identify the new golem's owner.
         '''
 
-        filename = player_input.nick + ".golem"
+        filename = player + ".golem"
 
-        golemData = {}
+        # hardcode bs
+        golemData = vtils.open_json_as_dict("../data/"+filename)
 
-        return
+        ## given stats
+        self.core = golemData["core"]
+        self.birth = golemData["birth"]
+        self.owner = golemData["owner"]
+
+        ## calculated stats
+        self.interval = golemData["interval"]
+        self.height = golemData["height"]
+        self.width = golemData["width"]
+
+        ## depends on self.height
+        self.strength = golemData["strength"]
+
+        ## depends on self.strength
+        self.death = golemData["death"]
+
+        ## mutables
+        self.shape = golemData["shape"]
+        self.lastStrike = golemData["lastStrike"]
+        self.res = golemData["res"]
+
+        return player
 
     def create(self, player_input, golemString):
         '''
@@ -98,15 +123,15 @@ class Golem():
 
     def save(self):
         '''
-        Writes this golem to disk.
+        Writes this golem to disk and returns its save location.
         '''
 
-        filename = self.owner + ".golem"
+        # hardcode bs
+        filename = "../data/" + self.owner + ".golem"
         golemData = self.to_dict()
+        vtils.write_dict_as_json(filename, golemData)
 
-        # then write file
-
-        return
+        return filename
 
     def to_dict(self):
         '''
@@ -124,7 +149,7 @@ class Golem():
                 "death": self.death,
                 "shape": self.shape,
                 "lastStrike": self.lastStrike,
-                "res": self.red
+                "res": self.res
                 }
 
         return golemData
@@ -223,6 +248,13 @@ class Golem():
         '''
 
         return self.death - int(timestamp)
+
+    def is_alive(self, timestamp):
+        '''
+        Returns true if the golem is alive, false otherwise.
+        '''
+
+        return self.remaining_life(timestamp) > 0
 
     def readable_holdings(self):
         '''

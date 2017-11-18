@@ -67,6 +67,13 @@ def has_golem(player):
 
     return GOLEMS.has_key(player)
 
+def golem_living(player_input):
+    '''
+    Requests golems status for the given player at the time of inquiry.
+    '''
+
+    return GOLEMS[player_input.nick].is_alive(player_input.timestamp)
+
 def listPlayers():
     '''
     TODO: deprecate this with better game data handling
@@ -207,6 +214,7 @@ def create_golem(player_input, rawGolem):
         return False
 
     players.removeRes(player_input.nick, newGolem.legacy_stats())
+    newGolem.save()
     GOLEMS.update({player_input.nick:newGolem})
 
     return newGolem
@@ -218,4 +226,18 @@ def initialize():
     Set up the game.
     '''
 
+    gamedata = os.listdir(GAMEDIR)
+
+    ## load golems
+
+    for filename in gamedata:
+        entry = os.path.basename(filename).split('.')
+        if entry[-1] == "golem":
+            incomingGolem = golems.Golem()
+            GOLEMS.update({incomingGolem.load(entry[0]):incomingGolem})
+
+    print GOLEMS
+
     return
+
+initialize()

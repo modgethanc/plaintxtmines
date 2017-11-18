@@ -554,10 +554,12 @@ def golemStats(player_input):
     Helper function to construct golem stats.
     '''
 
-    status = game.golem_shape(player_input.nick)+" is hard at work!  "
-    status += "It can excavate up to "+p.no("resource", game.golem_strength(player_input.nick))+" per strike, and strikes every "+p.no("second", game.golem_interval(player_input.nick))+".  It'll last another "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
-
-    return status
+    if game.golem_living(player_input):
+        status = game.golem_shape(player_input.nick)+" is hard at work!  "
+        status += "It can excavate up to "+p.no("resource", game.golem_strength(player_input.nick))+" per strike, and strikes every "+p.no("second", game.golem_interval(player_input.nick))+".  It'll last another "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
+        return status
+    else:
+        return game.golem_shape(player_input.nick) + " is about to expire!"
 
 def rankings():
     '''
@@ -591,7 +593,8 @@ def tick(now):
 
     response = []
 
-    response.extend(updateGolems(now))
+    # commenting this out while updating isn't reimplemented
+    #response.extend(updateGolems(now))
 
     # debugging ticks below:
     #response.append({"msg":"tick "+str(now), "channel":"hvincent"})
