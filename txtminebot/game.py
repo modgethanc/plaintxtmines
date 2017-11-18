@@ -67,12 +67,15 @@ def has_golem(player):
 
     return GOLEMS.has_key(player)
 
-def golem_living(player_input):
+def golem_living(player, timestamp):
     '''
     Requests golems status for the given player at the time of inquiry.
+
+    (Don't use player_input here because this sometimes happens without player
+    input)
     '''
 
-    return GOLEMS[player_input.nick].is_alive(player_input.timestamp)
+    return GOLEMS[player].is_alive(timestamp)
 
 def listPlayers():
     '''
@@ -218,6 +221,27 @@ def create_golem(player_input, rawGolem):
     GOLEMS.update({player_input.nick:newGolem})
 
     return newGolem
+
+def golem_expire(player, timestamp):
+    '''
+    Facilitates the expirations of a golem for the given player.
+
+    (Don't use player_input here because this sometimes happens without player
+    input)
+    '''
+
+    if GOLEMS[player].is_alive(timestamp):
+        return False
+    else:
+        deadGolem = GOLEMS.pop(player)
+        drops = deadGolem.expire()
+
+        # for legacy player acquireRes needs
+        dropList = drops.split(",")
+
+        players.acquireRes(player, dropList)
+
+        return dropList
 
 ## game setup
 

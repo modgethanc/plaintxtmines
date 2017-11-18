@@ -247,6 +247,12 @@ class Golem():
         Return the golem's remaining number of seconds until death.
         '''
 
+        """ toggle for debug
+        print "death: " + str(self.death)
+        print "now:   " + str(timestamp)
+        print "diff:  " + str(self.death-timestamp)
+        """
+
         return self.death - int(timestamp)
 
     def is_alive(self, timestamp):
@@ -268,6 +274,20 @@ class Golem():
             heldTotal += int(res)
 
         return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(heldTotal)+" units"
+
+    ## actions
+
+    def expire(self):
+        '''
+        Destroys this golem and returns a list of its resources.
+        '''
+
+        ## hardcoded
+        os.remove("../data/"+self.owner+".golem")
+
+        return self.res
+
+    ## legacy
 
     def legacy_stats(self):
         '''
@@ -364,7 +384,6 @@ def parse(golemstring):
         i += 1
 
     return golem
-
 
 ### golem outputting
 
