@@ -59,15 +59,17 @@ def is_mine(mine):
     '''
     return os.path.isfile(os.path.join(GAMEDIR,mine+'.mine'))
 
-def has_golem(user):
+def has_golem(player):
     '''
-    Returns whether or not the named player has a golem.
+    Returns whether or not the named player has a golem by searching for that
+    player in the loaded golems.
     '''
-    return os.path.isfile(os.path.join(GAMEDIR,user+'.golem'))
+
+    return GOLEMS.has_key(player)
 
 def listPlayers():
     '''
-    TODO: deprecate this with better game data handline
+    TODO: deprecate this with better game data handling
     '''
 
     gamedata = os.listdir(GAMEDIR)
@@ -122,10 +124,46 @@ def listDossiers():
 
 def golem_lifespan(player, timestamp):
     '''
-    Returns the number of seconds left in that player's golem's life.
+    Requests the number of seconds left in that player's golem's life.
     '''
 
     return GOLEMS[player].remaining_life(timestamp)
+
+def golem_shape(player):
+    '''
+    Requests the shape of the given player's golem.
+    '''
+
+    return GOLEMS[player].shape
+
+def golem_stats(player):
+    '''
+    Requests the golem's stats, using legacy stat format (string list of
+    resources).
+    '''
+
+    return GOLEMS[player].legacy_stats()
+
+def golem_strength(player):
+    '''
+    Requests the strength of player's golem.
+    '''
+
+    return GOLEMS[player].strength
+
+def golem_interval(player):
+    '''
+    Requests the strike interval of player's golem.
+    '''
+
+    return GOLEMS[player].interval
+
+def golem_holdings(player):
+    '''
+    Requests a human-readable string of the golem's held resources.
+    '''
+
+    return GOLEMS[player].readable_holdings()
 
 ## game actions
 
@@ -153,22 +191,23 @@ def open_mine(user, rates="standardrates"):
     return mine
 
 def create_golem(player_input, rawGolem):
-    """
+    '''
     Attempts to create a golem with the given player input.  If golem creation
     succeeds, remove that res from the player's holdings and add the golem to
     the game objects.
-    """
+    '''
 
-    newGolem = Golem()
+    newGolem = golems.Golem()
     shapedGolem = golems.sift(rawGolem)
 
     try:
+        print "making " + shapedGolem
         newGolem.create(player_input, shapedGolem)
     except BaseException:
         return False
 
-    players.removeRes(user, golems.getStats(user))
-    GOLEMS.update(newGolem)
+    players.removeRes(player_input.nick, newGolem.legacy_stats())
+    GOLEMS.update({player_input.nick:newGolem})
 
     return newGolem
 
