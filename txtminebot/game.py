@@ -37,6 +37,13 @@ def reset():
 GAMEDIR = os.path.join("..", "data")
 BASE_FATIGUE = 10
 
+## game objects
+
+GOLEMS = {}
+PLAYERS = {}
+MINES = {}
+EMPRESS = None
+
 ## game inquiries
 
 def is_playing(user):
@@ -118,7 +125,7 @@ def golem_lifespan(player, timestamp):
     Returns the number of seconds left in that player's golem's life.
     '''
 
-    return golems.getLifeRemaining(player, timestamp)
+    return GOLEMS[player].remaining_life(timestamp)
 
 ## game actions
 
@@ -144,6 +151,26 @@ def open_mine(user, rates="standardrates"):
     players.decAvailableMines(user)
 
     return mine
+
+def create_golem(player_input, rawGolem):
+    """
+    Attempts to create a golem with the given player input.  If golem creation
+    succeeds, remove that res from the player's holdings and add the golem to
+    the game objects.
+    """
+
+    newGolem = Golem()
+    shapedGolem = golems.sift(rawGolem)
+
+    try:
+        newGolem.create(player_input, shapedGolem)
+    except BaseException:
+        return False
+
+    players.removeRes(user, golems.getStats(user))
+    GOLEMS.update(newGolem)
+
+    return newGolem
 
 ## game setup
 

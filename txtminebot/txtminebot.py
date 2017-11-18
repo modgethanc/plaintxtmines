@@ -332,22 +332,19 @@ def newGolem(user, timestamp, golemstring):
     else:
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
-                golemfilter = list(golemstring)
+                rawGolem = list(golemstring)
                 maxgolem = (players.getStrength(user)*3.5)
-                if len(golemfilter) > maxgolem:
+                if len(rawGolem) > maxgolem:
                   return "You're not strong enough to construct a golem that big, friend.  The most you can use is "+p.no("resource", maxgolem)
                 else:
-                  golemshape = []
-                  for x in golemfilter:
-                      if x in ['~', '@', '#', '^', '&', '*', '[', ']']:
-                          golemshape.append(x)
 
-                  golem = golems.newGolem(user, ''.join(golemshape), timestamp)
-                  players.removeRes(user, golems.getStats(user))
-                  logGolem(user)
+                  if game.create_golem(player_input, rawGolem):
+                      logGolem(user)
 
-                  golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
-                  golemstats += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+"."
+                      golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(game.golem_lifespan(user, timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
+                      golemstats += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+"."
+                  else:
+                      golemstats = "Something went wrong when you tried to construct that golem.  I'm sorry, friend; why don't you try a different shape?"
 
                   return golemstats
 
@@ -568,8 +565,7 @@ def golemStats(player_input):
     '''
 
     status = golems.getShape(player_input.nick)+" is hard at work!  "
-    status += "It can excavate up to "+p.no("resource",
-            golems.getStrength(player_input.nick))+" per strike, and strikes every "+p.no("second", golems.getInterval(player_input.nick))+".  It'll last another "+formatter.prettyTime(golems.getLifeRemaining(player_input.nick, player_input.timestamp))
+    status += "It can excavate up to "+p.no("resource", golems.getStrength(player_input.nick))+" per strike, and strikes every "+p.no("second", golems.getInterval(player_input.nick))+".  It'll last another "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
 
     return status
 
