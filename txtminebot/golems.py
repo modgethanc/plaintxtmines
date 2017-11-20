@@ -341,10 +341,10 @@ class Golem():
                 self.core["@"],
                 self.core["#"],
                 self.core["&"],
-                self.core["&"],
                 self.core["*"],
                 self.core["["],
-                self.core["]"]]
+                self.core["]"],
+                self.core["^"]]
 
 ## golem helpers
 
