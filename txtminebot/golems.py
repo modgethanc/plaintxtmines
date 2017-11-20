@@ -110,6 +110,7 @@ class Golem():
         self.birth = player_input.timestamp
         self.owner = player_input.nick
         self.shape = golemString
+        self.lastStrike = player_input.timestamp
 
         ## calculated stats
         self.interval = self.calc_interval()

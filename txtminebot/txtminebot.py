@@ -337,20 +337,17 @@ def newGolem(player_input, golemstring):
     if game.has_golem(player_input.nick):
         return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
     else:
-        print "trying "+golemstring
-        print golems.parse(golemstring)
-
         if 1:
         #if players.canAfford(player_input.nick, golems.parse(golemstring)):
             rawGolem = list(golemstring)
-            maxgolem = (players.getStrength(player_input.nick)*3.5)
+            maxgolem = int((players.getStrength(player_input.nick)*3.5))
             if len(rawGolem) > maxgolem:
-                return "You're not strong enough to construct a golem that big, friend.  The most you can use is "+p.no("resource", maxgolem)
+                return "You're not strong enough to construct a golem with "+str(len(rawGolem))+" pieces, friend.  The most you can use is "+p.no("resource", maxgolem)
             else: # proceed with golem creation
                 if game.create_golem(player_input, rawGolem):
                     logGolem(player_input.nick)
 
-                    golemstats = players.printExcavation(game.golem_stats(player_input.nick))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
+                    golemstats = players.printExcavation(game.golem_stats(player_input.nick))+ " has been removed from your holdings.  Your new " + str(len(rawGolem)) + "-piece golem will last for "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
                     golemstats += "It can excavate up to "+p.no("resource", game.golem_strength(player_input.nick))+" per strike, and strikes every "+p.no("second", game.golem_interval(player_input.nick))+"."
                 else: # error on golem creation
                     golemstats = "Something went wrong when you tried to construct that golem.  I'm sorry, friend; why don't you try a different shape?"
@@ -370,6 +367,20 @@ def logGolem(user):
 def updateGolems(timestamp):
     response = []
 
+    deadGolemOwners = game.tick_golems(timestamp)
+
+    for deadGolemOwner in deadGolemOwners:
+        print "process dead golem for " + deadGolemOwner
+        golem = game.golem_shape(deadGolemOwner)
+        drops = players.printExcavation(game.golem_expire(deadGolemOwner, timestamp))
+        grave = "in front of you"
+
+        if len(players.getMines(deadGolemOwner)) > 2:
+            grave = "inside of "+players.getMines(user)[0].capitalize()
+
+        response.append({"msg":golem+" crumbles to dust "+grave+" and leaves a wake of "+drops, "channel":deadGolemOwner})
+
+    """ old golem updating method here
     for user in game.listGolems():
         strikeDiff = int(timestamp) - game.golem_last_strike(user)
         interval = game.golem_interval(user)
@@ -402,6 +413,7 @@ def updateGolems(timestamp):
                 golemgrave = "inside of "+players.getMines(user)[0].capitalize()
 
             response.append({"msg":golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined, "channel":user})
+    """
 
     return response
 
@@ -580,7 +592,7 @@ def golemStats(player_input):
 
         #temporary for debugging
         dyingGolem = game.golem_shape(player_input.nick)
-        game.golem_expire(player_input.nick, player_input.timestamp)
+        #game.golem_expire(player_input.nick, player_input.timestamp)
         return dyingGolem + " is about to expire!"
 
 def rankings():

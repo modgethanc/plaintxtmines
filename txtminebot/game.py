@@ -237,6 +237,45 @@ def golem_strike(player, targetMine, elapsed):
 
     return GOLEMS[player].strike(targetMine, elapsed)
 
+def tick_golems(timestamp):
+    '''
+    Goes through golem ticks, and returns a list of player names with expired
+    golems.
+    '''
+
+    deadGolems = []
+
+    for golem in GOLEMS.values():
+        print "updating "+ golem.owner +"'s golem at " + str(timestamp)
+
+        if not golem.is_alive(timestamp): #process golem death
+            print "golem expired"
+            deadGolems.append(golem.owner)
+        else:
+            # process golem striking
+            sinceLastStrike = int(timestamp) - golem.lastStrike
+            print "next strike at "+str(golem.lastStrike) + str(golem.interval)
+            
+            if (sinceLastStrike >= golem.interval 
+                 and len(players.getMines(golem.owner)) > 0):
+                targetMine = players.getMines(golem.owner)[0]
+                strikesCompleted = sinceLastStrike/golem.interval
+                print "owed "+str(strikesCompleted)+" golem strikes"
+                strikes = 0
+                strikeTime = golem.lastStrike
+                while strikes < strikesCompleted:
+                    excavation = [0,0,0,0,0,0,0,0]
+                    strikeTime += golem.interval
+
+                    if mines.getTotal(targetMine) > 0:
+                        excavation = golem_strike(golem.owner, targetMine, strikeTime)
+                        print excavation
+                        #print "golemstrike"+ str(golems.strike(user, target))
+
+                    strikes += 1
+
+    return deadGolems
+
 def golem_expire(player, timestamp):
     '''
     Facilitates the expirations of a golem for the given player.
