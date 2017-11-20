@@ -333,9 +333,9 @@ def newGolem(user, timestamp, golemstring):
         if golems.calcStrength(golems.parse(golemstring)) > 0:
             if players.canAfford(user, golems.parse(golemstring)):
                 golemfilter = list(golemstring)
-                maxgolem = (players.getStrength(user)*3.5)
+                maxgolem = int((players.getStrength(user)*3.5))
                 if len(golemfilter) > maxgolem:
-                  return "You're not strong enough to construct a golem that big, friend.  The most you can use is "+p.no("resource", maxgolem)
+                  return "You're not strong enough to construct a golem with "+str(len(golemfilter))+" pieces, friend.  The most you can use is "+p.no("resource", maxgolem)
                 else:
                   golemshape = []
                   for x in golemfilter:
@@ -346,7 +346,7 @@ def newGolem(user, timestamp, golemstring):
                   players.removeRes(user, golems.getStats(user))
                   logGolem(user)
 
-                  golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
+                  golemstats = players.printExcavation(golems.getStats(user))+ " has been removed from your holdings.  Your new "+str(len(golemfilter))+"-piece golem will last for "+formatter.prettyTime(golems.getLifeRemaining(user, timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
                   golemstats += "It can excavate up to "+p.no("resource", golems.getStrength(user))+" per strike, and strikes every "+p.no("second", golems.getInterval(user))+"."
 
                   return golemstats
