@@ -62,7 +62,8 @@ class Golem():
         ## mutables
         self.shape = ""
         self.lastStrike = 0
-        self.res = "0,0,0,0,0,0,0,0"
+        self.res = [0,0,0,0,0,0,0,0]
+        #self.res = "0,0,0,0,0,0,0,0"
 
 
     def load(self, player):
@@ -267,15 +268,43 @@ class Golem():
         Returns a human-readable string of the golem's held resources.
         '''
 
-        held = self.res.split(",")
+        #held = self.res.split(",")
+
+        held = self.res
 
         heldTotal = 0
         for res in held:
             heldTotal += int(res)
 
+        i = 0
+        while i < 8: # stupid string hax
+            r = str(held[i])
+            held[i] = r
+            i += 1
+
         return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(heldTotal)+" units"
+        #return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(heldTotal)+" units"
 
     ## actions
+
+    def strike(self, targetMine, elapsed):
+        '''
+        Strikes at targetted mine and adds resources to own held, then updates
+        last strike time.
+        '''
+
+        excavation = mines.excavate(targetMine, self.strength, self.width)
+        held = self.res
+
+        i = 0
+        for resType in excavation:
+            newTotal = int(held[i]) + int(resType)
+            held[i] = newTotal
+            i += 1
+
+        self.lastStrike = elapsed
+
+        return excavation
 
     def expire(self):
         '''
@@ -458,10 +487,3 @@ def decay(player, pieces):
     writeGolem(player, golemdata)
 
     return len(golemshape)-1
-
-def expire(player):
-    golemheld = getHeld(player)
-    os.remove("../data/"+player+".golem")
-    players.acquireRes(player, golemheld)
-
-    return golemheld

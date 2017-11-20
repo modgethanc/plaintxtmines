@@ -371,23 +371,29 @@ def updateGolems(timestamp):
     response = []
 
     for user in game.listGolems():
-        strikeDiff = int(timestamp) - golems.getLastStrike(user)
+        strikeDiff = int(timestamp) - game.golem_last_strike(user)
         interval = game.golem_interval(user)
+        print user + "'s golem check at "+str(timestamp)
 
         if strikeDiff >= interval and len(players.getMines(user)) > 0: # golem strike
             target = players.getMines(user)[0]
             strikeCount = strikeDiff/interval
             i = 0
-            elapsed = golems.getLastStrike(user)
+            elapsed = game.golem_last_strike(user)
             while i < strikeCount:
-                if mines.getTotal(target) > 0:
-                    print "golemstrike"+ str(golems.strike(user, target))
+                excavation = [0,0,0,0,0,0,0,0]
                 elapsed += interval
+
+                if mines.getTotal(target) > 0:
+                    excavation = game.golem_strike(user, target, elapsed)
+                    print excavation
+                    #print "golemstrike"+ str(golems.strike(user, target))
+
                 i += 1
 
-            golems.updateLastStrike(user, elapsed)
+            #golems.updateLastStrike(user, elapsed)
 
-        if game.golem_living(user, timestamp):
+        if not game.golem_living(user, timestamp):
         #if int(timestamp) > golems.getDeath(user): # golem death
             golem = game.golem_shape(user)
             mined = players.printExcavation(game.golem_expire(user, timestamp))
@@ -610,7 +616,7 @@ def tick(now):
     response = []
 
     # commenting this out while updating isn't reimplemented
-    #response.extend(updateGolems(now))
+    response.extend(updateGolems(now))
 
     # debugging ticks below:
     #response.append({"msg":"tick "+str(now), "channel":"hvincent"})

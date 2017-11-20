@@ -175,6 +175,13 @@ def golem_holdings(player):
 
     return GOLEMS[player].readable_holdings()
 
+def golem_last_strike(player):
+    '''
+    Requests the timestamp of the golem's last strike.
+    '''
+
+    return GOLEMS[player].lastStrike
+
 ## game actions
 
 def create_dossier(user):
@@ -222,6 +229,14 @@ def create_golem(player_input, rawGolem):
 
     return newGolem
 
+def golem_strike(player, targetMine, elapsed):
+    '''
+    Requests that a golem belonging to named player strikes at the given target
+    mine.
+    '''
+
+    return GOLEMS[player].strike(targetMine, elapsed)
+
 def golem_expire(player, timestamp):
     '''
     Facilitates the expirations of a golem for the given player.
@@ -237,11 +252,12 @@ def golem_expire(player, timestamp):
         drops = deadGolem.expire()
 
         # for legacy player acquireRes needs
-        dropList = drops.split(",")
+        #dropList = drops.split(",")
 
-        players.acquireRes(player, dropList)
+        players.acquireRes(player, drops)
+        #players.acquireRes(player, dropList)
 
-        return dropList
+        return drops
 
 ## game setup
 
