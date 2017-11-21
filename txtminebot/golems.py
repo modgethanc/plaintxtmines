@@ -415,60 +415,7 @@ def parse(golemstring):
 
     return golem
 
-### golem outputting
-
-def openGolem(player):
-    golemfile = open('../data/'+player+'.golem', 'r')
-    golemdata = []
-    for x in golemfile:
-        golemdata.append(x.rstrip())
-    golemfile.close()
-
-    return golemdata
-
-def getDeath(player): # return int of death time
-    return int(openGolem(player)[6])
-
-def getLastStrike(player): # return int of birth time
-    return int(openGolem(player)[8])
-
-## golem updating
-
-def writeGolem(player, golemdata):
-    golemfile = open('../data/'+player+'.golem', 'w')
-    for x in golemdata:
-        golemfile.write(str(x) + "\n")
-    golemfile.close()
-
-def updateLastStrike(player, time):
-    golemdata = openGolem(player)
-    golemdata[8] = time
-    writeGolem(player, golemdata)
-
-    return time
-
 ## actions
-
-def strike(player, target): # performs mining action
-    excavation = mines.excavate(target, getStrength(player), getWidth(player))
-    held = getHeld(player)
-
-    i = 0
-    for x in excavation:
-        r = int(held[i]) + int(x)
-        held[i] = str(r)
-        i += 1
-
-    golemdata = openGolem(player)
-    golemdata[9] = j.join(held)
-
-    writeGolem(player, golemdata)
-
-    ## 10/31/17 disabling decay because it's hanging
-    #if random.randrange(1,100) < 15:
-    #    print decay(player, 1)
-
-    return excavation
 
 def decay(player, pieces):
     golemdata = openGolem(player)
