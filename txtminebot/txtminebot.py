@@ -376,7 +376,7 @@ def updateGolems(timestamp):
         grave = "in front of you"
 
         if len(players.getMines(deadGolemOwner)) > 2:
-            grave = "inside of "+players.getMines(user)[0].capitalize()
+            grave = "inside of "+players.getMines(deadGolemOwner)[0].capitalize()
 
         response.append({"msg":golem+" crumbles to dust "+grave+" and leaves a wake of "+drops, "channel":deadGolemOwner})
 
