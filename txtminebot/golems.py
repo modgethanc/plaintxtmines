@@ -291,7 +291,7 @@ class Golem():
     def strike(self, targetMine, elapsed):
         '''
         Strikes at targetted mine and adds resources to own held, then updates
-        last strike time.
+        last strike time and saves self to disk.
         '''
 
         excavation = mines.excavate(targetMine, self.strength, self.width)
@@ -304,6 +304,7 @@ class Golem():
             i += 1
 
         self.lastStrike = elapsed
+        self.save()
 
         return excavation
 
