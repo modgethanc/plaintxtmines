@@ -37,6 +37,13 @@ def reset():
 GAMEDIR = os.path.join("..", "data")
 BASE_FATIGUE = 10
 
+## game objects
+
+GOLEMS = {}
+PLAYERS = {}
+MINES = {}
+EMPRESS = None
+
 ## game inquiries
 
 def is_playing(user):
@@ -52,15 +59,27 @@ def is_mine(mine):
     '''
     return os.path.isfile(os.path.join(GAMEDIR,mine+'.mine'))
 
-def has_golem(user):
+def has_golem(player):
     '''
-    Returns whether or not the named player has a golem.
+    Returns whether or not the named player has a golem by searching for that
+    player in the loaded golems.
     '''
-    return os.path.isfile(os.path.join(GAMEDIR,user+'.golem'))
+
+    return GOLEMS.has_key(player)
+
+def golem_living(player, timestamp):
+    '''
+    Requests golems status for the given player at the time of inquiry.
+
+    (Don't use player_input here because this sometimes happens without player
+    input)
+    '''
+
+    return GOLEMS[player].is_alive(timestamp)
 
 def listPlayers():
     '''
-    TODO: deprecate this with better game data handline
+    TODO: deprecate this with better game data handling
     '''
 
     gamedata = os.listdir(GAMEDIR)
@@ -115,10 +134,53 @@ def listDossiers():
 
 def golem_lifespan(player, timestamp):
     '''
-    Returns the number of seconds left in that player's golem's life.
+    Requests the number of seconds left in that player's golem's life.
     '''
 
-    return golems.getLifeRemaining(player, timestamp)
+    return GOLEMS[player].remaining_life(timestamp)
+
+def golem_shape(player):
+    '''
+    Requests the shape of the given player's golem.
+    '''
+
+    return GOLEMS[player].shape
+
+def golem_stats(player):
+    '''
+    Requests the golem's stats, using legacy stat format (string list of
+    resources).
+    '''
+
+    return GOLEMS[player].legacy_stats()
+
+def golem_strength(player):
+    '''
+    Requests the strength of player's golem.
+    '''
+
+    return GOLEMS[player].strength
+
+def golem_interval(player):
+    '''
+    Requests the strike interval of player's golem.
+    '''
+
+    return GOLEMS[player].interval
+
+def golem_holdings(player):
+    '''
+    Requests a human-readable string of the golem's held resources.
+    '''
+
+    return GOLEMS[player].readable_holdings()
+
+def golem_last_strike(player):
+    '''
+    Requests the timestamp of the golem's last strike.
+    '''
+
+    return GOLEMS[player].lastStrike
 
 ## game actions
 
@@ -145,6 +207,97 @@ def open_mine(user, rates="standardrates"):
 
     return mine
 
+def create_golem(player_input, rawGolem):
+    '''
+    Attempts to create a golem with the given player input.  If golem creation
+    succeeds, remove that res from the player's holdings and add the golem to
+    the game objects.
+    '''
+
+    newGolem = golems.Golem()
+    shapedGolem = golems.sift(rawGolem)
+
+    try:
+        print "making " + shapedGolem
+        newGolem.create(player_input, shapedGolem)
+    except BaseException:
+        return False
+
+    players.removeRes(player_input.nick, newGolem.legacy_stats())
+    newGolem.save()
+    GOLEMS.update({player_input.nick:newGolem})
+
+    return newGolem
+
+def golem_strike(player, targetMine, elapsed):
+    '''
+    Requests that a golem belonging to named player strikes at the given target
+    mine.
+    '''
+
+    return GOLEMS[player].strike(targetMine, elapsed)
+
+def tick_golems(timestamp):
+    '''
+    Goes through golem ticks, and returns a list of player names with expired
+    golems.
+    '''
+
+    deadGolems = []
+
+    for golem in GOLEMS.values():
+        print "updating "+ golem.owner +"'s golem at " + str(timestamp)
+
+        if not golem.is_alive(timestamp): #process golem death
+            print "golem expired"
+            deadGolems.append(golem.owner)
+        else:
+            # process golem striking
+            sinceLastStrike = int(timestamp) - golem.lastStrike
+            print "next strike at "+str(golem.lastStrike) + str(golem.interval)
+            
+            if (sinceLastStrike >= golem.interval 
+                 and len(players.getMines(golem.owner)) > 0):
+                targetMine = players.getMines(golem.owner)[0]
+                strikesCompleted = sinceLastStrike/golem.interval
+                print "owed "+str(strikesCompleted)+" golem strikes"
+                strikes = 0
+                strikeTime = golem.lastStrike
+                while strikes < strikesCompleted:
+                    excavation = [0,0,0,0,0,0,0,0]
+                    strikeTime += golem.interval
+
+                    if mines.getTotal(targetMine) > 0:
+                        excavation = golem_strike(golem.owner, targetMine, strikeTime)
+                        print excavation
+                        #print "golemstrike"+ str(golems.strike(user, target))
+
+                    strikes += 1
+
+    return deadGolems
+
+def golem_expire(player, timestamp):
+    '''
+    Facilitates the expirations of a golem for the given player.
+
+    (Don't use player_input here because this sometimes happens without player
+    input)
+    '''
+
+    if GOLEMS[player].is_alive(timestamp):
+        return False
+    else:
+        deadGolem = GOLEMS.pop(player)
+        drops = deadGolem.expire()
+
+        # for legacy player acquireRes needs
+        #dropList = drops.split(",")
+
+        players.acquireRes(player, drops)
+        #players.acquireRes(player, dropList)
+
+        return drops
+
 ## game setup
 
 def initialize():
@@ -152,4 +305,18 @@ def initialize():
     Set up the game.
     '''
 
+    gamedata = os.listdir(GAMEDIR)
+
+    ## load golems
+
+    for filename in gamedata:
+        entry = os.path.basename(filename).split('.')
+        if entry[-1] == "golem":
+            incomingGolem = golems.Golem()
+            GOLEMS.update({incomingGolem.load(entry[0]):incomingGolem})
+
+    print GOLEMS
+
     return
+
+initialize()

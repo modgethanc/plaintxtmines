@@ -134,7 +134,7 @@ class IRC():
         '''
 
         self.send("PONG :"+pingcode+"\n")
-        print("PONG! " + pingcode)
+        #print("PONG! " + pingcode)
 
     def joinchan(self, chan):
         '''
@@ -178,7 +178,7 @@ class IRC():
 
                 if msg.find("PING :") == 0:
                     pingcode = msg.split(":")[1]
-                    print "[pinged] with "+pingcode
+                    #print "[pinged] with "+pingcode
                     self.ping(pingcode)
 
                 elif msg.find("MODE") != -1:

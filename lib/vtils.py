@@ -2,11 +2,13 @@
 
 '''
 vtils.py: frequently used terminal and text processing utilities
-copyright (c) 2016 vincent zeng (hvincent@modgethanc.com)
+copyright (c) 2017 vincent zeng (hvincent@modgethanc.com)
 
 DEPENDENCIES:
     inflect
     colorama
+    os
+    json
 
 i have no idea why anyone else in their right mind would touch this bs, but in
 case you do, you have the following unrestricted permissions: use, copy, modify,
@@ -25,6 +27,8 @@ import inflect
 import time
 import random
 import colorama
+import os
+import json
 
 ## misc globals
 BACKS = ['back', 'b', 'q']
@@ -215,3 +219,24 @@ def input_yn(query):
         return True
     else:
         return False
+
+def open_json_as_dict(filename):
+    '''
+    Opens filename.json file and returns dict (blank if no file)
+    '''
+
+    if not os.path.isfile(filename):
+        return {}
+    else:
+        return json.load(open(filename))
+
+def write_dict_as_json(filename, j):
+    '''
+    Overwrites filename.json file with dict j
+    '''
+
+    datafile = open(filename, 'w')
+    datafile.write(json.dumps(j, sort_keys=True, indent=2, separators=(',', ':')))
+
+    return filename
+
