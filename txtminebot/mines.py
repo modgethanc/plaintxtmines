@@ -55,14 +55,53 @@ class Mine():
         Write self to disk.
         '''
 
-        pass
+        # hardcode bs
+        filename = "../data/" + self.name+ ".mine"
+        mineData = self.to_dict()
+        vtils.write_dict_as_json(filename, mineData)
 
-    def load(self):
+        return filename
+
+    def to_dict(self):
         '''
-        Loads a file from disk.
+        Turns all data into a dict.
         '''
-        
-        pass
+
+        mineData = {
+                "starting res": self.startingRes,
+                "starting total": self.startingTotal,
+                "owner": self.owner,
+                "name": self.name,
+                "current res": self.currentRes,
+                "current total": self.currentTotal,
+                "workers": self.workers
+                }
+
+        return mineData
+
+    def load(self, mineName):
+        '''
+        Loads a mine from file for the named mine, then returns own name for
+        verification.
+        '''
+
+        filename = player + ".mine"
+
+        # hardcode bs
+        mineData = vtils.open_json_as_dict("../data/"+filename)
+
+        ## given stats
+        self.startingRes = mineData["starting res"]
+        self.startingTotal = mineData["starting total"]
+        self.owner = mineData["owner"]
+        self.name = mineData["name"]
+
+        ## mutables
+        self.currentRes = mineData["current res"]
+        self.currentTotal = mineData["current total"]
+        self.workers = mineData["workers"]
+
+        return self.name
 
     def create(self, player_input):
         '''

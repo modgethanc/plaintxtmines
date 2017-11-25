@@ -307,15 +307,21 @@ def initialize():
 
     gamedata = os.listdir(GAMEDIR)
 
-    ## load golems
 
     for filename in gamedata:
         entry = os.path.basename(filename).split('.')
+
         if entry[-1] == "golem":
+            ## load golems
             incomingGolem = golems.Golem()
             GOLEMS.update({incomingGolem.load(entry[0]):incomingGolem})
+        elif entry[-1] == "mine":
+            ## load mines
+            incomingMine = mines.Mine()
+            MINES.update({incomingMine.load(entry[0]):incomingMine})
 
     print GOLEMS
+    print MINES
 
     return
 
