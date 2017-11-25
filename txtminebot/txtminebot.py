@@ -457,7 +457,7 @@ def strike(player_input):
         mined = players.printExcavation(players.acquireRes(player_input.nick, excavation))
         response.append({"msg":"\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined, "channel":player_input.nick})
 
-        if mines.getTotal(target) == 0:
+        if game.mine_total_res(target) == 0:
             emptyMines.append(target)
             players.incCleared(player_input.nick)
             players.incEndurance(player_input.nick)
@@ -535,7 +535,7 @@ def mineListFormatted(user):
     mineList = players.getMines(user)
     rawlist = []
     for x in mineList:
-        depletion = int(100*float(mines.getTotal(x))/float(mines.getStarting(x)))
+        depletion = int(100*float(game.mine_total_res(x))/float(mines.getStarting(x)))
         prefix = ''
 
         if mineList.index(x) == 0: # currently targetted

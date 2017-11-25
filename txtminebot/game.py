@@ -53,11 +53,11 @@ def is_playing(user):
 
     return os.path.isfile(os.path.join(GAMEDIR,user+'.dossier'))
 
-def is_mine(mine):
+def is_mine(mineName):
     '''
     Returns whether or not the named mine exists.
     '''
-    return os.path.isfile(os.path.join(GAMEDIR,mine+'.mine'))
+    return MINES.has_key(mineName)
 
 def has_golem(player):
     '''
@@ -89,19 +89,6 @@ def listPlayers():
         if entry[-1] == "stats":
             playerlist.append(entry[0])
     return playerlist
-
-def listGolems():
-    '''
-    TODO: deprecate this with better game data handline
-    '''
-
-    gamedata = os.listdir(GAMEDIR)
-    golemlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "golem":
-            golemlist.append(entry[0])
-    return golemlist
 
 def listMines():
     '''
@@ -181,6 +168,13 @@ def golem_last_strike(player):
     '''
 
     return GOLEMS[player].lastStrike
+
+def mine_total_res(mineName):
+    '''
+    Requests the total remaining resources in named mine.
+    '''
+
+    return MINES[mineName].currentTotal
 
 ## game actions
 
