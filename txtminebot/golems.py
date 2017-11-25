@@ -28,10 +28,7 @@ import random
 
 import vtils
 
-import players
 import mines
-
-j = ','
 
 class Golem():
     '''
@@ -332,10 +329,10 @@ class Golem():
                 str(self.core["@"]),
                 str(self.core["#"]),
                 str(self.core["&"]),
-                str(self.core["&"]),
                 str(self.core["*"]),
                 str(self.core["["]),
-                str(self.core["]"])])
+                str(self.core["]"]),
+                str(self.core["^"])])
         '''
         return [
                 self.core["~"],
@@ -365,16 +362,15 @@ def sift(rawGolem):
 
 ## legacy functions
 
-def newGolem(player, golemstring, time):
     '''
     Legacy golem creation method, left here for reference.
-    '''
+def newGolem(player, golemstring, time):
 
     golem = parse(golemstring)
 
     golemfile = open("../data/"+player+".golem", 'w+')
     golemfile.write(golemstring+"\n") # 0 golem string
-    golemfile.write(j.join(golem)+"\n") # 1 golem stats
+    golemfile.write(','.join(golem)+"\n") # 1 golem stats
     golemfile.write(str(calcHeight(golem))+"\n") # 2 height
     golemfile.write(str(calcWidth(golem))+"\n") # 3 width
     golemfile.write(str(calcStrength(golem))+"\n") # 4 strength
@@ -387,6 +383,7 @@ def newGolem(player, golemstring, time):
     golemfile.close()
     return golemstring
 
+    '''
 
 ## legacy golem access commands
 
