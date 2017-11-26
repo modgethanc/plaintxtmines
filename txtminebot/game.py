@@ -169,6 +169,15 @@ def golem_last_strike(player):
 
     return GOLEMS[player].lastStrike
 
+def mine_depletion(mineName):
+    '''
+    Returns the percentage depletion of a mine as an int (out of 100).
+    '''
+
+    mine = MINES[mineName]
+
+    return int(100*float(mine.currentTotal)/float(mine.startingTotal))
+
 def mine_total_res(mineName):
     '''
     Requests the total remaining resources in named mine.
@@ -261,7 +270,7 @@ def tick_golems(timestamp):
                     excavation = [0,0,0,0,0,0,0,0]
                     strikeTime += golem.interval
 
-                    if mines.getTotal(targetMine) > 0:
+                    if MINES[targetMine].currentTotal > 0:
                         excavation = golem_strike(golem.owner, targetMine, strikeTime)
                         print excavation
                         #print "golemstrike"+ str(golems.strike(user, target))

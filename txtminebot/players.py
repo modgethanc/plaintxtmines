@@ -274,7 +274,8 @@ def incCleared(player): # increment cleared count
 #### mine wrangling
 
 def newMine(player, rates):
-    minename = mines.newMine(player, rates)
+    mine = mines.Mine()
+    minename = mine.create(player, rates)
 
     currentMines = getOwned(player)
     currentMines.append(minename)

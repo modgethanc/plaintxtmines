@@ -364,13 +364,16 @@ def logGolem(user):
       golemarchive.write(golemtext+"\n")
       golemarchive.close()
 
-def updateGolems(timestamp):
+def update_golems(timestamp):
+    '''
+    Calls a golem tick for the game and processes any dead golems.
+    '''
+
     response = []
 
     deadGolemOwners = game.tick_golems(timestamp)
 
     for deadGolemOwner in deadGolemOwners:
-        print "process dead golem for " + deadGolemOwner
         golem = game.golem_shape(deadGolemOwner)
         drops = players.printExcavation(game.golem_expire(deadGolemOwner, timestamp))
         grave = "in front of you"
@@ -379,41 +382,6 @@ def updateGolems(timestamp):
             grave = "inside of "+players.getMines(deadGolemOwner)[0].capitalize()
 
         response.append({"msg":golem+" crumbles to dust "+grave+" and leaves a wake of "+drops, "channel":deadGolemOwner})
-
-    """ old golem updating method here
-    for user in game.listGolems():
-        strikeDiff = int(timestamp) - game.golem_last_strike(user)
-        interval = game.golem_interval(user)
-        print user + "'s golem check at "+str(timestamp)
-
-        if strikeDiff >= interval and len(players.getMines(user)) > 0: # golem strike
-            target = players.getMines(user)[0]
-            strikeCount = strikeDiff/interval
-            i = 0
-            elapsed = game.golem_last_strike(user)
-            while i < strikeCount:
-                excavation = [0,0,0,0,0,0,0,0]
-                elapsed += interval
-
-                if mines.getTotal(target) > 0:
-                    excavation = game.golem_strike(user, target, elapsed)
-                    print excavation
-                    #print "golemstrike"+ str(golems.strike(user, target))
-
-                i += 1
-
-            #golems.updateLastStrike(user, elapsed)
-
-        if not game.golem_living(user, timestamp):
-        #if int(timestamp) > golems.getDeath(user): # golem death
-            golem = game.golem_shape(user)
-            mined = players.printExcavation(game.golem_expire(user, timestamp))
-            golemgrave = "in front of you"
-            if len(players.getMines(user)) > 0:
-                golemgrave = "inside of "+players.getMines(user)[0].capitalize()
-
-            response.append({"msg":golem+" crumbles to dust "+golemgrave+" and leaves a wake of "+mined, "channel":user})
-    """
 
     return response
 
@@ -535,7 +503,7 @@ def mineListFormatted(user):
     mineList = players.getMines(user)
     rawlist = []
     for x in mineList:
-        depletion = int(100*float(game.mine_total_res(x))/float(mines.getStarting(x)))
+        depletion = game.mine_depletion(x)
         prefix = ''
 
         if mineList.index(x) == 0: # currently targetted
@@ -628,7 +596,7 @@ def tick(now):
     response = []
 
     # commenting this out while updating isn't reimplemented
-    response.extend(updateGolems(now))
+    response.extend(update_golems(now))
 
     # debugging ticks below:
     #response.append({"msg":"tick "+str(now), "channel":"hvincent"})

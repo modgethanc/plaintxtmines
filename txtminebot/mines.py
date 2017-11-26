@@ -6,6 +6,17 @@ This contains the class and functions for mines.
 Mines contain veins of resources, and are generated on demand when a new mine is
 opened.
 
+Mine attributes:
+    (given stats)
+    startingRes: 8-item int array of starting res count
+    startingTotal: int of initial total
+    owner: string of owner's name (based on dossier ID)
+    name: stirng of mine's name
+    (mutable)
+    currentRes: 8-item int array of current res counts
+    currentTotal: int of current res total
+    workers: string array of every dossier ID permitted to strike
+
 By convention, we use reslist as an array of ints, each item corresponding to
 the number of resources assuming the following order:
     reslist[0]: ~
@@ -27,6 +38,8 @@ https://github.com/modgethanc/plaintxtmines
 
 import os
 import random
+
+import vtils
 import gibber
 
 class Mine():
@@ -85,7 +98,7 @@ class Mine():
         verification.
         '''
 
-        filename = player + ".mine"
+        filename = mineName + ".mine"
 
         # hardcode bs
         mineData = vtils.open_json_as_dict("../data/"+filename)
@@ -103,10 +116,10 @@ class Mine():
 
         return self.name
 
-    def create(self, player_input):
+    def create(self, player, minerate="standardrates"):
         '''
-        Generate a new mine, assuming inputs from a player with optional
-        minerate. If no minerate is given, pass standard minerates down.
+        Generate a new mine for a given player with optional minerate. If no
+        minerate is given, pass standard minerates down.
 
         Mine name is created with the gibber function, and checks against all
         previously created mines for name collisions.
@@ -123,12 +136,17 @@ class Mine():
         ## given stats
         self.startingRes = reslist
         self.startingTotal = total
-        self.owner = player_input.nick
+        self.owner = player
+        self.name = minename
 
         ## mutables
         self.currentRes = reslist
         self.currentTotal = total
-        self.workers = [player_input.nick]
+        self.workers = [player]
+
+        self.save()
+
+        return minename
 
     def excavate(self, rate=10, width=3):
         '''
@@ -224,72 +242,12 @@ def sum_resources(reslist):
     '''
 
     total = 0
-    for x in res:
+    for x in reslist:
         total += int(x)
 
     return total
 
 ## legacy functions below
-
-## mine output
-
-def openMine(mine): # returns str list of entire mine file
-    minefile = open('../data/'+mine+'.mine', 'r')
-
-    minedata = []
-    for x in minefile:
-        minedata.append(x.rstrip())
-
-    minefile.close()
-    return minedata
-
-def getRes(mine): # return list of res
-    minedata = openMine(mine)
-
-    return minedata[0].rstrip().split(',')
-
-def getStarting(mine): # return original starting res
-    minedata = openMine(mine)
-
-    return minedata[1]
-
-def getTotal(mine): # return int of res total
-    return sumRes(getRes(mine))
-
-def getOwner(mine): # return str of owner
-    minedata = openMine(mine)
-
-    return minedata[2]
-
-def getWorkers(mine): # return str list of contracted workers
-    minedata = openMine(mine)
-
-    workerlist = minedata[2].rstrip().split[',']
-
-    while workerlist.count('') > 0:
-        workerlist.remove('') #dirty hack
-
-    return workerList
-
-
-## mine input
-
-def writeMine(mine, minedata):
-    minefile = open('../data/'+mine+'.mine', 'w')
-    for x in minedata:
-        minefile.write(str(x) + "\n")
-    minefile.close()
-
-## mine actions
-
-
-######## LINE OF DEATH
-
-def remaining(record): # REDUNDANT
-    return getTotal(record.split('/')[-1].split('.')[0])
-
-def starting(record): # REDUNDANT
-    return getStarting(record.split('/')[-1].split('.')[0])
 
 def printMine(mine):
     print mine[-1]
