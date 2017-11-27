@@ -1,11 +1,108 @@
 #!/usr/bin/python
+'''
+This contains the class and functions for players.
+
+On creation, a player is given a file with stats and a dossier. It's possible
+for a player to exist without a dossier; players that burn their file can
+restart the game with a clean state, but maintain all their physical stats.
+
+Player attributes:
+    (stats)
+    name: name that the mining assistant addresses them
+    aliases: list of strings for valid aliases
+    lastStrike: int of timestamp of last strike
+    strength: int of strength
+    endurance: int of endurance
+    lifetimeStrikes: int of total lifetime strikes
+    lifetimeCompleted : int of total lifetime completed mines
+    lifetimeGrovels: int of total lifetime grovels
+
+    (dossier)
+    minesOwned : list of strings of mine names the player owns
+    minesAssigned: list of strings of mine names the player has additional
+        permission to work on
+    minesCompleted : list of strings of mine names the player has completed
+    minesAvailable: int of how many mines player can currently open
+    resHeld: 8-item int array of currently held resources (*)
+    grovelCount: int of current grovel count
+    strikeCount: int of current strike count
+
+(*): see documentation for mines for note about reslist
+
+plaintxtmines is a text-based multiplayer mining simulator. For more
+information, see the full repository:
+
+https://github.com/modgethanc/plaintxtmines
+'''
 
 import random
-import mines
-import gibber
 import os
 
+import vtils
+import mines
+import gibber
+
 j = ','
+
+class Player():
+    '''
+    Implements a player object.
+    '''
+
+    def __init__(self):
+        '''
+        Initial player conditions.
+        '''
+
+    pass
+
+    def save(self):
+        '''
+        Write self to disk.
+        '''
+
+        filename = "../data/" + self.name+ ".player"
+        vtils.write_dict_as_json(filename, self.to_dict())
+
+        return filename
+
+
+    def to_dict(self):
+        '''
+        Turns all data into a dict.
+        '''
+
+        playerData = {}
+
+        return playerData
+
+
+    def load(self, playerName):
+        '''
+        Loads a player from file for the named player, then returns own name for
+        verification.
+        '''
+
+        filename = playerName + ".player"
+
+        playerData = vtils.open_json_as_dict("../data/"+filename)
+
+        return self.name
+
+    def burn(self):
+        '''
+        Removes player's dossier info.
+        '''
+
+        pass
+
+    def create(self):
+        '''
+        Creates a new dossier for this player.
+        '''
+
+        pass
+
 
 def newDossier(player): # makes a new .dossier file for named player
     playerfile = open('../data/'+player+'.dossier', 'w+')
