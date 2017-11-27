@@ -258,7 +258,7 @@ def tick_golems(timestamp):
             # process golem striking
             sinceLastStrike = int(timestamp) - golem.lastStrike
             print "next strike at "+str(golem.lastStrike) + str(golem.interval)
-            
+
             if (sinceLastStrike >= golem.interval 
                  and len(players.getMines(golem.owner)) > 0):
                 targetMine = players.getMines(golem.owner)[0]
@@ -274,6 +274,9 @@ def tick_golems(timestamp):
                         excavation = golem_strike(golem.owner, targetMine, strikeTime)
                         print excavation
                         #print "golemstrike"+ str(golems.strike(user, target))
+                    else:
+                        #set last strike for blank strike at empty mine
+                        golem.lastStrike = strikeTime
 
                     strikes += 1
 
