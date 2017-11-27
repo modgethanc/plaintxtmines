@@ -198,17 +198,21 @@ def create_dossier(user):
     else:
         players.newPlayer(user)
 
-def open_mine(user, rates="standardrates"):
+def open_mine(player, rates="standardrates"):
     '''
     Opens a mine for the named user, given an optional mine rate file. Assumes
     that player has the permission to open a new mine, and decreases their
     current mine permission.
     '''
 
-    mine = players.newMine(user, "standardrates").capitalize()
-    players.decAvailableMines(user)
+    newMine = mines.Mine()
+    minename = newMine.create(player, rates)
+    MINES.update({minename:newMine})
 
-    return mine
+    players.newMine(player, minename)
+    players.decAvailableMines(player)
+
+    return minename.capitalize()
 
 def create_golem(player_input, rawGolem):
     '''
