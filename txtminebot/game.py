@@ -185,6 +185,13 @@ def mine_total_res(mineName):
 
     return MINES[mineName].currentTotal
 
+def player_working_mines(player):
+    '''
+    Requests a list of names of mines that the player has permission to work on.
+    '''
+
+    return
+
 ## game actions
 
 def create_dossier(user):
@@ -236,6 +243,14 @@ def create_golem(player_input, rawGolem):
     GOLEMS.update({player_input.nick:newGolem})
 
     return newGolem
+
+def player_strike(player, targetMineName):
+    '''
+    Requests a player strike at the target mine, and returns excavated
+    resources.
+    '''
+
+    return players.strike(player, MINES[targetMineName])
 
 def golem_strike(player, targetMine, elapsed):
     '''

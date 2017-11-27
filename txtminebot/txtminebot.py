@@ -421,7 +421,8 @@ def strike(player_input):
     else: # actual mining actions
         emptyMines = []
         status = players.incStrikes(player_input.nick)
-        excavation = players.strike(player_input.nick, target)
+        excavation = game.player_strike(player_input.nick, target)
+        #excavation = players.strike(player_input.nick, target)
         mined = players.printExcavation(players.acquireRes(player_input.nick, excavation))
         response.append({"msg":"\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined, "channel":player_input.nick})
 

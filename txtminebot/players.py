@@ -294,7 +294,7 @@ def strike(player, mine): # performs mining action
     baseDepth = 3
     strikeDepth = baseDepth * getStrength(player)
 
-    return mines.excavate(mine, strikeDepth)
+    return mine.excavate(strikeDepth)
 
 def acquireRes(player, excavation): # adds res to held
     held = getHeld(player)
