@@ -287,11 +287,11 @@ class Golem():
 
     def strike(self, targetMine, elapsed):
         '''
-        Strikes at targetted mine and adds resources to own held, then updates
+        Strikes at targeted mine and adds resources to own held, then updates
         last strike time and saves self to disk.
         '''
 
-        excavation = mines.excavate(targetMine, self.strength, self.width)
+        excavation = targetMine.excavate(self.strength, self.width)
         held = self.res
 
         i = 0
@@ -322,22 +322,10 @@ class Golem():
         Intermediate function, to return a string list of this golem's
         resources.
         '''
-
-        '''
-        return ",".join([
-                str(self.core["~"]),
-                str(self.core["@"]),
-                str(self.core["#"]),
-                str(self.core["&"]),
-                str(self.core["*"]),
-                str(self.core["["]),
-                str(self.core["]"]),
-                str(self.core["^"])])
-        '''
         return [
                 self.core["~"],
-                self.core["@"],
                 self.core["#"],
+                self.core["@"],
                 self.core["&"],
                 self.core["*"],
                 self.core["["],

@@ -157,7 +157,6 @@ class Mine():
         excavated = [0,0,0,0,0,0,0,0]
         reslist = self.currentRes
 
-        mineData = openMine(mine)
         veins = []
 
         if self.currentTotal <= rate:

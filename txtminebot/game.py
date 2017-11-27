@@ -207,10 +207,11 @@ def open_mine(player, rates="standardrates"):
 
     newMine = mines.Mine()
     minename = newMine.create(player, rates)
-    MINES.update({minename:newMine})
 
     players.newMine(player, minename)
     players.decAvailableMines(player)
+
+    MINES.update({minename:newMine})
 
     return minename.capitalize()
 
@@ -275,7 +276,7 @@ def tick_golems(timestamp):
                     strikeTime += golem.interval
 
                     if MINES[targetMine].currentTotal > 0:
-                        excavation = golem_strike(golem.owner, targetMine, strikeTime)
+                        excavation = golem_strike(golem.owner, MINES[targetMine], strikeTime)
                         print excavation
                         #print "golemstrike"+ str(golems.strike(user, target))
                     else:
