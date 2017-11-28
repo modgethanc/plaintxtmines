@@ -49,12 +49,31 @@ class Player():
     Implements a player object.
     '''
 
-    def __init__(self):
+    def __init__(self, player_input):
         '''
         Initial player conditions.
         '''
 
-    pass
+        # stats
+        self.name = player_input.nick
+        self.aliases = []
+        self.lastStrike = 0
+        self.strength = 1
+        self.endurance = 0
+        self.lifetimeStrikes = 0
+        self.lifetimeCompleted = 0
+        self.lifetimeGrovels = 0
+
+        # dossier
+        self.minesOwned = []
+        self.minesAssigned = []
+        self.minesCompleted = []
+        self.minesAvailable = 1
+        self.resHeld = [0,0,0,0,0,0,0,0]
+        self.grovelCount = 0
+        self.strikeCount = 0
+
+        self.save()
 
     def save(self):
         '''
@@ -72,7 +91,23 @@ class Player():
         Turns all data into a dict.
         '''
 
-        playerData = {}
+        playerData = {
+            "name": self.name,
+            "aliases": self.aliases,
+            "last strike": self.lastStrike,
+            "strength": self.strength,
+            "endurance": self.endurance,
+            "lifetime strikes": self.lifetimeStrikes,
+            "lifetime completed": self.lifetimeCompleted,
+            "lifetime grovels": self.lifetimeGrovels,
+            "mines owned": self.minesOwned,
+            "mines assigned": self.minesAssigned,
+            "mines completed": self.minesCompleted,
+            "mines available": self.minesAvailable,
+            "res held": self.resHeld,
+            "grovel count": self.grovelCount,
+            "strike count": self.strikeCount
+            }
 
         return playerData
 
@@ -86,6 +121,22 @@ class Player():
         filename = playerName + ".player"
 
         playerData = vtils.open_json_as_dict("../data/"+filename)
+
+        self.name = playerData.get("name")
+        self.aliases = playerData.get("aliases")
+        self.lastStrike = playerData.get("last strike")
+        self.strength = playerData.get("strength")
+        self.endurance = playerData.get("endurance")
+        self.lifetimeStrikes = playerData.get("lifetime strikes")
+        self.lifetimeCompleted = playerData.get("lifetime completed")
+        self.lifetimeGrovels = playerData.get("lifetime grovels")
+        self.minesOwned = playerData.get("mines owned")
+        self.minesAssigned = playerData.get("mines assigned")
+        self.minesCompleted = playerData.get("mines completed")
+        self.minesAvailable = playerData.get("mines available")
+        self.resHeld = playerData.get("res held")
+        self.grovelCount = playerData.get("grovel count")
+        self.strikeCount = playerData.get("strike count")
 
         return self.name
 
