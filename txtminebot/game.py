@@ -72,6 +72,46 @@ def player_may_open(playerName):
 
     return PLAYERS.get(playerName).minesAvailable > 0
 
+def player_strength(playerName):
+    '''
+    Returns the player's strength attribute.
+    '''
+
+    return PLAYERS.get(playerName).strength
+
+def player_endurance(playerName):
+    '''
+    Returns the player's endurance attribute.
+    '''
+
+    return PLAYERS.get(playerName).endurance
+
+def player_cleared(playerName):
+    '''
+    Returns the player's number of cleared mines.
+    '''
+
+    return PLAYERS.get(playerName).minesCompleted
+
+def player_held(playerName):
+    '''
+    Returns the player's held resources.
+    '''
+
+    return PLAYERS.get(playerName).resHeld
+
+def player_total(playerName):
+    '''
+    Return the player's total resource count.
+    '''
+
+    total = 0
+
+    for item in player_held(playerName):
+        total += int(item)
+
+    return total
+
 def has_golem(player):
     '''
     Returns whether or not the named player has a golem by searching for that

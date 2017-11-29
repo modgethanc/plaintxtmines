@@ -207,7 +207,7 @@ def ch_stats(player_input):
     response = []
 
     if game.is_playing(player_input.nick):
-        response.append(statsFormatted(player_input.nick))
+        response.append(player_stats(player_input.nick))
     else:
         response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
@@ -249,7 +249,7 @@ def ch_res(player_input):
     response = []
 
     if game.is_playing(player_input.nick):
-        response.append(resourcesFormatted(player_input.nick))
+        response.append(player_resources(player_input.nick))
     else:
         response.append("I don't know anything about you, friend.  Request a new dossier with '!init'.")
 
@@ -507,12 +507,12 @@ def report(player_input):
     if len(players.getMines(player_input.nick)) > 0:
         response.append(mine_list_formatted(mineList))
 
-    response.append(resourcesFormatted(player_input.nick))
+    response.append(player_resources(player_input.nick))
 
     if game.has_golem(player_input.nick):
         response.append(golemStats(player_input))
 
-    response.append(statsFormatted(player_input.nick))
+    response.append(player_stats(player_input.nick))
 
     return response
 
@@ -587,22 +587,44 @@ def mine_list_formatted(mineList):
 
     return "You're working on the following mine"+plural+": "+", ".join(prejoin)
 
-def resourcesFormatted(user):
-    return "You're holding the following resources: "+players.heldFormatted(user)
+def player_resources(player):
+    '''
+    Returns a nicely formatted string of the player's held resources.
+    '''
 
-def statsFormatted(user):
-    stats = "You can mine up to "+str(3*players.getStrength(user))+" units every strike, and strike every "+p.no("second", max(1, game.BASE_FATIGUE - players.getEndurance(user)))+" without experiencing fatigue.  "
+    rawheld = game.player_held(player)
+    held = []
+
+    for item in rawheld:
+        held.append(str(item))
+
+    message = "You're holding the following resources: "
+    message += held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(game.player_total(player))+" units"
+
+    return message
+
+def player_stats(player):
+    '''
+    Returns a nicely formatted line of the player's physical attributes.
+    '''
+
+    stats = "You can mine up to "+str(3*game.player_strength(player))+" units every strike, and strike every "+p.no("second", max(1, game.BASE_FATIGUE - game.player_endurance(player)))+" without experiencing fatigue.  "
+
+    # this hack is necessary because inflect pluralizes 'mine' as 'ours'
     plural = 's'
-    if players.getClearedCount(user) == 1: plural = ''
-    stats += "You've cleared "+str(players.getClearedCount(user))+" mine"+plural+".  "
-    stats += "You can make a golem with up to "+p.no("resource", int(3.5*players.getStrength(user)))+".  "
+    if len(game.player_cleared(player)) == 1: 
+        plural = ''
+
+    stats += "You've cleared "+str(len(game.player_cleared(player)))+" mine"+plural+".  "
+    stats += "You can make a golem with up to "+p.no("resource", int(3.5*game.player_strength(player)))+".  "
     stats += "Please continue working hard for the empress!"
 
     return stats
 
 def golemStats(player_input):
     '''
-    Helper function to construct golem stats.
+    Helper function to display golem stats. If the golem has passed its
+    expiration time, say that instead of its stats.
     '''
 
     if game.golem_living(player_input.nick, player_input.timestamp):
@@ -610,10 +632,7 @@ def golemStats(player_input):
         status += "It can excavate up to "+p.no("resource", game.golem_strength(player_input.nick))+" per strike, and strikes every "+p.no("second", game.golem_interval(player_input.nick))+".  It'll last another "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
         return status
     else:
-
-        #temporary for debugging
         dyingGolem = game.golem_shape(player_input.nick)
-        #game.golem_expire(player_input.nick, player_input.timestamp)
         return dyingGolem + " is about to expire!"
 
 def rankings():
