@@ -237,6 +237,57 @@ def removeRes(player, reslist): # subtracts reslist from player
     writeDossier(player, playerdata)
 
     return reslist
+### stats updating
+
+def writeStats(player, playerdata):
+    playerfile = open('../data/'+player+'.stats', 'w')
+    for x in playerdata:
+        playerfile.write(str(x) + "\n")
+    playerfile.close()
+
+def updateLastStrike(player, time):
+    playerdata = openStats(player)
+    playerdata[0] = str(time)
+    writeStats(player, playerdata)
+
+    return time
+
+def incStrength(player): # increment strength
+    playerdata = openStats(player)
+    playerdata[2] = str(int(playerdata[2]) + 1)
+    writeStats(player, playerdata)
+
+    return playerdata[2]
+
+def incEndurance(player): # increment endurance
+    playerdata = openStats(player)
+    playerdata[3] = str(int(playerdata[3]) + 1)
+    writeStats(player, playerdata)
+
+    return playerdata[3]
+
+def incStrikes(player): # increment strike count
+    status = '' #level up message
+
+    playerdata = openStats(player)
+    playerdata[4] = str(int(playerdata[4]) + 1)
+
+    x = int(playerdata[2])
+    if random.randrange(0,99) < 20/x: # scaling level up
+        playerdata[2] = str(x+1)
+        status = "You're feeling strong!  "
+
+    writeStats(player, playerdata)
+
+    return status
+
+def incCleared(player): # increment cleared count
+    playerdata = openStats(player)
+    playerdata[5] = str(int(playerdata[5]) + 1)
+    writeStats(player, playerdata)
+
+    return int(playerdata[5])
+
 #### mine wrangling
 
 def newMine(player, minename):

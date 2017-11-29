@@ -119,13 +119,15 @@ def player_total(playerName):
 
     return total
 
-def player_fatigue(player_input):
+def player_current_fatigue(player_input):
     '''
     Performs a fatigue check and returns seconds remaining in the player's
     fatigue.
     '''
 
-    return (BASE_FATIGUE - min(9, player_endurance(player_input.nick))) - (int(player_input.timestamp) - int(player_last_strike(player_input.nick)))
+    return int(player_last_strike(player_input.nick)) + BASE_FATIGUE - min(9, player_endurance(player_input.nick)) - player_input.timestamp
+
+    #return (BASE_FATIGUE - min(9, player_endurance(player_input.nick))) - (int(player_input.timestamp) - int(player_last_strike(player_input.nick)))
 
 def has_golem(player):
     '''
@@ -336,13 +338,84 @@ def create_golem(player_input, rawGolem):
 
     return newGolem
 
-def player_strike(player, targetMineName):
+def player_strike_attempt(player_input):
     '''
-    Requests a player strike at the target mine, and returns excavated
+    Processes a strike attempt for fatigue management. If the player has
+    outstanding fatigue, perform fatigue increase and return remaining fatigue
+    time in seconds. Otherwise, return 0.
+    '''
+
+    fatigue = player_current_fatigue(player_input)
+
+    if fatigue > 0:
+        # todo: put fatigue increase here
+        player = PLAYERS.get(player_input.nick)
+        '''
+        fatigue = min(fatigue * 2, 7200)
+        nextStrike = int(player_input.timestamp) + fatigue - (game.BASE_FATIGUE - players.getEndurance(player_input.nick))# still hardcoded bs
+        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":player_input.nick})
+        '''
+        player.save()
+        return fatigue
+    else:
+        return 0
+
+def player_strike(player_input, mineName):
+    '''
+    Requests a named player strike at the target mine, and returns excavated
     resources.
     '''
 
-    return players.strike(player, MINES[targetMineName])
+    player = PLAYERS.get(player_input.nick)
+
+    # perform strike
+    baseDepth = 3
+    strikeDepth = baseDepth * player.strength
+    excavation = MINES.get(mineName).excavate(strikeDepth)
+
+    # acquire resources
+    held = player.resHeld
+    i = 0
+    for res in excavation:
+        held[i] += res
+        i += 1
+
+    player.resHeld = held
+
+    # clean up
+    player.strikeCount += 1
+    player.lifetimeStrikes += 1
+    player.lastStrike = player_input.timestamp 
+    player.save()
+
+    return excavation
+
+def player_strength_roll(playerName):
+    '''
+    Perform a dice roll for player strength increase.
+    '''
+
+    player = PLAYERS.get(playerName)
+
+    if random.randrange(0,99) < 20:
+        player.strength += 1
+        player.save()
+        return True
+    else:
+        return False
+
+def player_finish_mine(playerName, mineName):
+    '''
+    Processes giving player credit for finishing the mine.
+    '''
+    
+    player = PLAYERS.get(player_input.nick)
+
+    player.minesCompleted.append(mineName)
+    player.minesAvailable += 1
+    player.endurance += 1
+
+    player.save()
 
 def player_grovel(player_input):
     '''
@@ -424,6 +497,56 @@ def golem_expire(player, timestamp):
         players.acquireRes(player, drops)
 
         return drops
+
+## helpers
+
+def pretty_reslist(reslist):
+    '''
+    Takes an int list representation of resources and formats it visually. If
+    there's nothing there, display rubble; if there's too much, display 'lots'.
+
+    Assumes the standard convention for reslist:
+        reslist[0]: ~
+        reslist[1]: @
+        reslist[2]: #
+        reslist[3]: &
+        reslist[4]: *
+        reslist[5]: [
+        reslist[6]: ]
+        reslist[7]: ^
+    '''
+
+    total = 0
+
+    for x in reslist:
+        total += int(x)
+
+    if total == 0:
+        return "nothing but rubble."
+
+    if total > 100:
+        return "a lot of resources!"
+
+    mined = ''
+    y = 0
+    for x in reslist:
+        if y == 0: item = '~'
+        elif y == 1: item = '#'
+        elif y == 2: item = '@'
+        elif y == 3: item = '&'
+        elif y == 4: item = '*'
+        elif y == 5: item = '['
+        elif y == 6: item = ']'
+        elif y == 7: item = '^'
+
+        i = 0
+        while i < int(x):
+            mined += item
+            i += 1
+
+        y += 1
+
+    return mined
 
 ## game setup
 

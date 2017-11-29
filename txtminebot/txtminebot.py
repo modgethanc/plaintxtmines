@@ -228,7 +228,7 @@ def ch_strike(player_input):
     response = []
 
     if game.is_playing(player_input.nick):
-        if len(players.getMines(player_input.nick)) == 0:
+        if len(game.player_working_mines(player_input.nick)) == 0:
             response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
         else:
             response.extend(strike(player_input))
@@ -398,7 +398,7 @@ def newGolem(player_input, golemstring):
                 if game.create_golem(player_input, rawGolem):
                     logGolem(player_input.nick)
 
-                    golemstats = players.printExcavation(game.golem_stats(player_input.nick))+ " has been removed from your holdings.  Your new " + str(len(rawGolem)) + "-piece golem will last for "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
+                    golemstats = game.pretty_reslist(game.golem_stats(player_input.nick))+ " has been removed from your holdings.  Your new " + str(len(rawGolem)) + "-piece golem will last for "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
                     golemstats += "It can excavate up to "+p.no("resource", game.golem_strength(player_input.nick))+" per strike, and strikes every "+p.no("second", game.golem_interval(player_input.nick))+"."
                 else: # error on golem creation
                     golemstats = "Something went wrong when you tried to construct that golem.  I'm sorry, friend; why don't you try a different shape?"
@@ -426,7 +426,7 @@ def update_golems(timestamp):
 
     for deadGolemOwner in deadGolemOwners:
         golem = game.golem_shape(deadGolemOwner)
-        drops = players.printExcavation(game.golem_expire(deadGolemOwner, timestamp))
+        drops = game.pretty_reslist(game.golem_expire(deadGolemOwner, timestamp))
         grave = "in front of you"
 
         if len(players.getMines(deadGolemOwner)) > 2:
@@ -445,14 +445,14 @@ def strike(player_input):
     response = []
 
     selected = ""
-    mineList = players.getMines(player_input.nick)
+    mineList = game.player_working_mines(player_input.nick)
     target = mineList[0] #autotarget first mine
 
     inputs = player_input.msg.split("!strike")
     if len(inputs[-1].split(" ")) > 1:
         selected = inputs[-1].split(" ")[+1].lower()
 
-    #check for targetted mine
+    # check for targetted mine
     if selected != "":
         if mineList.count(selected) == 0:
             response.append({"msg":"That's not a mine you're working on, friend.  Feel free to just '!strike' to work on the same mine you last targetted.", "channel":player_input.nick})
@@ -463,25 +463,28 @@ def strike(player_input):
             mineList.remove(target)    #bump this to the top of the minelist
             mineList.insert(0, target)
 
-    fatigue = players.fatigueCheck(player_input.nick, player_input.timestamp)
-    if fatigue > 0:
-        fatigue = min(fatigue * 2, 7200)
-        timestamp = int(player_input.timestamp) + fatigue - (game.BASE_FATIGUE - players.getEndurance(player_input.nick))# still hardcoded bs
-        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":player_input.nick})
+    # fatigue check
 
+    fatigue = game.player_strike_attempt(player_input)
+
+    if fatigue > 0:
+        response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":player_input.nick})
+        return response
     else: # actual mining actions
         emptyMines = []
-        status = players.incStrikes(player_input.nick)
-        excavation = game.player_strike(player_input.nick, target)
-        #excavation = players.strike(player_input.nick, target)
-        mined = players.printExcavation(players.acquireRes(player_input.nick, excavation))
+
+        if game.player_strength_roll(player_input.nick):
+            status = "You're feeling strong!  "
+        else:
+            status = ""
+
+        excavation = game.player_strike(player_input, target)
+        mined = game.pretty_reslist(excavation)
         response.append({"msg":"\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined, "channel":player_input.nick})
 
         if game.mine_total_res(target) == 0:
             emptyMines.append(target)
-            players.incCleared(player_input.nick)
-            players.incEndurance(player_input.nick)
-            players.incAvailableMines(player_input.nick)
+            game.player_finish_mine(player_input.nick, target)
 
             response.append({"msg":"As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.", "channel":player_input.nick})
             response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":player_input.nick})
@@ -490,8 +493,8 @@ def strike(player_input):
         for deadMine in emptyMines:
             mineList.remove(deadMine)
 
-    players.updateOwned(player_input.nick, mineList)
-    players.updateLastStrike(player_input.nick, player_input.timestamp)
+    #players.updateOwned(player_input.nick, mineList)
+    #players.updateLastStrike(player_input.nick, player_input.timestamp)
 
     return response
 
@@ -504,7 +507,7 @@ def report(player_input):
 
     mineList = game.player_working_mines(player_input.nick)
 
-    if len(players.getMines(player_input.nick)) > 0:
+    if len(mineList) > 0:
         response.append(mine_list_formatted(mineList))
 
     response.append(player_resources(player_input.nick))
@@ -537,7 +540,7 @@ def fatigue(player_input):
     ~krowbar memorial feature
     '''
 
-    fatigue = game.player_fatigue(player_input)
+    fatigue = game.player_current_fatigue(player_input)
     if fatigue > 0:
         return "You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body."
     else:
