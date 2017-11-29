@@ -274,6 +274,19 @@ def player_working_mines(player):
 
     return PLAYERS.get(player).minesOwned + PLAYERS.get(player).minesAssigned
 
+def can_afford(playerName, cost):
+    '''
+    Checks if named player can afford to spend the specified resources.
+    '''
+
+    held = player_held(playerName)
+
+    for index, res in enumerate(cost):
+        if held[index] < int(res):
+            return False
+
+    return True
+
 ## game actions
 
 def create_dossier(playerName):
@@ -332,7 +345,7 @@ def create_golem(player_input, rawGolem):
     except BaseException:
         return False
 
-    players.removeRes(player_input.nick, newGolem.legacy_stats())
+    player_remove_res(player_input.nick, newGolem.legacy_stats())
     newGolem.save()
     GOLEMS.update({player_input.nick:newGolem})
 
@@ -404,6 +417,20 @@ def player_strength_roll(playerName):
     else:
         return False
 
+def player_remove_res(playerName, cost):
+    '''
+    Removes given resources from player's held. Assumes player can afford it.
+    '''
+
+    player = PLAYERS.get(playerName)
+    held = player_held(playerName)
+
+    for index, res in enumerate(cost):
+        held[index] -= int(res)
+
+    player.resHeld = held
+    player.save()
+
 def player_finish_mine(playerName, mineName):
     '''
     Processes giving player credit for finishing the mine.
@@ -455,8 +482,8 @@ def tick_golems(timestamp):
             print "next strike at "+str(golem.lastStrike) + str(golem.interval)
 
             if (sinceLastStrike >= golem.interval 
-                 and len(players.getMines(golem.owner)) > 0):
-                targetMine = players.getMines(golem.owner)[0]
+                 and len(player_working_mines(golem.owner)) > 0):
+                targetMine = player_working_mines(golem.owner)[0]
                 strikesCompleted = sinceLastStrike/golem.interval
                 print "owed "+str(strikesCompleted)+" golem strikes"
                 strikes = 0

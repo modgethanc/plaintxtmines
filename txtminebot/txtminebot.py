@@ -389,9 +389,9 @@ def newGolem(player_input, golemstring):
         return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
     else:
         #if 1:
-        if players.canAfford(player_input.nick, golems.parse(golemstring)):
+        if game.can_afford(player_input.nick, golems.parse(golemstring)):
             rawGolem = list(golemstring)
-            maxgolem = int((players.getStrength(player_input.nick)*3.5))
+            maxgolem = int((game.player_strength(player_input.nick)*3.5))
             if len(rawGolem) > maxgolem:
                 return "You're not strong enough to construct a golem with "+str(len(rawGolem))+" pieces, friend.  The most you can use is "+p.no("resource", maxgolem)
             else: # proceed with golem creation
@@ -429,8 +429,8 @@ def update_golems(timestamp):
         drops = game.pretty_reslist(game.golem_expire(deadGolemOwner, timestamp))
         grave = "in front of you"
 
-        if len(players.getMines(deadGolemOwner)) > 2:
-            grave = "inside of "+players.getMines(deadGolemOwner)[0].capitalize()
+        if len(game.player_working_mines(deadGolemOwner)) > 2:
+            grave = "inside of "+game.player_working_mines(deadGolemOwner)[0].capitalize()
 
         response.append({"msg":golem+" crumbles to dust "+grave+" and leaves a wake of "+drops, "channel":deadGolemOwner})
 
