@@ -387,16 +387,7 @@ def player_strike(player_input, mineName):
     excavation = MINES.get(mineName).excavate(strikeDepth)
 
     # acquire resources
-    '''
-    held = player.resHeld
-    i = 0
-    for res in excavation:
-        held[i] += res
-        i += 1
-
-    player.resHeld = held
-    '''
-    player_acquire(playerName, excavation)
+    player_acquire(player_input.nick, excavation)
 
     # clean up
     player.strikeCount += 1
@@ -427,7 +418,7 @@ def player_strength_roll(playerName):
 
     player = PLAYERS.get(playerName)
 
-    if random.randrange(0,99) < 20:
+    if random.randrange(0,99) < 10:
         player.strength += 1
         player.save()
         return True
@@ -453,8 +444,9 @@ def player_finish_mine(playerName, mineName):
     Processes giving player credit for finishing the mine.
     '''
     
-    player = PLAYERS.get(player_input.nick)
+    player = PLAYERS.get(playerName)
 
+    player.minesOwned.remove(mineName)
     player.minesCompleted.append(mineName)
     player.minesAvailable += 1
     player.endurance += 1
