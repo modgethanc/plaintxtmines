@@ -521,7 +521,8 @@ def grovel(player_input):
     Handles groveling.
     '''
 
-    players.incGrovel(player_input.nick)
+    game.player_grovel(player_input)
+
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + str(empress.speak()).rstrip()
 
     return "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP)
@@ -536,7 +537,7 @@ def fatigue(player_input):
     ~krowbar memorial feature
     '''
 
-    fatigue = players.fatigueCheck(player_input.nick, player_input.timestamp)
+    fatigue = game.player_fatigue(player_input)
     if fatigue > 0:
         return "You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body."
     else:

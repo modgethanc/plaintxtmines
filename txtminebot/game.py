@@ -100,6 +100,13 @@ def player_held(playerName):
 
     return PLAYERS.get(playerName).resHeld
 
+def player_last_strike(playerName):
+    '''
+    Returns the player's last strike.
+    '''
+
+    return PLAYERS.get(playerName).lastStrike
+
 def player_total(playerName):
     '''
     Return the player's total resource count.
@@ -111,6 +118,14 @@ def player_total(playerName):
         total += int(item)
 
     return total
+
+def player_fatigue(player_input):
+    '''
+    Performs a fatigue check and returns seconds remaining in the player's
+    fatigue.
+    '''
+
+    return (BASE_FATIGUE - min(9, player_endurance(player_input.nick))) - (int(player_input.timestamp) - int(player_last_strike(player_input.nick)))
 
 def has_golem(player):
     '''
@@ -328,6 +343,16 @@ def player_strike(player, targetMineName):
     '''
 
     return players.strike(player, MINES[targetMineName])
+
+def player_grovel(player_input):
+    '''
+    Process player groveling.
+    '''
+
+    player = PLAYERS.get(player_input.nick)
+    player.lifetimeGrovels += 1
+    player.grovelCount += 1
+    player.save()
 
 def golem_strike(player, targetMine, elapsed):
     '''
