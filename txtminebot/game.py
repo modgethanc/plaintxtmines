@@ -387,6 +387,7 @@ def player_strike(player_input, mineName):
     excavation = MINES.get(mineName).excavate(strikeDepth)
 
     # acquire resources
+    '''
     held = player.resHeld
     i = 0
     for res in excavation:
@@ -394,6 +395,8 @@ def player_strike(player_input, mineName):
         i += 1
 
     player.resHeld = held
+    '''
+    player_acquire(playerName, excavation)
 
     # clean up
     player.strikeCount += 1
@@ -402,6 +405,20 @@ def player_strike(player_input, mineName):
     player.save()
 
     return excavation
+
+def player_acquire(playerName, newRes):
+    '''
+    Addes new resources to player's held.
+    '''
+
+    player = PLAYERS.get(playerName)
+    held = player.resHeld
+
+    for index, res in enumerate(newRes):
+        held[index] += int(res)
+
+    player.resHeld = held
+    player.save()
 
 def player_strength_roll(playerName):
     '''
@@ -504,7 +521,7 @@ def tick_golems(timestamp):
 
     return deadGolems
 
-def golem_expire(player, timestamp):
+def golem_expire(playerName, timestamp):
     '''
     Facilitates the expirations of a golem for the given player.
 
@@ -512,16 +529,16 @@ def golem_expire(player, timestamp):
     input)
     '''
 
-    if GOLEMS[player].is_alive(timestamp):
+    if GOLEMS[playerName].is_alive(timestamp):
         return False
     else:
-        deadGolem = GOLEMS.pop(player)
+        deadGolem = GOLEMS.pop(playerName)
         drops = deadGolem.expire()
 
         # for legacy player acquireRes needs
         #dropList = drops.split(",")
 
-        players.acquireRes(player, drops)
+        player_acquire(playerName, drops)
 
         return drops
 
