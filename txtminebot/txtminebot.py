@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!usr/bin/python
 '''
 This is the core response generator for txtminebot.
 
@@ -167,10 +167,11 @@ def ch_mines(player_input):
     response = []
 
     if game.is_playing(player_input.nick):
-        if len(players.getMines(player_input.nick)) == 0:
+        mineList = game.player_working_mines(player_input.nick)
+        if len(mineList) == 0:
             response.append("You don't have any mines assigned to you yet, friend.  Remember, the empress has genrously alotted each citizen one free mine.  Start yours with '!open'.")
         else:
-            response.append(mineListFormatted(player_input.nick))
+            response.append(mine_list_formatted(mineList))
     else:
         response.append("I don't have anything on file for you, friend.  Request a new dossier with '!init'.")
 
@@ -488,6 +489,51 @@ def fatigue(player_input):
         return "You'll be ready to strike again in "+formatter.prettyTime(fatigue)+".  Please rest patiently so you do not stress your body."
     else:
         return "You're refreshed and ready to mine.  Take care to not overwork; a broken body is no use to the empress."
+
+def mine_list_formatted(mineList):
+    '''
+    Given a minelist, returns a nicely formatted list of mines for IRC printing.
+    '''
+
+    plural = ''
+    if len(mineList) > 0:
+        plural = 's'
+
+    prejoin = []
+
+    #mineList = players.getMines(user)
+    rawlist = []
+    for x in mineList:
+        depletion = game.mine_depletion(x)
+        prefix = ''
+
+        if mineList.index(x) == 0: # currently targetted
+            prefix= '>'
+
+        rawlist.append([prefix+x.capitalize(), depletion])
+
+    rawlist.sort(key=lambda entry:int(entry[1]))
+
+    for x in rawlist:
+        depletion = x[1]
+
+        color = ''
+        if depletion > 98:
+            color += "\x0311"
+        elif depletion > 90:
+            color += "\x0309"
+        elif depletion > 49:
+            color += "\x0308"
+        elif depletion > 24:
+            color += "\x0307"
+        elif depletion > 9:
+            color += "\x0304"
+        else:
+            color += "\x0305"
+
+        prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
+
+    return "You're working on the following mine"+plural+": "+", ".join(prejoin)
 
 def mineListFormatted(user):
     '''

@@ -215,7 +215,7 @@ def player_working_mines(player):
     Requests a list of names of mines that the player has permission to work on.
     '''
 
-    return
+    return PLAYERS.get(player).minesOwned + PLAYERS.get(player).minesAssigned
 
 ## game actions
 
