@@ -177,27 +177,17 @@ def listMines():
 
     return MINES.keys()
 
-def listDossiers():
+def list_dossiers():
     '''
     Return a list of player names for all current dossiers in the game
     directory.
-
-    gamedata = os.listdir(GAMEDIR)
-    playerlist = []
-
-    for filename in gamedata:
-        entry = os.path.basename(filename).split('.')
-        if entry[-1] == "dossier":
-            playerlist.append(entry[0])
-
-    return playerlist
     '''
 
     playerlist = []
 
     for player in PLAYERS:
-        if player.playing:
-            playerlist.append(player.name)
+        if PLAYERS.get(player).playing:
+            playerlist.append(player)
 
     return playerlist
 
@@ -595,6 +585,10 @@ def initialize():
 
     for filename in gamedata:
         entry = os.path.basename(filename).split('.')
+
+        if not entry[0]:
+            # skip blank files
+            continue
 
         if entry[-1] == "golem":
             ## load golems

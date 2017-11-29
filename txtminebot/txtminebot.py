@@ -471,8 +471,6 @@ def strike(player_input):
         response.append({"msg":"You're still tired from your last attempt.  You'll be ready again in "+str(fatigue)+" seconds.  Please take breaks to prevent fatigue; rushing will only lengthen your recovery.", "channel":player_input.nick})
         return response
     else: # actual mining actions
-        emptyMines = []
-
         if game.player_strength_roll(player_input.nick):
             status = "You're feeling strong!  "
         else:
@@ -483,20 +481,13 @@ def strike(player_input):
         response.append({"msg":"\x03" + random.choice(['4', '8', '9', '11', '12', '13'])+random.choice(['WHAM! ', 'CRASH!', 'BANG! ', 'KLANG!', 'CLUNK!', 'PLINK!', 'DINK! '])+"\x03  "+status+"You struck at " + target.capitalize() +" and excavated "+mined, "channel":player_input.nick})
 
         if game.mine_total_res(target) == 0:
-            emptyMines.append(target)
             game.player_finish_mine(player_input.nick, target)
 
             response.append({"msg":"As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.", "channel":player_input.nick})
             response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":player_input.nick})
             response.append({"msg":"There's a distant rumbling as "+player_input.nick+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN", "nick":False})
 
-        for deadMine in emptyMines:
-            mineList.remove(deadMine)
-
-    #players.updateOwned(player_input.nick, mineList)
-    #players.updateLastStrike(player_input.nick, player_input.timestamp)
-
-    return response
+        return response
 
 def report(player_input):
     '''
@@ -645,11 +636,11 @@ def rankings():
     '''
 
     response = []
-    dossiers = game.listDossiers()
+    dossiers = game.list_dossiers()
 
     records = []
-    for x in dossiers:
-        records.append([x, str(players.getHeldTotal(x))])
+    for playerName in dossiers:
+        records.append([playerName, str(game.player_total(playerName))])
 
     records.sort(key=lambda entry:int(entry[1]), reverse=True)
     response.append("The wealthiest citizens are:")
