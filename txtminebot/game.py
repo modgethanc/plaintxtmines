@@ -357,7 +357,6 @@ def golem_expire(player, timestamp):
         #dropList = drops.split(",")
 
         players.acquireRes(player, drops)
-        #players.acquireRes(player, dropList)
 
         return drops
 

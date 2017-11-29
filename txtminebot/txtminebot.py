@@ -115,7 +115,8 @@ def said(player_input):
 
 def ch_info(player_input):
     '''
-    Handles responses to !info command.
+    Handles responses to !info command, which announces the session
+    administrator and gives a list of commands the bot responds to.
     '''
 
     response = []
@@ -127,7 +128,11 @@ def ch_info(player_input):
 
 def ch_init(player_input):
     '''
-    Handles responses to !init command.
+    Handles responses to !init command, which creates a new player file or
+    dossier through the game engine.
+
+    Checks:
+        * if player is playing
     '''
 
     response = []
@@ -143,7 +148,12 @@ def ch_init(player_input):
 
 def ch_open(player_input, rate = "standardrates"):
     '''
-    Handlers response to !open command.
+    Handles response to !open command, which creates and opens a new mine for
+    the player if they may.
+
+    Checks:
+        * if player is playing
+        * if player has permission to open a mine
     '''
 
     response = []
@@ -161,7 +171,11 @@ def ch_open(player_input, rate = "standardrates"):
 
 def ch_mines(player_input):
     '''
-    Handles responses to !mines command.
+    Handles responses to !mines command, which calls a pretty mine printer.
+
+    Checks:
+        * if player is playing
+        * if player has any mines
     '''
 
     response = []
@@ -179,7 +193,15 @@ def ch_mines(player_input):
 
 def ch_stats(player_input):
     '''
-    Handles response to !stats command.
+    Handles response to !stats command, which gives the player their current
+    physical attributes.
+
+    Checks:
+        * if player is playing
+
+    (note: if a player is listed as not playing, but still has a stat file from
+    a previous session, the bot will not recognize the player, and thus will not
+    be able to provide any physical assessments)
     '''
 
     response = []
@@ -193,7 +215,14 @@ def ch_stats(player_input):
 
 def ch_strike(player_input):
     '''
-    Handles response to !strike command.
+    Handles response to !strike command, which allows the player to strike at
+    either their last targetted mine, or a specified one. Calls the strike
+    helper function if the player has at least one valid target, but lets the
+    strike function handle parsing/striking.
+
+    Checks:
+        * if player is playing
+        * if player has mines to strike
     '''
 
     response = []
@@ -210,7 +239,11 @@ def ch_strike(player_input):
 
 def ch_res(player_input):
     '''
-    Handles response to !res command.
+    Handles response to !res command, which returns a nicely formatted list of
+    the player's currently held resources.
+
+    Checks:
+        * if player is playing
     '''
 
     response = []
@@ -224,7 +257,11 @@ def ch_res(player_input):
 
 def ch_fatigue(player_input):
     '''
-    Handles response to !fatigue command.
+    Handles response to !fatigue command, which calls the fatigue helper to
+    determine player's current fatigue status.
+
+    Checks:
+        * if player is playing
     '''
 
     response = []
@@ -238,7 +275,11 @@ def ch_fatigue(player_input):
 
 def ch_grovel(player_input):
     '''
-    Handles response to !grovel command.
+    Handles response to !grovel command, which calls the grovel helper if the
+    player is currently playing.
+
+    Checks:
+        * if player is playing
     '''
 
     response = []
@@ -255,7 +296,11 @@ def ch_grovel(player_input):
 
 def ch_report(player_input):
     '''
-    Handles response to !report command.
+    Handles response to !report command, which returns a full report on the
+    player's stats, progress, and golem.
+
+    Checks:
+        * if player is playing
     '''
 
     response = []
@@ -269,7 +314,12 @@ def ch_report(player_input):
 
 def ch_golem(player_input):
     '''
-    Handles response to !golem command.
+    Handles response to !golem command, which either builds a golem for the
+    player, or reports on the current golem's status.
+
+    Checks:
+        * if player is playing
+        * if player already has a golem
     '''
 
     response = []
@@ -452,8 +502,10 @@ def report(player_input):
 
     response = []
 
+    mineList = game.player_working_mines(player_input.nick)
+
     if len(players.getMines(player_input.nick)) > 0:
-        response.append(mineListFormatted(player_input.nick))
+        response.append(mine_list_formatted(mineList))
 
     response.append(resourcesFormatted(player_input.nick))
 
@@ -502,52 +554,6 @@ def mine_list_formatted(mineList):
     prejoin = []
 
     #mineList = players.getMines(user)
-    rawlist = []
-    for x in mineList:
-        depletion = game.mine_depletion(x)
-        prefix = ''
-
-        if mineList.index(x) == 0: # currently targetted
-            prefix= '>'
-
-        rawlist.append([prefix+x.capitalize(), depletion])
-
-    rawlist.sort(key=lambda entry:int(entry[1]))
-
-    for x in rawlist:
-        depletion = x[1]
-
-        color = ''
-        if depletion > 98:
-            color += "\x0311"
-        elif depletion > 90:
-            color += "\x0309"
-        elif depletion > 49:
-            color += "\x0308"
-        elif depletion > 24:
-            color += "\x0307"
-        elif depletion > 9:
-            color += "\x0304"
-        else:
-            color += "\x0305"
-
-        prejoin.append(x[0] + " (" + color + str(depletion) + "%\x03)")
-
-    return "You're working on the following mine"+plural+": "+", ".join(prejoin)
-
-def mineListFormatted(user):
-    '''
-    Returns a nicely formatted list of mines for IRC printing from the given
-    user's dossier.
-    '''
-
-    plural = ''
-    if len(players.getMines(user)) > 0:
-        plural = 's'
-
-    prejoin = []
-
-    mineList = players.getMines(user)
     rawlist = []
     for x in mineList:
         depletion = game.mine_depletion(x)
