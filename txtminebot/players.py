@@ -26,6 +26,7 @@ Player attributes:
     resHeld: 8-item int array of currently held resources (*)
     grovelCount: int of current grovel count
     strikeCount: int of current strike count
+    playing: boolean for if player has a dossier
 
 (*): see documentation for mines for note about reslist
 
@@ -49,13 +50,13 @@ class Player():
     Implements a player object.
     '''
 
-    def __init__(self, player_input):
+    def __init__(self):
         '''
         Initial player conditions.
         '''
 
         # stats
-        self.name = player_input.nick
+        self.name = ""
         self.aliases = []
         self.lastStrike = 0
         self.strength = 1
@@ -72,6 +73,7 @@ class Player():
         self.resHeld = [0,0,0,0,0,0,0,0]
         self.grovelCount = 0
         self.strikeCount = 0
+        self.playing = True
 
         self.save()
 
@@ -106,7 +108,8 @@ class Player():
             "mines available": self.minesAvailable,
             "res held": self.resHeld,
             "grovel count": self.grovelCount,
-            "strike count": self.strikeCount
+            "strike count": self.strikeCount,
+            "playing": self.playing
             }
 
         return playerData
@@ -137,6 +140,7 @@ class Player():
         self.resHeld = playerData.get("res held")
         self.grovelCount = playerData.get("grovel count")
         self.strikeCount = playerData.get("strike count")
+        self.playing = playerData.get("playing")
 
         return self.name
 
@@ -154,6 +158,29 @@ class Player():
 
         pass
 
+    def set_name(self, playerName):
+        '''
+        Sets the name for this player, and adds name to alias list.
+        '''
+
+        self.name = playerName
+        self.aliases.append(playerName)
+
+        return self.name
+
+    ## helper functions
+
+    def add_mine(self, minename):
+        '''
+        Adds the named mine to this player's list of owned mines, then
+        decrements available mines. Saves to disk afterwards.
+        '''
+
+        self.minesOwned.append(minename)
+        self.minesAvailable -= 1
+        self.save()
+
+## legacy functions
 
 def newDossier(player): # makes a new .dossier file for named player
     playerfile = open('../data/'+player+'.dossier', 'w+')

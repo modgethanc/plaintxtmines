@@ -149,7 +149,7 @@ def ch_open(player_input, rate = "standardrates"):
     response = []
 
     if game.is_playing(player_input.nick):
-        if players.getAvailableMines(player_input.nick) > 0:
+        if game.player_may_open(player_input.nick):
              newMine = game.open_mine(player_input.nick, rate)
              response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+newMine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.")
         else:

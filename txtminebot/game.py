@@ -46,18 +46,31 @@ EMPRESS = None
 
 ## game inquiries
 
-def is_playing(user):
+def is_playing(playerName):
     '''
     Returns whether or not the named user has a dossier on file.
     '''
 
-    return os.path.isfile(os.path.join(GAMEDIR,user+'.dossier'))
+    player = PLAYERS.get(playerName)
+
+    if not player:
+        return False
+    else:
+        return player.playing
 
 def is_mine(mineName):
     '''
     Returns whether or not the named mine exists.
     '''
+
     return MINES.has_key(mineName)
+
+def player_may_open(playerName):
+    '''
+    Returns whether or not the named player has permission to open a new mine.
+    '''
+
+    return PLAYERS.get(playerName).minesAvailable > 0
 
 def has_golem(player):
     '''
@@ -80,7 +93,6 @@ def golem_living(player, timestamp):
 def listPlayers():
     '''
     TODO: deprecate this with better game data handling
-    '''
 
     gamedata = os.listdir(GAMEDIR)
     playerlist = []
@@ -89,11 +101,13 @@ def listPlayers():
         if entry[-1] == "stats":
             playerlist.append(entry[0])
     return playerlist
+    '''
+
+    return PLAYERS.keys()
 
 def listMines():
     '''
     TODO: deprecate this with better game data handline
-    '''
 
     gamedata = os.listdir(GAMEDIR)
     minelist = []
@@ -102,12 +116,14 @@ def listMines():
         if entry[-1] == "mine":
             minelist.append(entry[0])
     return minelist
+    '''
+
+    return MINES.keys()
 
 def listDossiers():
     '''
     Return a list of player names for all current dossiers in the game
     directory.
-    '''
 
     gamedata = os.listdir(GAMEDIR)
     playerlist = []
@@ -116,6 +132,15 @@ def listDossiers():
         entry = os.path.basename(filename).split('.')
         if entry[-1] == "dossier":
             playerlist.append(entry[0])
+
+    return playerlist
+    '''
+
+    playerlist = []
+
+    for player in PLAYERS:
+        if player.playing:
+            playerlist.append(player.name)
 
     return playerlist
 
@@ -194,29 +219,41 @@ def player_working_mines(player):
 
 ## game actions
 
-def create_dossier(user):
+def create_dossier(playerName):
     '''
     Creates a new dossier for the listed player. If they don't already have a
     stats file, also create a stats file.
-    '''
 
     if os.path.isfile(os.path.join(GAMEDIR, user+'.stats')):
         players.newDossier(user)
     else:
         players.newPlayer(user)
 
-def open_mine(player, rates="standardrates"):
+    Creates a new dossier for the named player. If that player has a previous
+    stat file, just add to that; otherwise, create a new stat file with initial
+    conditions.
     '''
-    Opens a mine for the named user, given an optional mine rate file. Assumes
+
+    player = PLAYERS.get(playerName)
+
+    if player:
+        player.create()
+    else:
+        newPlayer = players.Player()
+        newPlayer.set_name(playerName)
+        PLAYERS.update({playerName:newPlayer})
+
+def open_mine(playerName, rates="standardrates"):
+    '''
+    Opens a mine for the named player, given an optional mine rate file. Assumes
     that player has the permission to open a new mine, and decreases their
     current mine permission.
     '''
 
     newMine = mines.Mine()
-    minename = newMine.create(player, rates)
+    minename = newMine.create(playerName, rates)
 
-    players.newMine(player, minename)
-    players.decAvailableMines(player)
+    PLAYERS.get(playerName).add_mine(minename)
 
     MINES.update({minename:newMine})
 
@@ -333,7 +370,6 @@ def initialize():
 
     gamedata = os.listdir(GAMEDIR)
 
-
     for filename in gamedata:
         entry = os.path.basename(filename).split('.')
 
@@ -346,8 +382,14 @@ def initialize():
             incomingMine = mines.Mine()
             MINES.update({incomingMine.load(entry[0]):incomingMine})
 
+        elif entry[-1] == "player":
+            ## load players
+            incomingPlayer = players.Player()
+            PLAYERS.update({incomingPlayer.load(entry[0]):incomingPlayer})
+
     print GOLEMS
     print MINES
+    print PLAYERS
 
     return
 
