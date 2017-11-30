@@ -127,8 +127,6 @@ def player_current_fatigue(player_input):
 
     return int(player_last_strike(player_input.nick)) + BASE_FATIGUE - min(9, player_endurance(player_input.nick)) - player_input.timestamp
 
-    #return (BASE_FATIGUE - min(9, player_endurance(player_input.nick))) - (int(player_input.timestamp) - int(player_last_strike(player_input.nick)))
-
 def has_golem(player):
     '''
     Returns whether or not the named player has a golem by searching for that
@@ -149,30 +147,14 @@ def golem_living(player, timestamp):
 
 def listPlayers():
     '''
-    TODO: deprecate this with better game data handling
-
-    gamedata = os.listdir(GAMEDIR)
-    playerlist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "stats":
-            playerlist.append(entry[0])
-    return playerlist
+    Return a list of current player names, even if they don't have dossiers.
     '''
 
     return PLAYERS.keys()
 
 def listMines():
     '''
-    TODO: deprecate this with better game data handline
-
-    gamedata = os.listdir(GAMEDIR)
-    minelist = []
-    for x in gamedata:
-        entry = os.path.basename(x).split('.')
-        if entry[-1] == "mine":
-            minelist.append(entry[0])
-    return minelist
+    Return a list of current mine names.
     '''
 
     return MINES.keys()
@@ -382,7 +364,7 @@ def player_strike(player_input, mineName):
     # clean up
     player.strikeCount += 1
     player.lifetimeStrikes += 1
-    player.lastStrike = player_input.timestamp 
+    player.lastStrike = player_input.timestamp
     player.save()
 
     return excavation
