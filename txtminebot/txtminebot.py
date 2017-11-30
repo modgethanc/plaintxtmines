@@ -346,37 +346,7 @@ def ch_golem(player_input):
 
     return response
 
-class CommandHandler():
-    '''
-    Just dumping this structure here so I don't lose it; stubs to make more
-    graceful command handling.
-    '''
-
-    def __init__(self):
-        self.TRIGGERS = ["command", "alternate command"]
-        self.UNKNOWN = "unknown player response"
-
-    def catch_command(self, bot, channel, nick, timestamp, msg, interface):
-        '''
-        Command-catching wrapper.
-        '''
-
-        response = []
-
-        response.extend(self.handle(
-            self, bot, channel, nick, timestamp, msg, interface))
-
-        return response
-
-    def handle(self, bot, channel, nick, timestamp, msg, interface):
-        '''
-        Override this.
-        '''
-
-        return
-
-
-## legacy gameplay functions
+## gameplay functions
 
 def newGolem(player_input, golemstring):
     '''
@@ -388,7 +358,6 @@ def newGolem(player_input, golemstring):
     if game.has_golem(player_input.nick):
         return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
     else:
-        #if 1:
         if game.can_afford(player_input.nick, golems.parse(golemstring)):
             rawGolem = list(golemstring)
             maxgolem = int((game.player_strength(player_input.nick)*3.5))
@@ -548,13 +517,12 @@ def mine_list_formatted(mineList):
 
     prejoin = []
 
-    #mineList = players.getMines(user)
     rawlist = []
     for x in mineList:
         depletion = game.mine_depletion(x)
         prefix = ''
 
-        if mineList.index(x) == 0: # currently targetted
+        if mineList.index(x) == 0: # currently targeted
             prefix= '>'
 
         rawlist.append([prefix+x.capitalize(), depletion])
@@ -656,13 +624,10 @@ def rankings():
 def tick(now):
     '''
     Called by IRC whenever a second ellapses.
-
-    TODO: Put golem updating here!
     '''
 
     response = []
 
-    # commenting this out while updating isn't reimplemented
     response.extend(update_golems(now))
 
     # debugging ticks below:
@@ -670,4 +635,34 @@ def tick(now):
 
     return response
 
-print "arnold loaded."
+print "danielle loaded."
+
+
+class CommandHandler():
+    '''
+    Just dumping this structure here so I don't lose it; stubs to make more
+    graceful command handling.
+    '''
+
+    def __init__(self):
+        self.TRIGGERS = ["command", "alternate command"]
+        self.UNKNOWN = "unknown player response"
+
+    def catch_command(self, bot, channel, nick, timestamp, msg, interface):
+        '''
+        Command-catching wrapper.
+        '''
+
+        response = []
+
+        response.extend(self.handle(
+            self, bot, channel, nick, timestamp, msg, interface))
+
+        return response
+
+    def handle(self, bot, channel, nick, timestamp, msg, interface):
+        '''
+        Override this.
+        '''
+
+        return

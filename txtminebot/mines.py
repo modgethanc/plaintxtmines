@@ -148,7 +148,7 @@ class Mine():
 
         return minename
 
-    def excavate(self, rate=10, width=3):
+    def excavate(self, rate=10, width=6):
         '''
         Given optional strike rate and width, return an excavation from this
         mine. Those resources are moved from this mine's data.
