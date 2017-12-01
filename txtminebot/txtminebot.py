@@ -454,7 +454,7 @@ def strike(player_input):
 
             response.append({"msg":"As you clear the last of the rubble from "+target.capitalize()+", a mysterious wisp of smoke rises from the bottom.  You feel slightly rejuvinated when you breathe it in.", "channel":player_input.nick})
             response.append({"msg":target.capitalize()+" is now empty.  The empress shall be pleased with your progress.  I'll remove it from your dossier now; feel free to request a new mine.", "channel":player_input.nick})
-            response.append({"msg":"There's a distant rumbling as "+player_input.nick+" clears the last few resources from "+target.capitalize()+".", "channel":"MAIN", "nick":False})
+            response.append({"msg":"There's a distant rumbling as the last few resources are cleared from "+target.capitalize()+".", "channel":"MAIN", "nick":False})
 
         return response
 
