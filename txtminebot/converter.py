@@ -122,6 +122,10 @@ def convert_mine(mineName):
         oldmine.append(x.rstrip())
     minefile.close()
 
+    if oldmine[0] == "{":
+        # eject if this is already a modern mine file
+        return "nothing"
+
     oldres = oldmine[0].split(",")
 
     total = 0
@@ -152,6 +156,10 @@ def convert_golem(golemOwner):
     for x in golemfile:
         oldgolem.append(x.rstrip())
     golemfile.close()
+
+    if oldgolem[0] == "{":
+        # eject if this is already a modern golem file
+        return "nothing"
 
     oldcore = oldgolem[1].split(",")
 
