@@ -575,10 +575,10 @@ def player_stats(player):
 
     # this hack is necessary because inflect pluralizes 'mine' as 'ours'
     plural = 's'
-    if len(game.player_cleared(player)) == 1: 
+    if game.player_cleared(player) == 1:
         plural = ''
 
-    stats += "You've cleared "+str(len(game.player_cleared(player)))+" mine"+plural+".  "
+    stats += "You've cleared "+str(game.player_cleared(player))+" mine"+plural+".  "
     stats += "You can make a golem with up to "+p.no("resource", int(3.5*game.player_strength(player)))+".  "
     stats += "Please continue working hard for the empress!"
 

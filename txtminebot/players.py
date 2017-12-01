@@ -22,6 +22,7 @@ Player attributes:
     minesAssigned: list of strings of mine names the player has additional
         permission to work on
     minesCompleted : list of strings of mine names the player has completed
+    completionCount: int of number of mines cleared on this dossier
     minesAvailable: int of how many mines player can currently open
     resHeld: 8-item int array of currently held resources (*)
     grovelCount: int of current grovel count
@@ -69,6 +70,7 @@ class Player():
         self.minesOwned = []
         self.minesAssigned = []
         self.minesCompleted = []
+        self.currentCompletion = 0
         self.minesAvailable = 1
         self.resHeld = [0,0,0,0,0,0,0,0]
         self.grovelCount = 0
@@ -105,6 +107,7 @@ class Player():
             "mines owned": self.minesOwned,
             "mines assigned": self.minesAssigned,
             "mines completed": self.minesCompleted,
+            "current completion count": self.currentCompletion,
             "mines available": self.minesAvailable,
             "res held": self.resHeld,
             "grovel count": self.grovelCount,
@@ -136,6 +139,7 @@ class Player():
         self.minesOwned = playerData.get("mines owned")
         self.minesAssigned = playerData.get("mines assigned")
         self.minesCompleted = playerData.get("mines completed")
+        self.currentCompletion = playerData.get("current completion count")
         self.minesAvailable = playerData.get("mines available")
         self.resHeld = playerData.get("res held")
         self.grovelCount = playerData.get("grovel count")

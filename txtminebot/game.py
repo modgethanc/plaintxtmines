@@ -88,10 +88,10 @@ def player_endurance(playerName):
 
 def player_cleared(playerName):
     '''
-    Returns the player's number of cleared mines.
+    Returns the count of player's currently completed mines in this session.
     '''
 
-    return PLAYERS.get(playerName).minesCompleted
+    return PLAYERS.get(playerName).currentCompletion
 
 def player_held(playerName):
     '''
@@ -390,7 +390,7 @@ def player_strength_roll(playerName):
 
     player = PLAYERS.get(playerName)
 
-    if random.randrange(0,99) < 10:
+    if random.randrange(0,99) < 3:
         player.strength += 1
         player.save()
         return True
@@ -420,6 +420,7 @@ def player_finish_mine(playerName, mineName):
 
     player.minesOwned.remove(mineName)
     player.minesCompleted.append(mineName)
+    player.lifetimeCompleted += 1
     player.minesAvailable += 1
     player.endurance += 1
 
