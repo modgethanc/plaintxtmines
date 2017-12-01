@@ -34,7 +34,7 @@ def main():
     if not os.path.isdir(OUTDIR):
         os.mkdir(OUTDIR)
 
-    print "outputting to " + OUTDIR 
+    print "outputting to " + OUTDIR
 
     for filename in GAMEDATA:
         print "checking: " + filename
@@ -57,7 +57,58 @@ def convert_player(playerName):
     Converts old player data to new format, combining both .stats and .dossier.
     '''
 
-    return "nothing"
+    oldstats = []
+    playerfile = open(os.path.join(sys.argv[1], playerName+".stats"))
+    for x in playerfile:
+        oldstats.append(x.rstrip())
+    playerfile.close()
+
+    olddossier = []
+    try:
+        playerfile = open(os.path.join(sys.argv[1], playerName+".dossier"))
+        for x in playerfile:
+            olddossier.append(x.rstrip())
+        playerfile.close()
+    except BaseException:
+        olddossier.append('')
+        olddossier.append('')
+        olddossier.append("0,0,0,0,0,0,0,0")
+        olddossier.append("0")
+        olddossier.append("0,0,0,0,0,0,0,0")
+        olddossier.append("0")
+        olddossier.append("")
+        olddossier.append("1,0,0,0")
+
+    empressStats = olddossier[7].split(",")
+    mines = olddossier[0].split(",")
+    minesCompleted = olddossier[6].split(",")
+    if len(minesCompleted) > 1:
+        minesCompleted = []
+    resHeld = olddossier[2].split(",")
+
+    for index,res in enumerate(resHeld):
+        resHeld[index] = int(res)
+
+    newPlayer = {
+        "name": playerName,
+        "aliases": [playerName],
+        "last strike": int(oldstats[0]),
+        "strength": int(oldstats[2]),
+        "endurance": int(oldstats[3]),
+        "lifetime strikes": int(oldstats[0]),
+        "lifetime completed": int(oldstats[5]),
+        "lifetime grovels": int(empressStats[1]),
+        "mines owned": mines,
+        "mines assigned": [],
+        "mines completed": minesCompleted,
+        "mines available": int(empressStats[0]),
+        "res held": resHeld,
+        "grovel count": int(empressStats[1]),
+        "strike count": int(oldstats[0]),
+        "playing": True
+        }
+
+    return vtils.write_dict_as_json(os.path.join(OUTDIR, playerName+".player"), newPlayer)
 
 def convert_mine(mineName):
     '''
@@ -95,7 +146,48 @@ def convert_golem(golemOwner):
     Converts old golem data to new format.
     '''
 
-    return "nothing"
+    oldgolem = []
+
+    golemfile = open(os.path.join(sys.argv[1], golemOwner+".golem"))
+    for x in golemfile:
+        oldgolem.append(x.rstrip())
+    golemfile.close()
+
+    oldcore = oldgolem[1].split(",")
+
+    for index,res in enumerate(oldcore):
+        oldcore[index] = int(res)
+
+    core = {
+            "~": oldcore[0],
+            "#": oldcore[1],
+            "@": oldcore[2],
+            "&": oldcore[3],
+            "*": oldcore[4],
+            "[": oldcore[5],
+            "]": oldcore[6],
+            "^": oldcore[7]
+            }
+
+    res = oldgolem[9].split(",")
+    for index,item in enumerate(res):
+        res[index] = int(item)
+
+    newGolem = {
+            "core": core,
+            "birth": int(oldgolem[7]),
+            "owner": golemOwner,
+            "interval": int(oldgolem[5]),
+            "height": int(oldgolem[2]),
+            "width": int(oldgolem[3]),
+            "strength": int(oldgolem[4]),
+            "death": int(oldgolem[6]),
+            "shape": oldgolem[0],
+            "lastStrike": oldgolem[8],
+            "res": res
+            }
+
+    return vtils.write_dict_as_json(os.path.join(OUTDIR, golemOwner+".golem"), newGolem)
 
 if __name__ == "__main__":
     main()
