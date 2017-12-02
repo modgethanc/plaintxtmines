@@ -347,7 +347,7 @@ def player_strike_attempt(player_input):
 
 def player_strike(player_input, mineName):
     '''
-    Requests a named player strike at the target mine, and returns excavated
+    Processes a player's strike at the target mine, and returns excavated
     resources.
     '''
 
@@ -359,7 +359,7 @@ def player_strike(player_input, mineName):
     excavation = MINES.get(mineName).excavate(strikeDepth)
 
     # acquire resources
-    player_acquire(player_input.nick, excavation)
+    player.acquire(excavation)
 
     # clean up
     player.strikeCount += 1
@@ -368,20 +368,6 @@ def player_strike(player_input, mineName):
     player.save()
 
     return excavation
-
-def player_acquire(playerName, newRes):
-    '''
-    Addes new resources to player's held.
-    '''
-
-    player = PLAYERS.get(playerName)
-    held = player.resHeld
-
-    for index, res in enumerate(newRes):
-        held[index] += int(res)
-
-    player.resHeld = held
-    player.save()
 
 def player_strength_roll(playerName):
     '''
@@ -436,13 +422,26 @@ def player_grovel(player_input):
     player.grovelCount += 1
     player.save()
 
-def golem_strike(player, targetMine, elapsed):
+def golem_strike(playerName, targetMine, elapsed):
     '''
     Requests that a golem belonging to named player strikes at the given target
     mine.
     '''
+    golem = GOLEMS.get(playerName)
 
-    return GOLEMS[player].strike(targetMine, elapsed)
+    # perform strike
+    baseDepth = 3
+    strikeDepth = baseDepth * golem.strength
+    excavation = MINES.get(targetMine).excavate(strikeDepth)
+
+    # acquire resources
+    golem.acquire(excavation)
+
+    # clean up
+    golem.lastStrike = elapsed
+    golem.save()
+
+    return excavation
 
 def tick_golems(timestamp):
     '''
@@ -475,9 +474,8 @@ def tick_golems(timestamp):
                     strikeTime += golem.interval
 
                     if MINES[targetMine].currentTotal > 0:
-                        excavation = golem_strike(golem.owner, MINES[targetMine], strikeTime)
+                        excavation = golem_strike(golem.owner, targetMine, strikeTime)
                         print excavation
-                        #print "golemstrike"+ str(golems.strike(user, target))
                     else:
                         #set last strike for blank strike at empty mine
                         golem.lastStrike = strikeTime
@@ -503,7 +501,7 @@ def golem_expire(playerName, timestamp):
         # for legacy player acquireRes needs
         #dropList = drops.split(",")
 
-        player_acquire(playerName, drops)
+        PLAYERS.get(playerName).acquire(drops)
 
         return drops
 

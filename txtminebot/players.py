@@ -183,3 +183,18 @@ class Player():
         self.minesOwned.append(minename)
         self.minesAvailable -= 1
         self.save()
+
+    def acquire(self, newRes):
+        '''
+        Adds new resources to player's held.
+        '''
+
+        held = self.resHeld
+
+        for index, res in enumerate(newRes):
+            held[index] += int(res)
+
+        self.resHeld = held
+        self.save()
+
+        return newRes
