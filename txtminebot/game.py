@@ -237,7 +237,10 @@ def mine_total_res(mineName):
     Requests the total remaining resources in named mine.
     '''
 
-    return MINES[mineName].currentTotal
+    if not MINES.get(mineName):
+        return 0
+    else:
+        return MINES.get(mineName).currentTotal
 
 def player_working_mines(player):
     '''
@@ -352,16 +355,18 @@ def player_strike(player_input, mineName):
     '''
 
     player = PLAYERS.get(player_input.nick)
+    targetMine = MINES.get(mineName)
 
     # perform strike
     baseDepth = 3
     strikeDepth = baseDepth * player.strength
-    excavation = MINES.get(mineName).excavate(strikeDepth)
+    excavation = targetMine.excavate(strikeDepth)
 
     # acquire resources
     player.acquire(excavation)
 
     # clean up
+
     player.strikeCount += 1
     player.lifetimeStrikes += 1
     player.lastStrike = player_input.timestamp
@@ -401,7 +406,6 @@ def player_finish_mine(playerName, mineName):
     '''
     Processes giving player credit for finishing the mine.
     '''
-    
     player = PLAYERS.get(playerName)
 
     player.minesOwned.remove(mineName)
@@ -411,6 +415,20 @@ def player_finish_mine(playerName, mineName):
     player.endurance += 1
 
     player.save()
+
+    mine_clear(mineName)
+
+def mine_clear(mineName):
+    '''
+    Performs mine clearing actions.
+    '''
+
+    targetMine = MINES.get(mineName)
+
+    if targetMine.currentTotal == 0:
+        deadMine = MINES.pop(mineName)
+        ## hardcoded
+        os.renames("../data/"+mineName+".mine", "../data/mine-archive/"+mineName+".mine")
 
 def player_grovel(player_input):
     '''
