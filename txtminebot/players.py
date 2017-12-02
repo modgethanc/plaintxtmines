@@ -22,7 +22,7 @@ Player attributes:
     minesAssigned: list of strings of mine names the player has additional
         permission to work on
     minesCompleted : list of strings of mine names the player has completed
-    completionCount: int of number of mines cleared on this dossier
+    currentCompletion: int of number of mines cleared on this dossier
     minesAvailable: int of how many mines player can currently open
     resHeld: 8-item int array of currently held resources (*)
     grovelCount: int of current grovel count

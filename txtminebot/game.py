@@ -410,6 +410,7 @@ def player_finish_mine(playerName, mineName):
 
     player.minesOwned.remove(mineName)
     player.minesCompleted.append(mineName)
+    player.currentCompltion += 1
     player.lifetimeCompleted += 1
     player.minesAvailable += 1
     player.endurance += 1
