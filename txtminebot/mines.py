@@ -164,6 +164,7 @@ class Mine():
 
             excavated = reslist
             self.currentRes = [0,0,0,0,0,0,0,0]
+            self.currentTotal = 0
             self.save()
             return excavated
 
