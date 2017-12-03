@@ -249,12 +249,13 @@ def player_working_mines(player):
 
     return PLAYERS.get(player).minesOwned + PLAYERS.get(player).minesAssigned
 
-def can_afford(playerName, cost):
+def can_afford(playerName, resString):
     '''
     Checks if named player can afford to spend the specified resources.
     '''
 
     held = player_held(playerName)
+    cost = tally_res(resString)
 
     for index, res in enumerate(cost):
         if held[index] < int(res):
@@ -525,6 +526,26 @@ def golem_expire(playerName, timestamp):
         return drops
 
 ## helpers
+
+def tally_res(resString):
+    '''
+    Returns a reslist constructed from the specified res string.
+    '''
+
+    tally = [0,0,0,0,0,0,0,0]
+    components = list(resString)
+
+    for x in components:
+        if x == '~': tally[0] += 1
+        elif x == '#': tally[1] += 1
+        elif x == '@': tally[2] += 1
+        elif x == '&': tally[3] += 1
+        elif x == '*': tally[4] += 1
+        elif x == '[': tally[5] += 1
+        elif x == ']': tally[6] += 1
+        elif x == '^': tally[7] += 1
+
+    return tally 
 
 def pretty_reslist(reslist):
     '''

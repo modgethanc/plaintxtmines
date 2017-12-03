@@ -296,7 +296,7 @@ class Golem():
         print held
 
         for index, res in enumerate(newRes):
-            held[index] += res
+            held[index] += int(res)
 
         self.res = held
         self.save()
@@ -410,12 +410,13 @@ def parse(golemstring):
         elif x == '[': golem[5] += 1
         elif x == ']': golem[6] += 1
         elif x == '^': golem[7] += 1
-
+    """
     i = 0
     while i < 8: # stupid string hax
         r = str(golem[i])
         golem[i] = r
         i += 1
+    """
 
     return golem
 

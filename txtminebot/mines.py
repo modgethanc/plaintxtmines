@@ -231,7 +231,7 @@ def roll_resources(minerate):
 
     i = 0
     for x in resources:
-        resources[i] = str(seed * rates[i] + random.randrange(1,bound))
+        resources[i] = seed * rates[i] + random.randrange(1,bound)
         i += 1
 
     return resources
