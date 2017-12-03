@@ -358,7 +358,7 @@ def newGolem(player_input, golemstring):
     if game.has_golem(player_input.nick):
         return "You can't make a new golem until your old golem finishes working!  It'll be ready in "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
     else:
-        if game.can_afford(player_input.nick, golems.parse(golemstring)):
+        if game.can_afford(player_input.nick, golemstring):
             rawGolem = list(golemstring)
             maxgolem = int((game.player_strength(player_input.nick)*3.5))
             if len(rawGolem) > maxgolem:
