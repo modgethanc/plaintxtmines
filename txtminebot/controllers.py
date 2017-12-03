@@ -349,7 +349,7 @@ class IRC():
             msg = self.sock.recv(2048)
             if msg:
                 if re.match("^PING", msg):
-                    print "[pinged]"
+                    #print "[pinged]"
                     pingcode = msg.split(":")[1]
                     self.ping(pingcode)
 
@@ -381,7 +381,7 @@ class IRC():
         print(msg)
 
         if re.match("^PING", msg):
-            print "[pinged]"
+            #print "[pinged]"
             pingcode = msg.split(":")[1]
             return self.ping(pingcode)
 

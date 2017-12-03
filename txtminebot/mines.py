@@ -127,7 +127,10 @@ class Mine():
 
         # generate name
         minename = gibber.medium()
-        while os.path.isfile('../data/'+minename+'.mine'): # check for mine colision
+
+        ## hardcode bs
+        while os.path.isfile('../data/'+minename+'.mine') or os.path.isfile('../data/mines-archive'+minename+'.mine'): 
+            # check for minename collision
             minename = gibber.medium()
 
         reslist = roll_resources(minerate)

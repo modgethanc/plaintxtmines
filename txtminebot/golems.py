@@ -15,6 +15,29 @@ entered into the player's holdings.
 Golems will never take mysterious smoke from the mines, nor will they switch
 mines automatically.
 
+Golem attributes:
+    (given attributes)
+    core: dict listing how many of each res went into creating it
+    birth: int of birth timestamp
+    owner: string of owner player name
+
+    (calculated stats)
+    interval: int of strike interval in seconds
+    height: int of total size, which goes into strength calculation
+    width: int of number of different res in core, which determines strike
+        variety
+
+    (rolled stats)
+    strength: int of number of res per strike
+    death: int of death timestamp
+
+    (mutables)
+    shape: string of original shape determined by player
+    lastStrike: string of last strike timestamp
+    res: 8-item int arrray of currently held resources (*)
+
+(*): see mines.py documentation for reslist convention
+
 plaintxtmines is a text-based multiplayer mining simulator. For more
 information, see the full repository:
 
@@ -27,8 +50,6 @@ import os
 import random
 
 import vtils
-
-import mines
 
 class Golem():
     '''
@@ -60,8 +81,6 @@ class Golem():
         self.shape = ""
         self.lastStrike = 0
         self.res = [0,0,0,0,0,0,0,0]
-        #self.res = "0,0,0,0,0,0,0,0"
-
 
     def load(self, player):
         '''
@@ -416,7 +435,7 @@ def parse(golemstring):
         r = str(golem[i])
         golem[i] = r
         i += 1
-    """
+        """
 
     return golem
 

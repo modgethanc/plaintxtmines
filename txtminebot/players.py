@@ -41,10 +41,7 @@ import random
 import os
 
 import vtils
-import mines
-import gibber
 
-j = ','
 
 class Player():
     '''
