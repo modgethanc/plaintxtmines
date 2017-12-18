@@ -287,20 +287,7 @@ class Golem():
 
         held = self.res
 
-        heldTotal = 0
-        for index, res in enumerate(held):
-            heldTotal += int(res)
-            #held[index] = str(res)
-
-        """
-        i = 0
-        while i < 8: # stupid string hax
-            r = str(held[i])
-            held[i] = r
-            i += 1
-        """
-
-        return str(held[0])+ " tilde, "+str(held[1])+ " pound, "+str(held[2])+ " spiral, "+str(held[3])+ " amper, "+str(held[4])+ " splat, "+str(held[5])+ " lbrack, "+str(held[6])+ " rbrack, and "+str(held[7])+" carat, for a total of "+str(heldTotal)+" units"
+        return str(held[0])+ " tilde, "+str(held[1])+ " pound, "+str(held[2])+ " spiral, "+str(held[3])+ " amper, "+str(held[4])+ " splat, "+str(held[5])+ " lbrack, "+str(held[6])+ " rbrack, and "+str(held[7])+" carat, for a total of "+str(sum(held))+" units"
         #return held[0]+ " tilde, "+held[1]+ " pound, "+held[2]+ " spiral, "+held[3]+ " amper, "+held[4]+ " splat, "+held[5]+ " lbrack, "+held[6]+ " rbrack, and "+held[7]+" carat, for a total of "+str(heldTotal)+" units"
 
     ## actions

@@ -244,11 +244,7 @@ def sum_resources(reslist):
     Takes a given resource list and returns a sum of its total.
     '''
 
-    total = 0
-    for x in reslist:
-        total += int(x)
-
-    return total
+    return sum(reslist)
 
 ## legacy functions below
 

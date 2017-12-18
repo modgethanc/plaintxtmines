@@ -112,12 +112,7 @@ def player_total(playerName):
     Return the player's total resource count.
     '''
 
-    total = 0
-
-    for item in player_held(playerName):
-        total += int(item)
-
-    return total
+    return sum(player_held(playerName))
 
 def player_current_fatigue(player_input):
     '''
