@@ -1,32 +1,107 @@
 #!/usr/bin/python
+"""
+This contains the class and functions for the empress.
+
+The empress is a single, autonomous unit that players must work to please.
+
+Empress attributes:
+    (mutable)
+    mood: int representing empress's current mood
+    grovels: int of total times empress has been groveled to
+    favorite: string of the empress's favorite player's name
+
+"""
 
 import os
 import random
+import time
+
+import vtils
 import gibber
 
-def newEmpress():
-    empressfile = open('../data/empress.txt', 'w+')
+class Empress():
+    """Implements an empress object.
+    """
 
-    empressfile.write('0\n') # 0 next grovel window
-    empressfile.write("0,0,0,0,0,0,0,0\n") # 1 tithed total
-    empressfile.write('\n') # 2 favorite
+    def __init__(self):
+        """Initial conditions.
+        """
 
-### output
+        ## given
+        self.name = None
+        self.birth = None
 
-def openEmpress():
-    return
+        ## mutables
+        self.mood = 0
+        self.grovels = 0
+        self.favorite = None
 
-def getGrovel():
-    return
+    def load(self, empress):
+        """Loads an empress from the given empress filename.
+        """
 
-def getTithed():
-    return
+        filename = empress + ".empress"
 
-def getFavorite():
-    return
+        # hardcode bs
+        empress_data = vtils.open_json_as_dict("../data/"+filename)
 
-def speak():
-    return gibber.sentence()
+        ## given
+        self.name = empress_data["name"]
+        self.birth = empress_data["birth"]
 
-if not os.path.isfile("../data/empress.txt"):
-    newEmpress()
+        ## mutables
+        self.mood = empress_data["mood"]
+        self.grovels = empress_data["grovels"]
+        self.favorite = empress_data["favorite"]
+
+    def create(self):
+        """Creates a new empress, returning her name.
+        """
+
+        empress_name = gibber.excessive_word()
+
+        while os.path.isfile('../data/'+empress_name+'.empress'):
+            empress_name = gibber.excessive()
+
+        ## given
+        self.name = empress_name
+        self.birth = int(time.time())
+
+        ## mutables
+        self.mood = 0
+        self.grovels = 0
+        self.favorite = None
+
+        return empress_name.capitalize()
+
+    def save(self):
+        '''
+        Write self to disk.
+        '''
+
+        # hardcode bs
+        filename = "../data/" + self.name+ ".empress"
+        vtils.write_dict_as_json(filename, self.to_dict())
+
+        return filename
+
+    def __str__(self):
+        """Returns a string representation of data.
+        """
+
+        return str(self.name).capitalize()
+
+    def to_dict(self):
+        """Returns a dict representation of data.
+        """
+
+        return {
+                "name": self.name,
+                "birth": self.birth,
+                "mood": self.mood,
+                "grovels": self.grovels,
+                "favorite": self.favorite
+                }
+
+    def speak(self):
+        return gibber.sentence()

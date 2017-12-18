@@ -75,6 +75,12 @@ class Mine():
 
         return filename
 
+    def __str__(self):
+        """Returns a string representation of self.
+        """
+
+        return "{name} ({owner})".format(name=self.name.capitalize(), owner=self.owner)
+
     def to_dict(self):
         '''
         Turns all data into a dict.
@@ -126,7 +132,7 @@ class Mine():
         '''
 
         # generate name
-        minename = gibber.medium()
+        minename = gibber.medium_word()
 
         ## hardcode bs
         while os.path.isfile('../data/'+minename+'.mine') or os.path.isfile('../data/mines-archive'+minename+'.mine'): 

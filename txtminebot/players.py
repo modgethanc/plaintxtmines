@@ -86,6 +86,11 @@ class Player():
 
         return filename
 
+    def __str__(self):
+        """Returns a string representation of self.
+        """
+
+        return self.name
 
     def to_dict(self):
         '''

@@ -151,6 +151,12 @@ class Golem():
 
         return filename
 
+    def __str__(self):
+        """Returns a string representation of this golem.
+        """
+
+        return "{shape} ({owner})".format(shape=self.shape, owner=self.owner)
+
     def to_dict(self):
         '''
         Turns all data into a dict.

@@ -437,6 +437,8 @@ def player_grovel(player_input):
     player.grovelCount += 1
     player.save()
 
+    return EMPRESS.speak()
+
 def golem_strike(playerName, targetMine, elapsed):
     '''
     Requests that a golem belonging to named player strikes at the given target
@@ -597,6 +599,11 @@ def initialize():
     Set up the game.
     '''
 
+    global PLAYERS
+    global MINES
+    global GOLEMS
+    global EMPRESS
+
     gamedata = os.listdir(GAMEDIR)
 
     for filename in gamedata:
@@ -620,10 +627,25 @@ def initialize():
             incomingPlayer = players.Player()
             PLAYERS.update({incomingPlayer.load(entry[0]):incomingPlayer})
 
-    print GOLEMS
-    print MINES
-    print PLAYERS
+        elif entry[-1] == "empress":
+            ## load empress
+            EMPRESS = empress.Empress()
+            EMPRESS.load(entry[0])
 
-    return
+    mine_list = []
+    for mine in MINES:
+        mine_list.append(str(MINES[mine]))
 
-initialize()
+    golem_list = []
+    for golem in GOLEMS:
+        golem_list.append(str(GOLEMS[golem]))
+
+    print("Registered citizens: {players}".format(players=", ".join(PLAYERS.keys())))
+    print("Active mines: {mines}".format(mines=", ".join(mine_list)))
+    print("Working golems: {golems}".format(golems=", ".join(golem_list)))
+    print("Now ready to work under our empress, {empress}.".format(empress=EMPRESS))
+    print(EMPRESS.speak())
+
+    return "game loaded"
+
+print(initialize())
