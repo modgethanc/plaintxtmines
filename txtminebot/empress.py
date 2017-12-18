@@ -5,6 +5,11 @@ This contains the class and functions for the empress.
 The empress is a single, autonomous unit that players must work to please.
 
 Empress attributes:
+    (givens)
+    name: string of empress's name (this is forbidden knowledge for normal
+        players)
+    birth: int of empress's birth
+
     (mutable)
     mood: int representing empress's current mood
     grovels: int of total times empress has been groveled to

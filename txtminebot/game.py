@@ -429,7 +429,7 @@ def mine_clear(mineName):
 
 def player_grovel(player_input):
     '''
-    Process player groveling.
+    Process player groveling, and returns a comment from the empress.
     '''
 
     player = PLAYERS.get(player_input.nick)
@@ -504,9 +504,6 @@ def tick_golems(timestamp):
 def golem_expire(playerName, timestamp):
     '''
     Facilitates the expirations of a golem for the given player.
-
-    (Don't use player_input here because this sometimes happens without player
-    input)
     '''
 
     if GOLEMS[playerName].is_alive(timestamp):
@@ -514,9 +511,6 @@ def golem_expire(playerName, timestamp):
     else:
         deadGolem = GOLEMS.pop(playerName)
         drops = deadGolem.expire()
-
-        # for legacy player acquireRes needs
-        #dropList = drops.split(",")
 
         PLAYERS.get(playerName).acquire(drops)
 
@@ -614,21 +608,15 @@ def initialize():
             continue
 
         if entry[-1] == "golem":
-            ## load golems
             incomingGolem = golems.Golem()
             GOLEMS.update({incomingGolem.load(entry[0]):incomingGolem})
         elif entry[-1] == "mine":
-            ## load mines
             incomingMine = mines.Mine()
             MINES.update({incomingMine.load(entry[0]):incomingMine})
-
         elif entry[-1] == "player":
-            ## load players
             incomingPlayer = players.Player()
             PLAYERS.update({incomingPlayer.load(entry[0]):incomingPlayer})
-
         elif entry[-1] == "empress":
-            ## load empress
             EMPRESS = empress.Empress()
             EMPRESS.load(entry[0])
 
@@ -640,11 +628,19 @@ def initialize():
     for golem in GOLEMS:
         golem_list.append(str(GOLEMS[golem]))
 
-    print("Registered citizens: {players}".format(players=", ".join(PLAYERS.keys())))
-    print("Active mines: {mines}".format(mines=", ".join(mine_list)))
-    print("Working golems: {golems}".format(golems=", ".join(golem_list)))
-    print("Now ready to work under our empress, {empress}.".format(empress=EMPRESS))
-    print(EMPRESS.speak())
+    print("""
+ _____________________________________
+|                                     |
+|  WELCOME TO THE TXTMINEBOT CONSOLE  |
+|                                     |
+|  please work hard for the empress!  |
+|_____________________________________|
+""")
+    print("\tRegistered citizens: {players}".format(players=", ".join(PLAYERS.keys())))
+    print("\tActive mines: {mines}".format(mines=", ".join(mine_list)))
+    print("\tWorking golems: {golems}".format(golems=", ".join(golem_list)))
+    print("\tNow ready to work under our empress, {empress}.".format(empress=EMPRESS))
+    print("\n\t\""+EMPRESS.speak().rstrip()+"\"\n")
 
     return "game loaded"
 
