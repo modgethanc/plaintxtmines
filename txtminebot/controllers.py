@@ -26,7 +26,6 @@ import vtils
 
 import txtminebot
 
-__version__ = "1.0"
 __author__ = "Vincent Zeng <hvincent@modgethanc.com>"
 
 ## globals

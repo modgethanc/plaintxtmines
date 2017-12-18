@@ -60,7 +60,9 @@ def addressed(player_input):
 
     response = []
 
-    randoms = ["Sorry, friend, I'm not sure how to help you here.", "Check with my lieutenant, "+player_input.bot.ADMIN+", if you need an urgent response.", "Perhaps you should just focus on your mining duties."]
+    randoms = (["Sorry, friend, I'm not sure how to help you here.",
+        "Check with my lieutenant, {admin}, if you need an urgent response.".format(admin=player_input.bot.ADMIN),
+        "Perhaps you should just focus on your mining duties."])
 
     saids = said(player_input)
 
@@ -82,32 +84,25 @@ def said(player_input):
 
     response = []
 
-    msg = player_input.msg
+    command = player_input.msg.split()[0]
+    command_map = {
+            "!info": ch_info,
+            "!help": ch_info,
+            "!init": ch_init,
+            "!open": ch_open,
+            "!mines": ch_mines,
+            "!stats": ch_stats,
+            "!strike": ch_strike,
+            "!res": ch_res,
+            "!fatigue": ch_fatigue,
+            "!grovel": ch_grovel,
+            "!report": ch_report,
+            "!golem": ch_golem,
+            "!rankings": rankings
+            }
 
-    if msg.find("!info") == 0 or msg.find("!help") == 0:
-        response.extend(ch_info(player_input))
-    elif msg.find("!init") == 0:
-        response.extend(ch_init(player_input))
-    elif msg.find("!open") == 0:
-        response.extend(ch_open(player_input))
-    elif msg.find("!mines") == 0:
-        response.extend(ch_mines(player_input))
-    elif msg.find("!stats") == 0:
-        response.extend(ch_stats(player_input))
-    elif msg.find("!strike") == 0:
-        response.extend(ch_strike(player_input))
-    elif msg.find("!res") == 0:
-        response.extend(ch_res(player_input))
-    elif msg.find("!fatigue") == 0:
-        response.extend(ch_fatigue(player_input))
-    elif msg.find("!grovel") == 0:
-        response.extend(ch_grovel(player_input))
-    elif msg.find("!report") == 0:
-        response.extend(ch_report(player_input))
-    elif msg.find("!golem") == 0:
-        response.extend(ch_golem(player_input))
-    elif msg.find("!rankings") == 0: # !rankings
-        response.extend(rankings())
+    if command in command_map:
+        response.extend(command_map[command](player_input))
 
     return response
 
@@ -121,7 +116,7 @@ def ch_info(player_input):
 
     response = []
 
-    response.append("I am the mining assistant, here to facilitate your ventures by order of the empress.  My lieutenant is "+player_input.bot.ADMIN+", who may be able to handle inquiries beyond my availability.")
+    response.append("I am the mining assistant, here to facilitate your ventures by order of the empress.  My lieutenant is {admin}, who may be able to handle inquiries beyond my availability.".format(admin=player_input.bot.ADMIN))
     response.append("Commands: !init, !open, !mines, !strike {mine}, !report, !stats, !fatigue, !golem {resources}, !grovel, !rankings, !info.")
 
     return response
@@ -161,7 +156,7 @@ def ch_open(player_input, rate = "standardrates"):
     if game.is_playing(player_input.nick):
         if game.player_may_open(player_input.nick):
              newMine = game.open_mine(player_input.nick, rate)
-             response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named "+newMine+".  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.")
+             response.append("Congratulations on successfully opening a new mine.  In honor of your ancestors, it has been named {mine}.  I wish you fortune in your mining endeavors.  Always keep the empress in your thoughts, and begin with an enthusiastic '!strike'.".format(mine=newMine))
         else:
             response.append("You do not have permission to open a new mine at the moment, friend.  Perhaps in the future, the empress will allow you further ventures.")
     else:
