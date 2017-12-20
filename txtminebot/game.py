@@ -437,7 +437,10 @@ def player_grovel(player_input):
     player.grovelCount += 1
     player.save()
 
-    return EMPRESS.speak()
+    EMPRESS.grovels += 1
+    EMPRESS.save()
+
+    return EMPRESS.speak().rstrip()
 
 def golem_strike(playerName, targetMine, elapsed):
     '''

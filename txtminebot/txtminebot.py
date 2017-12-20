@@ -27,10 +27,12 @@ from datetime import datetime
 import formatter
 import game
 
-import players
-import golems
-import mines
-import empress
+## globals
+
+p = inflect.engine()
+INTERP = []
+for x in open("lang/interp.txt"):
+    INTERP.append(x.rstrip())
 
 def reset():
     '''
@@ -39,13 +41,6 @@ def reset():
 
     reload(game)
     game.reset()
-
-## globals
-
-p = inflect.engine()
-INTERP = []
-for x in open("lang/interp.txt"):
-    INTERP.append(x.rstrip())
 
 ## speaking functions
 
@@ -321,21 +316,13 @@ def ch_golem(player_input):
 
     if game.is_playing(player_input.nick):
         parse = player_input.msg.split("!golem")
-        if parse[1] == '': #no arguments
+        if parse[1] == '':
             if game.has_golem(player_input.nick):
-                    if game.golem_living(player_input.nick, player_input.timestamp):
-                        status = game.golem_shape(player_input.nick)+" is hard at work!  "
-                        status += "It can excavate up to "+p.no("resource", game.golem_strength(player_input.nick))+" per strike, and strikes every "+p.no("second", game.golem_interval(player_input.nick))+".  It'll last another "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))
-                        response.append(status)
-                        response.append("It's holding the following resources: "+game.golem_holdings(player_input.nick))
-                    else: #dying golem
-                        dyingGolem = game.golem_shape(player_input.nick)
-                        game.golem_expire(player_input.nick, player_input.timestamp)
-                        response.append(dyingGolem + " is about to expire!")
+                response.extend(golem_status_report(player_input))
             else:
                 response.append("You don't have a golem working for you, friend.  Create one with '!golem {resources}'.")
-        else: # check for mines??
-            response.append(newGolem(player_input, parse[1].lstrip()))
+        else:
+            response.append(make_new_golem(player_input, parse[1].lstrip()))
     else:
         response.append("I can't help you make a golem without any information on file for you, friend.  Request a new dossier with '!init'.")
 
@@ -343,7 +330,28 @@ def ch_golem(player_input):
 
 ## gameplay functions
 
-def newGolem(player_input, golemstring):
+def golem_status_report(player_input):
+    """Assuming a living golem, report its stats.
+    """
+
+    response = []
+
+    if game.golem_living(player_input.nick, player_input.timestamp):
+        status = "{golemshape} is hard at work!  ".format(golemshape=game.golem_shape(player_input.nick))
+        status += "It can excavate up to {resources} per strike, and strikes every {seconds}.  It'll last another {lifespan}.".format(
+            resources=p.no("resource", game.golem_strength(player_input.nick)),
+            seconds=p.no("second", game.golem_interval(player_input.nick)),
+            lifespan=formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp)))
+        response.append(status)
+        response.append("It's holding the following resources: "+game.golem_holdings(player_input.nick))
+    else:
+        dyingGolem = game.golem_shape(player_input.nick)
+        game.golem_expire(player_input.nick, player_input.timestamp)
+        response.append(dyingGolem + " is about to expire!")
+
+    return response
+
+def make_new_golem(player_input, golemstring):
     '''
     Runs checks for building a golem.
 
