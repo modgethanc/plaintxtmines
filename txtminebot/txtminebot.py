@@ -609,7 +609,7 @@ def golem_stats(player_input):
         dyingGolem = game.golem_shape(player_input.nick)
         return dyingGolem + " is about to expire!"
 
-def rankings():
+def rankings(_):
     '''
     Calculates rankings by resources held.
     '''
