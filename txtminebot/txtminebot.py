@@ -366,26 +366,31 @@ def make_new_golem(player_input, golemstring):
             maxgolem = int((game.player_strength(player_input.nick)*3.5))
             if len(rawGolem) > maxgolem:
                 return "You're not strong enough to construct a golem with "+str(len(rawGolem))+" pieces, friend.  The most you can use is "+p.no("resource", maxgolem)
-            else: # proceed with golem creation
+            else:
                 if game.create_golem(player_input, rawGolem):
-                    logGolem(player_input.nick)
+                    log_golem(player_input.nick)
 
                     golemstats = game.pretty_reslist(game.golem_stats(player_input.nick))+ " has been removed from your holdings.  Your new " + str(len(rawGolem)) + "-piece golem will last for "+formatter.prettyTime(game.golem_lifespan(player_input.nick, player_input.timestamp))+".  Once it expires, you can gather all the resources it harvested for you.  "
                     golemstats += "It can excavate up to "+p.no("resource", game.golem_strength(player_input.nick))+" per strike, and strikes every "+p.no("second", game.golem_interval(player_input.nick))+"."
-                else: # error on golem creation
+                else:
                     golemstats = "Something went wrong when you tried to construct that golem.  I'm sorry, friend; why don't you try a different shape?"
 
                 return golemstats
-        else: # escape if player can't afford golem
+        else:
             return "You don't have the resources to make that golem, friend."
 
-def logGolem(user):
-      golemarchive = open("../data/golems.txt", 'a')
-      golemtext = game.golem_shape(user) + "\t"
-      golemtext += str(game.golem_strength(user)) + "/" + str(game.golem_interval(user)) + "\t"
-      golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
-      golemarchive.write(golemtext+"\n")
-      golemarchive.close()
+def log_golem(user):
+    """Takes the given user's golem and prints it to a logfile.
+
+    This is mostly hardcoded bs.
+    """
+
+    golemarchive = open("../data/golems.txt", 'a')
+    golemtext = game.golem_shape(user) + "\t"
+    golemtext += str(game.golem_strength(user)) + "/" + str(game.golem_interval(user)) + "\t"
+    golemtext += " ("+user+" on "+datetime.now().date().__str__()+")"
+    golemarchive.write(golemtext+"\n")
+    golemarchive.close()
 
 def update_golems(timestamp):
     '''
@@ -424,7 +429,7 @@ def strike(player_input):
     if len(inputs[-1].split(" ")) > 1:
         selected = inputs[-1].split(" ")[+1].lower()
 
-    # check for targetted mine
+    # check for targeted mine
     if selected != "":
         if mineList.count(selected) == 0:
             response.append({"msg":"That's not a mine you're working on, friend.  Feel free to just '!strike' to work on the same mine you last targetted.", "channel":player_input.nick})
@@ -436,7 +441,6 @@ def strike(player_input):
             mineList.insert(0, target)
 
     # fatigue check
-
     fatigue = game.player_strike_attempt(player_input)
 
     if fatigue > 0:
@@ -476,7 +480,7 @@ def report(player_input):
     response.append(player_resources(player_input.nick))
 
     if game.has_golem(player_input.nick):
-        response.append(golemStats(player_input))
+        response.append(golem_stats(player_input))
 
     response.append(player_stats(player_input.nick))
 
@@ -487,20 +491,22 @@ def grovel(player_input):
     Handles groveling.
     '''
 
-    #game.player_grovel(player_input)
-
     statement = '\x03' + random.choice(['4', '8', '9', '11', '12', '13']) + game.player_grovel(player_input)
 
     return "The empress "+random.choice(['says', 'states', 'replies', 'snaps', 'mumbles', 'mutters'])+", \""+statement+"\x03\"  "+random.choice(INTERP)
 
-def stirke(msg, channel, user, timestamp): #hazelnut memorial disfeature
-    a = 0
+def stirke(msg, channel, user, timestamp): # hazelnut memorial disfeature
+    """Unimplemented strike typo action.
 
-def fatigue(player_input):
+    The original intent was that a typo of '!stirke' instead of strike would
+    result in flavortext about dropping the tool, with a possible injury.
+    """
+
+    pass
+
+def fatigue(player_input): # ~krowbar memorial feature
     '''
     Returns remaining fatigue for a player.
-
-    ~krowbar memorial feature
     '''
 
     fatigue = game.player_current_fatigue(player_input)
@@ -587,7 +593,7 @@ def player_stats(player):
 
     return stats
 
-def golemStats(player_input):
+def golem_stats(player_input):
     '''
     Helper function to display golem stats. If the golem has passed its
     expiration time, say that instead of its stats.
@@ -638,7 +644,7 @@ def tick(now):
 
     return response
 
-print "danielle loaded."
+print "ephraim loaded."
 
 
 class CommandHandler():
