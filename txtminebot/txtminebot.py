@@ -29,6 +29,8 @@ import game
 
 ## globals
 
+BOT_CODENAME = "ephraim"
+
 p = inflect.engine()
 INTERP = []
 for x in open("lang/interp.txt"):
@@ -644,8 +646,7 @@ def tick(now):
 
     return response
 
-print "ephraim loaded."
-
+print("{bot} loaded!".format(bot=BOT_CODENAME))
 
 class CommandHandler():
     '''

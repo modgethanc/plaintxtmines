@@ -124,7 +124,8 @@ class IRC():
 
         # TODO: option for toggling echo
 
-        print ">>" + msg
+        print("<{bot_code}> {outmsg}".format(bot_code=txtminebot.BOT_CODENAME,
+            outmsg=msg.rstrip()))
         self.sock.send(msg.encode('ascii'))
 
     def ping(self, pingcode):
@@ -196,7 +197,7 @@ class IRC():
         quit message.
         '''
 
-        self.send("QUIT " + quitmsg + "\n")
+        self.send("QUIT \"" + quitmsg + "\"\n")
         self.sock.close()
 
     def say(self, channel, msg, nick=""):
