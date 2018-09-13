@@ -631,6 +631,10 @@ def initialize():
     for golem in GOLEMS:
         golem_list.append(str(GOLEMS[golem]))
 
+    if not EMPRESS:
+        EMPRESS = empress.Empress()
+        EMPRESS.create()
+
     print("""
  _____________________________________
 |                                     |
