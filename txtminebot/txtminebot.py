@@ -29,7 +29,7 @@ import game
 
 ## globals
 
-BOT_CODENAME = "ephraim"
+BOT_CODENAME = "ferris"
 
 p = inflect.engine()
 INTERP = []

@@ -14,12 +14,15 @@ __author__ = "Vincent Zeng (hvincent@modgethanc.com)"
 import os
 import random
 import time
+import inflect
 
 import players
 import golems
 import mines
 import gibber
 import empress
+
+p = inflect.engine()
 
 def reset():
     '''
@@ -609,25 +612,17 @@ def pretty_reslist(reslist):
     for x in reslist:
         total += int(x)
 
-    items = []
-    y = 0
-    for x in reslist:
-        if y == 0: item = '~'
-        elif y == 1: item = '#'
-        elif y == 2: item = '@'
-        elif y == 3: item = '&'
-        elif y == 4: item = '*'
-        elif y == 5: item = '['
-        elif y == 6: item = ']'
-        elif y == 7: item = '^'
-
-        items.append("{item} x{quant}".format(item=item, quant=x))
-
-        y += 1
-
-    return "{mined} (total: {total} units)".format(
-            mined=items.join(", "),
-            total=total)
+    return "{tilde} tilde, {pound} pound, {spiral} spiral, {amper} amper, {splat} splat, {lbrack} lbrack, {rbrack} rbrack, and {carat} carat, for a total of {units}".format(
+            tilde=reslist[0],
+            pound=reslist[1],
+            spiral=reslist[2],
+            amper=reslist[3],
+            splat=reslist[4],
+            lbrack=reslist[5],
+            rbrack=reslist[6],
+            carat=reslist[7],
+            units=p.no("unit", total)
+            )
 
 ## game setup
 
