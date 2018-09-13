@@ -539,9 +539,9 @@ def tally_res(resString):
         elif x == ']': tally[6] += 1
         elif x == '^': tally[7] += 1
 
-    return tally 
+    return tally
 
-def pretty_reslist(reslist):
+def graphical_reslist(reslist):
     '''
     Takes an int list representation of resources and formats it visually. If
     there's nothing there, display rubble; if there's too much, display 'lots'.
@@ -588,6 +588,46 @@ def pretty_reslist(reslist):
         y += 1
 
     return mined
+
+def pretty_reslist(reslist):
+    '''
+    Takes an int list representation of resources and formats it into an
+    itemized breakdown.
+
+    Assumes the standard convention for reslist:
+        reslist[0]: ~
+        reslist[1]: @
+        reslist[2]: #
+        reslist[3]: &
+        reslist[4]: *
+        reslist[5]: [
+        reslist[6]: ]
+        reslist[7]: ^
+    '''
+    total = 0
+
+    for x in reslist:
+        total += int(x)
+
+    items = []
+    y = 0
+    for x in reslist:
+        if y == 0: item = '~'
+        elif y == 1: item = '#'
+        elif y == 2: item = '@'
+        elif y == 3: item = '&'
+        elif y == 4: item = '*'
+        elif y == 5: item = '['
+        elif y == 6: item = ']'
+        elif y == 7: item = '^'
+
+        items.append("{item} x{quant}".format(item=item, quant=x))
+
+        y += 1
+
+    return "{mined} (total: {total} units)".format(
+            mined=items.join(", "),
+            total=total)
 
 ## game setup
 
